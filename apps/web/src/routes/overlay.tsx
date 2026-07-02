@@ -30,7 +30,7 @@ function OverlayPage() {
 		return (
 			<div className="hb-hint p-4 font-sans text-neutral-400 text-sm">
 				Add ?channel=your_twitch_name to this URL, for example
-				/overlay?channel=mrdemonwolf&bg=off&theme=wolf
+				/overlay?channel=xqc&bg=off&theme=wolf
 			</div>
 		);
 	}
