@@ -1,40 +1,42 @@
 {
-  "name": "web",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "serve": "vite preview",
-    "start": "vite",
-    "check-types": "vite build && tsc --noEmit"
-  },
-  "dependencies": {
-    "@hookform/resolvers": "^5.2.2",
-    "@howlbox/env": "workspace:*",
-    "@howlbox/ui": "workspace:*",
-    "@tailwindcss/vite": "^4.3.1",
-    "@tanstack/react-router": "^1.168.22",
-    "dotenv": "catalog:",
-    "lucide-react": "catalog:",
-    "next-themes": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "sonner": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@howlbox/config": "workspace:*",
-    "@tanstack/react-router-devtools": "^1.166.13",
-    "@tanstack/router-plugin": "^1.167.22",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "^6.0.1",
-    "postcss": "^8.5.10",
-    "tailwindcss": "catalog:",
-    "typescript": "catalog:",
-    "vite": "^8.0.8"
-  }
+	"name": "web",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"serve": "vite preview",
+		"start": "vite",
+		"check-types": "vite build && tsc --noEmit"
+	},
+	"dependencies": {
+		"@hookform/resolvers": "^5.2.2",
+		"@howlbox/env": "workspace:*",
+		"@howlbox/ui": "workspace:*",
+		"@tailwindcss/vite": "^4.3.1",
+		"@tanstack/react-router": "^1.168.22",
+		"@twurple/auth": "^8.1.4",
+		"@twurple/chat": "^8.1.4",
+		"dotenv": "catalog:",
+		"lucide-react": "catalog:",
+		"next-themes": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"sonner": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@howlbox/config": "workspace:*",
+		"@tanstack/react-router-devtools": "^1.166.13",
+		"@tanstack/router-plugin": "^1.167.22",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vitejs/plugin-react": "^6.0.1",
+		"postcss": "^8.5.10",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:",
+		"vite": "^8.0.8"
+	}
 }
