@@ -1,76 +1,150 @@
-# howlbox
+# HowlBox - Themed Twitch Chat Overlay for OBS
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, and more.
+HowlBox is a self-hosted, client-only Twitch chat overlay for OBS
+browser sources. It connects to Twitch chat anonymously (no login, no
+OAuth, no secrets), renders native Twitch, 7TV, BTTV, and FFZ emotes,
+and is configured entirely through URL query parameters so every OBS
+source URL is self-contained. Built for streamers who want a modern
+chat overlay without depending on third-party overlay services.
+
+Your chat. Your colors. Your howl.
 
 ## Features
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Turborepo** - Optimized monorepo build system
-- **Biome** - Linting and formatting
+- **Anonymous chat connection** - Read-only Twitch chat over
+  `@twurple/chat`, no account or API keys required.
+- **Full emote support** - Native Twitch, 7TV, BTTV, and FFZ emotes,
+  fetched and cached per channel.
+- **Three display modes** - Transparent messages only (`bg=off`),
+  themed backdrop panel (`bg=panel`), or per-message bubbles
+  (`bg=bubble`).
+- **Theme system** - CSS variable driven. Ships the wolf brand theme
+  plus dark, light, and high-contrast neutrals.
+- **URL-only configuration** - Every option is a query parameter. No
+  config files, no dashboard, no state.
+- **Generator page** - Pick options live at `/` and copy a ready OBS
+  source URL.
+- **Message controls** - Max messages, hide commands, hide bots,
+  allow/hide lists, badges, timestamps, animations, and optional
+  auto-hide after N seconds.
+- **Static deploy anywhere** - GitHub Pages by default, or any static
+  host such as Coolify.
 
 ## Getting Started
 
-First, install the dependencies:
+1. Clone the repository:
 
-```bash
-bun install
+   ```bash
+   git clone https://github.com/mrdemonwolf/howlbox.git
+   cd howlbox
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   bun install
+   ```
+
+3. Start the dev server:
+
+   ```bash
+   bun run dev
+   ```
+
+4. Open `http://localhost:3001` to use the generator, then add the
+   generated URL as an OBS browser source.
+
+## Usage
+
+Build an overlay URL with the generator at `/`, or hand-write one:
+
+```
+/overlay?channel=mrdemonwolf&theme=wolf&bg=off
 ```
 
-Then, run the development server:
+| Parameter | Values                                  | Description                            |
+| --------- | --------------------------------------- | -------------------------------------- |
+| `channel` | Twitch login name                       | Channel to join (required)             |
+| `theme`   | `wolf`, `dark`, `light`, `contrast`     | Color theme preset                     |
+| `bg`      | `off`, `panel`, `bubble`                | Display mode                           |
 
-```bash
-bun run dev
-```
+The full parameter reference (message limits, filters, badges,
+timestamps, animations, auto-hide) is documented on the generator
+page.
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
+In OBS 31 or newer, add a Browser source with the generated URL and
+set Width/Height on the source itself. Leave "Shutdown source when
+not visible" and "Refresh browser when scene becomes active" off.
 
-## UI Customization
+## Tech Stack
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
+| Layer      | Technology                        |
+| ---------- | --------------------------------- |
+| Framework  | React 19 + TanStack Router (Vite) |
+| Language   | TypeScript (strict)               |
+| Chat       | @twurple/chat (anonymous IRC)     |
+| Styling    | Tailwind CSS 4 + CSS variables    |
+| Monorepo   | Turborepo + Bun workspaces        |
+| Linting    | Biome                             |
+| Deploy     | GitHub Pages (static)             |
 
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
+## Development
 
-### Add more shared components
+### Prerequisites
 
-Run this from the project root to add more primitives to the shared UI package:
+- [Bun](https://bun.sh) 1.3 or newer
+- OBS Studio 31 or newer (for overlay testing)
 
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
+### Setup
 
-Import shared components like this:
+1. Install dependencies:
 
-```tsx
-import { Button } from "@howlbox/ui/components/button";
-```
+   ```bash
+   bun install
+   ```
 
-### Add app-specific blocks
+2. Run the dev server:
 
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
+   ```bash
+   bun run dev
+   ```
 
-## Git Hooks and Formatting
+### Development Scripts
 
-- Run checks: `bun run check`
+- `bun run dev`: Start all apps in development mode
+- `bun run dev:web`: Start only the web app
+- `bun run build`: Build all apps
+- `bun run check-types`: Check TypeScript types across the monorepo
+- `bun run check`: Run Biome formatting and linting
+
+### Code Quality
+
+- TypeScript strict mode across every workspace
+- Biome for linting and formatting
+- Turborepo task caching for fast builds
 
 ## Project Structure
 
 ```
 howlbox/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
+│   └── web/          # Overlay + generator app (React, TanStack Router)
 ├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
+│   ├── config/       # Shared tsconfig base
+│   ├── env/          # Typed environment access
+│   └── ui/           # Shared shadcn/ui components and styles
+├── biome.json        # Lint and format config
+└── turbo.json        # Turborepo pipeline
 ```
 
-## Available Scripts
+## License
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run check`: Run Biome formatting and linting
+![GitHub license](https://img.shields.io/github/license/mrdemonwolf/howlbox.svg?style=for-the-badge&logo=github)
+
+## Contact
+
+Have questions or feedback?
+
+- Discord: [Join my server](https://mrdwolf.net/discord)
+
+Made with love by [MrDemonWolf, Inc.](https://www.mrdemonwolf.com)
