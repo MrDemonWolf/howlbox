@@ -9,6 +9,12 @@ export const THEMES = [
 	"dark",
 	"light",
 	"contrast",
+	"cozy",
+	"nobox",
+	"retro95",
+	"arcade",
+	"galaxy",
+	"mocha",
 ] as const;
 
 // Every option rides in the OBS source URL. Invalid or missing values

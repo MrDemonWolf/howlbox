@@ -30,6 +30,8 @@ html.hb-overlay body {
 
 	/* wolf is the default theme; data-theme blocks override below */
 	--hb-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+	--hb-font-size: 1rem;
+	--hb-mask: none;
 	--hb-radius: 14px;
 	--hb-text: #f2f6fc;
 	--hb-surface:
@@ -141,6 +143,112 @@ html.hb-overlay body {
 	--hb-shadow-off:
 		0 0 2px #000000, 0 1px 2px #000000, 0 0 6px #000000, -1px 0 2px #000000,
 		1px 0 2px #000000;
+}
+
+/* kawaii pastel: the biggest-selling chat aesthetic */
+.hb-root[data-theme="cozy"] {
+	--hb-font:
+		ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Comic Sans MS",
+		sans-serif;
+	--hb-radius: 22px;
+	--hb-text: #5b4260;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(255 226 240 / 0.92), rgb(228 220 255 / 0.88));
+	--hb-surface-solid: linear-gradient(135deg, #ffe2f0, #e4dcff);
+	--hb-border: rgb(255 143 196 / 0.55);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 0.9), 0 6px 18px rgb(214 148 200 / 0.35);
+	--hb-shadow-off:
+		0 1px 2px rgb(255 255 255 / 0.9), 0 0 8px rgb(255 255 255 / 0.7);
+}
+
+/* no box: the S0N0S/esports pure-text style, zero surface */
+.hb-root[data-theme="nobox"] {
+	--hb-radius: 0px;
+	--hb-text: #ffffff;
+	--hb-surface: none;
+	--hb-surface-solid: rgb(16 19 24);
+	--hb-border: transparent;
+	--hb-shadow: none;
+	--hb-glow:
+		0 0 1px rgb(0 0 0 / 0.9), 1px 1px 0 #000000, -1px -1px 0 #000000,
+		1px -1px 0 #000000, -1px 1px 0 #000000, 0 2px 6px rgb(0 0 0 / 0.6);
+	--hb-shadow-off:
+		0 0 1px rgb(0 0 0 / 0.9), 1px 1px 0 #000000,
+		-1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000,
+		0 2px 6px rgb(0 0 0 / 0.6);
+	--hb-mask: linear-gradient(to bottom, transparent, black 18%);
+	font-weight: 600;
+}
+
+/* Windows 95 window chrome */
+.hb-root[data-theme="retro95"] {
+	--hb-font: Tahoma, "MS Sans Serif", "Segoe UI", sans-serif;
+	--hb-radius: 0px;
+	--hb-text: #000000;
+	--hb-surface: #c0c0c0;
+	--hb-surface-solid: #c0c0c0;
+	--hb-border: rgb(10 10 10 / 0.9);
+	--hb-shadow:
+		inset 1px 1px 0 #ffffff, inset -1px -1px 0 #868a8e,
+		inset 2px 2px 0 #dfdfdf, inset -2px -2px 0 #5a5e62,
+		2px 2px 0 rgb(0 0 0 / 0.35);
+	--hb-shadow-off: 0 1px 0 #ffffff;
+}
+
+/* 8-bit arcade: hard sprite shadows, zero blur anywhere */
+.hb-root[data-theme="arcade"] {
+	--hb-font: "Press Start 2P", "Wallpoet", ui-monospace, monospace;
+	--hb-font-size: 0.8125rem;
+	--hb-radius: 0px;
+	--hb-text: #ffffff;
+	--hb-surface: linear-gradient(rgb(20 14 46 / 0.94), rgb(12 9 32 / 0.94));
+	--hb-surface-solid: #140e2e;
+	--hb-border: rgb(255 210 63 / 0.9);
+	--hb-shadow: 4px 4px 0 rgb(0 0 0 / 0.85), inset 0 0 0 2px rgb(38 28 82);
+	--hb-shadow-off: 2px 2px 0 #000000;
+}
+
+.hb-root[data-theme="arcade"] .hb-emote {
+	image-rendering: pixelated;
+}
+
+/* celestial deep violet with star speckle */
+.hb-root[data-theme="galaxy"] {
+	--hb-radius: 16px;
+	--hb-text: #f0ecff;
+	--hb-surface:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='white'%3E%3Ccircle cx='12' cy='22' r='1' opacity='.5'/%3E%3Ccircle cx='47' cy='9' r='1.4' opacity='.35'/%3E%3Ccircle cx='83' cy='31' r='.9' opacity='.45'/%3E%3Ccircle cx='121' cy='14' r='1.2' opacity='.3'/%3E%3Ccircle cx='29' cy='58' r='1' opacity='.3'/%3E%3Ccircle cx='68' cy='72' r='1.5' opacity='.5'/%3E%3Ccircle cx='104' cy='55' r='.8' opacity='.4'/%3E%3Ccircle cx='134' cy='79' r='1' opacity='.35'/%3E%3Ccircle cx='16' cy='97' r='1.3' opacity='.45'/%3E%3Ccircle cx='55' cy='113' r='.9' opacity='.3'/%3E%3Ccircle cx='92' cy='102' r='1.1' opacity='.5'/%3E%3Ccircle cx='126' cy='126' r='1.4' opacity='.35'/%3E%3C/g%3E%3C/svg%3E"),
+		radial-gradient(
+			130% 150% at 18% 0%,
+			rgb(88 44 138 / 0.85),
+			rgb(28 18 72 / 0.8) 55%,
+			rgb(9 8 34 / 0.86)
+		);
+	--hb-surface-solid: linear-gradient(135deg, #2b1a52, #0a0a24);
+	--hb-border: rgb(186 148 255 / 0.4);
+	--hb-shadow:
+		inset 0 1px 0 rgb(214 190 255 / 0.35), 0 0 20px rgb(120 80 220 / 0.28),
+		0 8px 28px rgb(6 4 20 / 0.55);
+	--hb-glow: 0 0 8px rgb(186 148 255 / 0.35);
+	--hb-shadow-off: 0 0 8px rgb(120 80 220 / 0.5), 0 1px 3px rgb(0 0 0 / 0.85);
+}
+
+/* cozy coffee, paper and warm browns */
+.hb-root[data-theme="mocha"] {
+	--hb-font: "Iowan Old Style", Palatino, Georgia, serif;
+	--hb-radius: 12px;
+	--hb-text: #3d2f26;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(243 232 218 / 0.94), rgb(226 208 189 / 0.9));
+	--hb-surface-solid: #efe2d1;
+	--hb-border: rgb(122 90 68 / 0.35);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 250 240 / 0.9), 0 5px 16px rgb(90 62 40 / 0.28);
+	--hb-shadow-off:
+		0 1px 2px rgb(255 248 238 / 0.9), 0 0 8px rgb(255 248 238 / 0.6);
 }
 
 @media (prefers-reduced-transparency: reduce) {

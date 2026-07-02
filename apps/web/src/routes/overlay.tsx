@@ -5,6 +5,7 @@ import { ChatOverlay } from "@/components/chat/chat-overlay";
 import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import { overlayParamsSchema } from "@/lib/overlay/params";
 
+import "@fontsource/press-start-2p/index.css";
 import "@/components/chat/overlay.css";
 
 export const Route = createFileRoute("/overlay")({
