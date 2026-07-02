@@ -1,0 +1,104 @@
+/*
+ * HowlBox overlay styles.
+ *
+ * The hb-* class names are a public contract: streamers override them
+ * through the OBS browser source "Custom CSS" field. Keep them stable.
+ *
+ * Theme presets land in a later pass; wolf brand values are the
+ * defaults on .hb-root until then.
+ */
+
+/* The app shell paints an opaque theme background. OBS needs the page
+   transparent, so the overlay route tags <html> with .hb-overlay. */
+html.hb-overlay,
+html.hb-overlay body {
+	background: transparent !important;
+	margin: 0;
+	overflow: hidden;
+}
+
+.hb-root {
+	--hb-text: #f4f7fb;
+	--hb-panel-bg: rgba(9, 21, 51, 0.85);
+	--hb-bubble-bg: rgba(9, 21, 51, 0.85);
+	--hb-accent: #00aced;
+	--hb-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+	--hb-font-size: 16px;
+
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	overflow: hidden;
+	color: var(--hb-text);
+	font-family: var(--hb-font);
+	font-size: var(--hb-font-size);
+	line-height: 1.45;
+}
+
+.hb-messages {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	gap: 4px;
+	overflow: hidden;
+	padding: 8px;
+}
+
+.hb-message {
+	overflow-wrap: anywhere;
+}
+
+/* bg=off: raw text over gameplay needs a legibility shadow */
+.hb-root[data-bg="off"] .hb-message {
+	text-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.9),
+		0 0 4px rgba(0, 0, 0, 0.6);
+}
+
+/* bg=panel: one themed backdrop behind the whole chat */
+.hb-root[data-bg="panel"] .hb-messages {
+	margin: 8px;
+	padding: 12px;
+	border-radius: 10px;
+	background: var(--hb-panel-bg);
+}
+
+/* bg=bubble: per-message bubbles */
+.hb-root[data-bg="bubble"] .hb-message {
+	width: fit-content;
+	max-width: 100%;
+	padding: 6px 10px;
+	border-radius: 10px;
+	background: var(--hb-bubble-bg);
+}
+
+.hb-name {
+	font-weight: 700;
+}
+
+.hb-emote {
+	display: inline-block;
+	height: 1.6em;
+	margin: -0.2em 0;
+	vertical-align: middle;
+}
+
+.hb-status {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	padding: 4px 8px;
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.7);
+	color: #ffffff;
+	font-size: 12px;
+}
+
+.hb-hint {
+	padding: 16px;
+	color: #888888;
+	font-family: system-ui, sans-serif;
+	font-size: 14px;
+}

@@ -1,0 +1,45 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+
+import { ChatOverlay } from "@/components/chat/chat-overlay";
+import { useTwitchChat } from "@/hooks/use-twitch-chat";
+import { overlayParamsSchema } from "@/lib/overlay/params";
+
+import "@/components/chat/overlay.css";
+
+export const Route = createFileRoute("/overlay")({
+	validateSearch: (search) => overlayParamsSchema.parse(search),
+	component: OverlayPage,
+});
+
+function OverlayPage() {
+	const params = Route.useSearch();
+	const { messages, status } = useTwitchChat(params.channel, {
+		maxMessages: params.max,
+	});
+
+	useEffect(() => {
+		document.documentElement.classList.add("hb-overlay");
+		return () => {
+			document.documentElement.classList.remove("hb-overlay");
+		};
+	}, []);
+
+	if (!params.channel) {
+		return (
+			<div className="hb-hint">
+				Add ?channel=your_twitch_name to this URL, for example
+				/overlay?channel=mrdemonwolf&bg=off&theme=wolf
+			</div>
+		);
+	}
+
+	return (
+		<ChatOverlay
+			messages={messages}
+			status={status}
+			bg={params.bg}
+			theme={params.theme}
+		/>
+	);
+}
