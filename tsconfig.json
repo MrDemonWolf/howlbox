@@ -1,0 +1,3 @@
+{
+  "extends": "@howlbox/config/tsconfig.base.json"
+}
