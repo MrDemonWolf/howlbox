@@ -1,11 +1,18 @@
 /*
- * HowlBox overlay styles.
+ * HowlBox overlay theme system.
  *
- * The hb-* class names are a public contract: streamers override them
- * through the OBS browser source "Custom CSS" field. Keep them stable.
+ * Layout and typography live in Tailwind classes on the components.
+ * This file owns only what Tailwind cannot: the OBS transparency
+ * override and the per-theme CSS variable blocks the utilities
+ * consume. The hb-* class names carry no styles here; they are a
+ * stable contract for the OBS browser source "Custom CSS" field.
  *
- * Theme presets land in a later pass; wolf brand values are the
- * defaults on .hb-root until then.
+ * Glass note: backdrop-filter cannot sample the OBS-composited game
+ * feed behind a transparent page (CSS Filter Effects 2, backdrop
+ * root stops at the document). Every glass surface below is faked
+ * with layered fills, hairline borders, inset specular highlights,
+ * and noise. No blur, so it also stays cheap when OBS runs with
+ * hardware acceleration off.
  */
 
 /* The app shell paints an opaque theme background. OBS needs the page
@@ -18,87 +25,126 @@ html.hb-overlay body {
 }
 
 .hb-root {
-	--hb-text: #f4f7fb;
-	--hb-panel-bg: rgba(9, 21, 51, 0.85);
-	--hb-bubble-bg: rgba(9, 21, 51, 0.85);
-	--hb-accent: #00aced;
+	/* 2 layers of every glass surface: feTurbulence grain + fill */
+	--hb-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+
+	/* wolf is the default theme; data-theme blocks override below */
 	--hb-font: system-ui, -apple-system, "Segoe UI", sans-serif;
-	--hb-font-size: 16px;
-
-	position: fixed;
-	inset: 0;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-	overflow: hidden;
-	color: var(--hb-text);
-	font-family: var(--hb-font);
-	font-size: var(--hb-font-size);
-	line-height: 1.45;
+	--hb-radius: 14px;
+	--hb-text: #f2f6fc;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(19 40 86 / 0.78), rgb(9 21 51 / 0.68));
+	--hb-surface-solid: linear-gradient(135deg, rgb(16 33 71), rgb(9 21 51));
+	--hb-border: rgb(102 196 255 / 0.28);
+	--hb-shadow:
+		inset 0 1px 0 rgb(158 216 255 / 0.3),
+		inset -8px -6px 0 -9px rgb(0 172 237 / 0.7), 0 8px 28px rgb(3 8 22 / 0.45);
+	--hb-glow: none;
+	--hb-shadow-off: 0 1px 2px rgb(0 0 0 / 0.85), 0 0 8px rgb(0 0 0 / 0.5);
 }
 
-.hb-messages {
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-	gap: 4px;
-	overflow: hidden;
-	padding: 8px;
+/* macOS 27 Liquid Glass: near-clear smoke with specular rim shine.
+   Dark base keeps worst-case text contrast bounded over gameplay. */
+.hb-root[data-theme="glass"] {
+	--hb-radius: 18px;
+	--hb-text: #ffffff;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(
+			135deg,
+			rgb(255 255 255 / 0.16),
+			rgb(255 255 255 / 0.03) 40%,
+			rgb(255 255 255 / 0.09)
+		),
+		linear-gradient(rgb(22 24 32 / 0.6), rgb(22 24 32 / 0.6));
+	--hb-surface-solid: linear-gradient(rgb(44 46 56), rgb(30 32 40));
+	--hb-border: rgb(255 255 255 / 0.35);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 0.4),
+		inset -10px -8px 0 -11px rgb(255 255 255 / 0.9),
+		inset 10px 8px 0 -11px rgb(255 255 255 / 0.35),
+		0 8px 32px rgb(0 0 0 / 0.35);
 }
 
-.hb-message {
-	overflow-wrap: anywhere;
+/* CRT phosphor terminal */
+.hb-root[data-theme="terminal"] {
+	--hb-font:
+		ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+	--hb-radius: 6px;
+	--hb-text: #a9f5bc;
+	--hb-surface:
+		repeating-linear-gradient(
+			0deg,
+			rgb(0 0 0 / 0.22) 0 1px,
+			transparent 1px 3px
+		),
+		linear-gradient(rgb(4 14 8 / 0.9), rgb(2 10 5 / 0.9));
+	--hb-surface-solid: #06130a;
+	--hb-border: rgb(74 246 128 / 0.35);
+	--hb-shadow:
+		inset 0 0 24px rgb(74 246 128 / 0.07), 0 4px 16px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(74 246 128 / 0.4);
+	--hb-shadow-off: 0 0 6px rgb(74 246 128 / 0.45), 0 1px 2px rgb(0 0 0 / 0.9);
 }
 
-/* bg=off: raw text over gameplay needs a legibility shadow */
-.hb-root[data-bg="off"] .hb-message {
-	text-shadow:
-		0 1px 2px rgba(0, 0, 0, 0.9),
-		0 0 4px rgba(0, 0, 0, 0.6);
+/* synthwave neon */
+.hb-root[data-theme="neon"] {
+	--hb-text: #f4f0ff;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(44 16 78 / 0.8), rgb(18 10 46 / 0.72));
+	--hb-surface-solid: linear-gradient(135deg, rgb(40 14 70), rgb(16 9 42));
+	--hb-border: rgb(255 92 205 / 0.45);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 130 225 / 0.35), 0 0 18px rgb(255 45 180 / 0.28),
+		0 8px 28px rgb(8 3 22 / 0.55);
+	--hb-glow: 0 0 8px rgb(64 232 255 / 0.3);
+	--hb-shadow-off: 0 0 8px rgb(255 45 180 / 0.5), 0 1px 3px rgb(0 0 0 / 0.85);
 }
 
-/* bg=panel: one themed backdrop behind the whole chat */
-.hb-root[data-bg="panel"] .hb-messages {
-	margin: 8px;
-	padding: 12px;
-	border-radius: 10px;
-	background: var(--hb-panel-bg);
+/* neutral dark */
+.hb-root[data-theme="dark"] {
+	--hb-text: #f4f4f5;
+	--hb-surface:
+		var(--hb-noise), linear-gradient(rgb(28 28 32 / 0.85), rgb(20 20 24 / 0.82));
+	--hb-surface-solid: #1a1a1e;
+	--hb-border: rgb(255 255 255 / 0.14);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 0.1), 0 6px 24px rgb(0 0 0 / 0.4);
+	--hb-shadow-off: 0 1px 2px rgb(0 0 0 / 0.9), 0 0 8px rgb(0 0 0 / 0.55);
 }
 
-/* bg=bubble: per-message bubbles */
-.hb-root[data-bg="bubble"] .hb-message {
-	width: fit-content;
-	max-width: 100%;
-	padding: 6px 10px;
-	border-radius: 10px;
-	background: var(--hb-bubble-bg);
+/* neutral light */
+.hb-root[data-theme="light"] {
+	--hb-text: #171a20;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(255 255 255 / 0.92), rgb(242 245 250 / 0.85));
+	--hb-surface-solid: #f7f8fb;
+	--hb-border: rgb(20 28 45 / 0.12);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 0.95), 0 6px 24px rgb(24 32 50 / 0.18);
+	--hb-shadow-off:
+		0 1px 2px rgb(255 255 255 / 0.9), 0 0 8px rgb(255 255 255 / 0.65);
 }
 
-.hb-name {
-	font-weight: 700;
+/* accessible high contrast: opaque, no glass */
+.hb-root[data-theme="contrast"] {
+	--hb-radius: 8px;
+	--hb-text: #ffffff;
+	--hb-surface: #000000;
+	--hb-surface-solid: #000000;
+	--hb-border: rgb(255 255 255 / 0.85);
+	--hb-shadow: none;
+	--hb-glow: none;
+	--hb-shadow-off:
+		0 0 2px #000000, 0 1px 2px #000000, 0 0 6px #000000, -1px 0 2px #000000,
+		1px 0 2px #000000;
 }
 
-.hb-emote {
-	display: inline-block;
-	height: 1.6em;
-	margin: -0.2em 0;
-	vertical-align: middle;
-}
-
-.hb-status {
-	position: absolute;
-	top: 8px;
-	left: 8px;
-	padding: 4px 8px;
-	border-radius: 6px;
-	background: rgba(0, 0, 0, 0.7);
-	color: #ffffff;
-	font-size: 12px;
-}
-
-.hb-hint {
-	padding: 16px;
-	color: #888888;
-	font-family: system-ui, sans-serif;
-	font-size: 14px;
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root {
+		--hb-surface: var(--hb-surface-solid);
+	}
 }

@@ -1,7 +1,15 @@
 import { z } from "zod";
 
 export const BG_MODES = ["off", "panel", "bubble"] as const;
-export const THEMES = ["wolf", "dark", "light", "contrast"] as const;
+export const THEMES = [
+	"wolf",
+	"glass",
+	"terminal",
+	"neon",
+	"dark",
+	"light",
+	"contrast",
+] as const;
 
 // Every option rides in the OBS source URL. Invalid or missing values
 // fall back to defaults instead of erroring: a typo in OBS must never
