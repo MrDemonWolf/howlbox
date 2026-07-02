@@ -11,6 +11,7 @@
 		"check-types": "vite build && tsc --noEmit"
 	},
 	"dependencies": {
+		"@fontsource/press-start-2p": "^5.2.7",
 		"@hookform/resolvers": "^5.2.2",
 		"@howlbox/env": "workspace:*",
 		"@howlbox/ui": "workspace:*",
