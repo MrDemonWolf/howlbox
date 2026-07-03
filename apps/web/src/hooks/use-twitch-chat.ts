@@ -11,6 +11,9 @@ export interface UseTwitchChatOptions {
 	// land before the overlay shows them; mods/broadcaster skip it
 	delaySeconds?: number;
 	hiddenLogins?: readonly string[];
+	// featured mode: when non-empty, only these logins are shown
+	allowedLogins?: readonly string[];
+	hideCommands?: boolean;
 	// read at append time; ref identity is stable so late-loading
 	// maps never tear down the connection
 	emotesRef?: RefObject<EmoteMap | null>;
@@ -26,6 +29,8 @@ export function useTwitchChat(
 	const maxMessages = options.maxMessages ?? DEFAULT_MAX_MESSAGES;
 	const delaySeconds = options.delaySeconds ?? 0;
 	const hiddenKey = (options.hiddenLogins ?? []).join(",");
+	const allowedKey = (options.allowedLogins ?? []).join(",");
+	const hideCommands = options.hideCommands ?? false;
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
 	const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
@@ -37,6 +42,7 @@ export function useTwitchChat(
 		// must not be able to push state (double-mounts, HMR, races)
 		let active = true;
 		const hidden = new Set(hiddenKey.split(",").filter(Boolean));
+		const allowed = new Set(allowedKey.split(",").filter(Boolean));
 		// pending = delayed messages not yet shown; bounded because a
 		// long delay in a fast chat would otherwise queue thousands
 		const pending = new Map<
@@ -79,6 +85,18 @@ export function useTwitchChat(
 			onMessage: (raw) => {
 				if (!active || hidden.has(raw.login)) {
 					return;
+				}
+				if (allowed.size > 0 && !allowed.has(raw.login)) {
+					return;
+				}
+				if (hideCommands) {
+					const first = raw.parts[0];
+					if (
+						first?.type === "text" &&
+						first.text.trimStart().startsWith("!")
+					) {
+						return;
+					}
 				}
 				const message = resolveMessageExtras(
 					raw,
@@ -137,7 +155,7 @@ export function useTwitchChat(
 			dropPending(() => true);
 			disconnect();
 		};
-	}, [channel, maxMessages, delaySeconds, hiddenKey]);
+	}, [channel, maxMessages, delaySeconds, hiddenKey, allowedKey, hideCommands]);
 
 	return { messages, status };
 }

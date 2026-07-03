@@ -8,6 +8,10 @@ interface ChatOverlayProps {
 	status: ConnectionStatus;
 	bg: OverlayParams["bg"];
 	theme: OverlayParams["theme"];
+	showBadges: boolean;
+	showTimestamps: boolean;
+	animate: boolean;
+	fadeSeconds: number;
 }
 
 const PANEL_CLASSES =
@@ -28,7 +32,16 @@ const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
 	join_failed: "could not join channel",
 };
 
-export function ChatOverlay({ messages, status, bg, theme }: ChatOverlayProps) {
+export function ChatOverlay({
+	messages,
+	status,
+	bg,
+	theme,
+	showBadges,
+	showTimestamps,
+	animate,
+	fadeSeconds,
+}: ChatOverlayProps) {
 	const surfaceTone =
 		bg !== "off" && LIGHT_SURFACE_THEMES.has(theme) ? "light" : "dark";
 
@@ -50,9 +63,13 @@ export function ChatOverlay({ messages, status, bg, theme }: ChatOverlayProps) {
 			>
 				{messages.map((message) => (
 					<ChatMessageRow
+						animate={animate}
 						bg={bg}
+						fadeSeconds={fadeSeconds}
 						key={message.id}
 						message={message}
+						showBadges={showBadges}
+						showTimestamps={showTimestamps}
 						surfaceTone={surfaceTone}
 					/>
 				))}

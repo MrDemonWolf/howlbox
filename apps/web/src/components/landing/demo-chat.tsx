@@ -164,8 +164,12 @@ export function DemoChat() {
 					{messages.map((message) => (
 						<div className="hb-demo-in" key={message.id}>
 							<ChatMessageRow
+								animate={false}
 								bg="bubble"
+								fadeSeconds={0}
 								message={message}
+								showBadges={false}
+								showTimestamps={false}
 								surfaceTone={surfaceTone}
 							/>
 						</div>

@@ -36,6 +36,25 @@ const boolParam = z
 	}, z.boolean())
 	.catch(false);
 
+// default-on switches: only an explicit off value disables
+const boolParamOn = z
+	.preprocess((value) => {
+		if (value === undefined) {
+			return true;
+		}
+		if (typeof value === "boolean") {
+			return value;
+		}
+		if (typeof value === "number") {
+			return value !== 0;
+		}
+		if (typeof value === "string") {
+			return !["0", "false", "off", "no"].includes(value.toLowerCase());
+		}
+		return true;
+	}, z.boolean())
+	.catch(true);
+
 const loginList = z
 	.preprocess((value) => {
 		if (typeof value !== "string") {
@@ -83,6 +102,17 @@ export const overlayParamsSchema = z.object({
 	// before the overlay ever shows the message
 	delay: z
 		.preprocess(numberish, z.coerce.number().int().min(0).max(300))
+		.catch(0),
+	// drop messages starting with "!"
+	hidecommands: boolParam,
+	// featured mode: when set, ONLY these users are shown
+	allow: loginList,
+	badges: boolParamOn,
+	timestamps: boolParam,
+	animate: boolParamOn,
+	// auto-hide: fade each message out N seconds after it appears
+	fade: z
+		.preprocess(numberish, z.coerce.number().int().min(0).max(600))
 		.catch(0),
 });
 
