@@ -17,6 +17,12 @@ const PANEL_CLASSES =
 // other combination (incl. bg=off over gameplay) lightens dark ones
 const LIGHT_SURFACE_THEMES = new Set(["light", "cozy", "retro95", "mocha"]);
 
+const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
+	connecting: "connecting to chat",
+	disconnected: "disconnected, retrying",
+	join_failed: "could not join channel",
+};
+
 export function ChatOverlay({ messages, status, bg, theme }: ChatOverlayProps) {
 	const surfaceTone =
 		bg !== "off" && LIGHT_SURFACE_THEMES.has(theme) ? "light" : "dark";
@@ -29,9 +35,7 @@ export function ChatOverlay({ messages, status, bg, theme }: ChatOverlayProps) {
 		>
 			{status !== "connected" && (
 				<div className="hb-status absolute top-2 left-2 rounded-md bg-black/70 px-2 py-1 font-sans text-white text-xs">
-					{status === "connecting"
-						? "connecting to chat"
-						: "disconnected, retrying"}
+					{STATUS_LABEL[status]}
 				</div>
 			)}
 			<div

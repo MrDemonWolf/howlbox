@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import type { OverlayParams } from "@/lib/overlay/params";
 import { readableUserColor } from "@/lib/twitch/colors";
 import type { ChatMessageView } from "@/lib/twitch/types";
@@ -11,7 +13,9 @@ interface ChatMessageRowProps {
 const BUBBLE_CLASSES =
 	"w-fit max-w-full rounded-(--hb-radius) border border-(--hb-border) px-2.5 py-1.5 [background:var(--hb-surface)] [box-shadow:var(--hb-shadow)]";
 
-export function ChatMessageRow({
+// memoized: at ?max=200 every incoming message would otherwise
+// re-render all 200 rows
+export const ChatMessageRow = memo(function ChatMessageRow({
 	message,
 	bg,
 	surfaceTone,
@@ -45,7 +49,7 @@ export function ChatMessageRow({
 					return part.type === "emote" ? (
 						<img
 							alt={part.name}
-							className="hb-emote -my-1 inline-block h-[1.6em] align-middle"
+							className="hb-emote -my-1 inline-block h-[1.6em] min-w-[1.6em] align-middle"
 							key={key}
 							src={part.url}
 							title={part.name}
@@ -57,4 +61,4 @@ export function ChatMessageRow({
 			</span>
 		</div>
 	);
-}
+});

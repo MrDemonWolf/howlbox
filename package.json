@@ -29,11 +29,6 @@
 		"dev:web": "turbo run dev -F web",
 		"check": "biome check --write ."
 	},
-	"dependencies": {
-		"@howlbox/env": "workspace:*",
-		"dotenv": "catalog:",
-		"zod": "catalog:"
-	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",
 		"@howlbox/config": "workspace:*",
