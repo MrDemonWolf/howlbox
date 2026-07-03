@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { ChatOverlay } from "@/components/chat/chat-overlay";
 import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import { overlayParamsSchema } from "@/lib/overlay/params";
+import { KNOWN_BOTS } from "@/lib/twitch/bots";
 
 import "@fontsource/press-start-2p/index.css";
 import "@/components/chat/overlay.css";
@@ -15,8 +16,13 @@ export const Route = createFileRoute("/overlay")({
 
 function OverlayPage() {
 	const params = Route.useSearch();
+	const hiddenLogins = params.hidebots
+		? [...KNOWN_BOTS, ...params.hide]
+		: params.hide;
 	const { messages, status } = useTwitchChat(params.channel, {
 		maxMessages: params.max,
+		delaySeconds: params.delay,
+		hiddenLogins,
 	});
 
 	useEffect(() => {

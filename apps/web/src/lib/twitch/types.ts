@@ -16,6 +16,8 @@ export interface ChatMessageView {
 	badges: ChatBadge[];
 	parts: MessagePart[];
 	isAction: boolean;
+	// broadcaster or mod: skips the moderation delay
+	isPrivileged: boolean;
 	timestamp: number;
 }
 
