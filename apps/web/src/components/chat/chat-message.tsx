@@ -8,6 +8,17 @@ interface ChatMessageRowProps {
 	message: ChatMessageView;
 	bg: OverlayParams["bg"];
 	surfaceTone: "dark" | "light";
+	showBadges: boolean;
+	showTimestamps: boolean;
+	animate: boolean;
+	fadeSeconds: number;
+}
+
+function formatTime(timestamp: number): string {
+	return new Date(timestamp).toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
 }
 
 const BUBBLE_CLASSES =
@@ -47,6 +58,10 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 	message,
 	bg,
 	surfaceTone,
+	showBadges,
+	showTimestamps,
+	animate,
+	fadeSeconds,
 }: ChatMessageRowProps) {
 	// bg=off has no surface to supply contrast, so text carries a
 	// heavy shadow stack; other modes get the theme's glow (if any)
@@ -56,20 +71,39 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 			: "[text-shadow:var(--hb-glow)]";
 	const color = readableUserColor(message.color, surfaceTone);
 
+	// CSS-only entrance + auto-hide: animation clocks keep running
+	// while OBS hides the source, unlike JS timers
+	const animation =
+		[
+			animate ? "hb-msg-in 220ms ease-out" : null,
+			fadeSeconds > 0
+				? `hb-fade-out 600ms ease ${fadeSeconds}s forwards`
+				: null,
+		]
+			.filter(Boolean)
+			.join(", ") || undefined;
+
 	return (
 		<div
 			className={`hb-message [overflow-wrap:anywhere] ${textShadow} ${
 				bg === "bubble" ? BUBBLE_CLASSES : ""
 			} ${message.isAction ? "italic" : ""}`}
+			style={animation ? { animation } : undefined}
 		>
-			{message.badgeUrls.map((url, index) => (
-				<img
-					alt=""
-					className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
-					key={`${message.id}-badge-${index}`}
-					src={url}
-				/>
-			))}
+			{showTimestamps && (
+				<span className="hb-time mr-1 align-middle text-[0.78em] opacity-60">
+					{formatTime(message.timestamp)}
+				</span>
+			)}
+			{showBadges &&
+				message.badgeUrls.map((url, index) => (
+					<img
+						alt=""
+						className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
+						key={`${message.id}-badge-${index}`}
+						src={url}
+					/>
+				))}
 			<span className="hb-name font-semibold" style={{ color }}>
 				{message.displayName}
 			</span>

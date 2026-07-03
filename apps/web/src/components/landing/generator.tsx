@@ -42,6 +42,11 @@ export function Generator() {
 	const [delay, setDelay] = useState(0);
 	const [hidebots, setHidebots] = useState(false);
 	const [hide, setHide] = useState("");
+	const [hidecommands, setHidecommands] = useState(false);
+	const [timestamps, setTimestamps] = useState(false);
+	const [badges, setBadges] = useState(true);
+	const [animate, setAnimate] = useState(true);
+	const [fade, setFade] = useState(0);
 
 	const cleanChannel = channel.trim().toLowerCase().replace(/^@/, "");
 
@@ -71,8 +76,36 @@ export function Generator() {
 		if (hideList) {
 			qs.set("hide", hideList);
 		}
+		if (hidecommands) {
+			qs.set("hidecommands", "true");
+		}
+		if (timestamps) {
+			qs.set("timestamps", "true");
+		}
+		if (!badges) {
+			qs.set("badges", "false");
+		}
+		if (!animate) {
+			qs.set("animate", "false");
+		}
+		if (fade > 0) {
+			qs.set("fade", String(fade));
+		}
 		return `${window.location.origin}${import.meta.env.BASE_URL}overlay?${qs.toString()}`;
-	}, [cleanChannel, theme, bg, max, delay, hidebots, hide]);
+	}, [
+		cleanChannel,
+		theme,
+		bg,
+		max,
+		delay,
+		hidebots,
+		hide,
+		hidecommands,
+		timestamps,
+		badges,
+		animate,
+		fade,
+	]);
 
 	const copy = async () => {
 		if (!cleanChannel) {
@@ -169,15 +202,71 @@ export function Generator() {
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
-					<Checkbox
-						checked={hidebots}
-						id="gen-hidebots"
-						onCheckedChange={(checked) => setHidebots(checked === true)}
+				<div className="grid gap-2.5">
+					<div className="flex items-center gap-2">
+						<Checkbox
+							checked={hidebots}
+							id="gen-hidebots"
+							onCheckedChange={(checked) => setHidebots(checked === true)}
+						/>
+						<Label className="font-normal" htmlFor="gen-hidebots">
+							Hide known bots (Nightbot, StreamElements, ...)
+						</Label>
+					</div>
+					<div className="flex items-center gap-2">
+						<Checkbox
+							checked={hidecommands}
+							id="gen-hidecommands"
+							onCheckedChange={(checked) => setHidecommands(checked === true)}
+						/>
+						<Label className="font-normal" htmlFor="gen-hidecommands">
+							Hide !commands
+						</Label>
+					</div>
+					<div className="flex items-center gap-2">
+						<Checkbox
+							checked={timestamps}
+							id="gen-timestamps"
+							onCheckedChange={(checked) => setTimestamps(checked === true)}
+						/>
+						<Label className="font-normal" htmlFor="gen-timestamps">
+							Show timestamps
+						</Label>
+					</div>
+					<div className="flex items-center gap-2">
+						<Checkbox
+							checked={badges}
+							id="gen-badges"
+							onCheckedChange={(checked) => setBadges(checked === true)}
+						/>
+						<Label className="font-normal" htmlFor="gen-badges">
+							Show badges
+						</Label>
+					</div>
+					<div className="flex items-center gap-2">
+						<Checkbox
+							checked={animate}
+							id="gen-animate"
+							onCheckedChange={(checked) => setAnimate(checked === true)}
+						/>
+						<Label className="font-normal" htmlFor="gen-animate">
+							Animate messages in
+						</Label>
+					</div>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="gen-fade">Auto-hide after (seconds, 0 = never)</Label>
+					<Input
+						id="gen-fade"
+						max={600}
+						min={0}
+						onChange={(e) =>
+							setFade(Math.min(600, Math.max(0, Number(e.target.value) || 0)))
+						}
+						type="number"
+						value={fade}
 					/>
-					<Label className="font-normal" htmlFor="gen-hidebots">
-						Hide known bots (Nightbot, StreamElements, ...)
-					</Label>
 				</div>
 
 				<div className="grid gap-2">

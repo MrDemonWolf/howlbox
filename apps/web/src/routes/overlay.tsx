@@ -26,6 +26,8 @@ function OverlayPage() {
 		maxMessages: params.max,
 		delaySeconds: params.delay,
 		hiddenLogins,
+		allowedLogins: params.allow,
+		hideCommands: params.hidecommands,
 		emotesRef,
 		badgesRef,
 	});
@@ -48,9 +50,13 @@ function OverlayPage() {
 
 	return (
 		<ChatOverlay
-			messages={messages}
-			status={status}
+			animate={params.animate}
 			bg={params.bg}
+			fadeSeconds={params.fade}
+			messages={messages}
+			showBadges={params.badges}
+			showTimestamps={params.timestamps}
+			status={status}
 			theme={params.theme}
 		/>
 	);

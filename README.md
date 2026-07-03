@@ -1,34 +1,48 @@
 # HowlBox - Themed Twitch Chat Overlay for OBS
 
 HowlBox is a self-hosted, client-only Twitch chat overlay for OBS
-browser sources. It connects to Twitch chat anonymously (no login, no
-OAuth, no secrets), renders native Twitch, 7TV, BTTV, and FFZ emotes,
-and is configured entirely through URL query parameters so every OBS
-source URL is self-contained. Built for streamers who want a modern
-chat overlay without depending on third-party overlay services.
+browser sources. It connects to Twitch chat anonymously (no login,
+no OAuth, no API keys), renders native Twitch, 7TV, BTTV, and
+FrankerFaceZ emotes with badge art, and is configured entirely
+through URL query parameters so every OBS source URL is
+self-contained. Built for streamers who want a modern, beautiful
+chat overlay without a third-party overlay service between them and
+their chat.
 
 Your chat. Your colors. Your howl.
 
 ## Features
 
 - **Anonymous chat connection** - Read-only Twitch chat over
-  `@twurple/chat`, no account or API keys required.
-- **Full emote support** - Native Twitch, 7TV, BTTV, and FFZ emotes,
-  fetched and cached per channel.
-- **Three display modes** - Transparent messages only (`bg=off`),
-  themed backdrop panel (`bg=panel`), or per-message bubbles
-  (`bg=bubble`).
-- **Theme system** - CSS variable driven. Ships the wolf brand theme
-  plus dark, light, and high-contrast neutrals.
+  `@twurple/chat`. No account, no keys, nothing to expire
+  mid-stream.
+- **13 themes** - Wolf brand glass, macOS-style Liquid Glass, CRT
+  terminal, synthwave neon, Windows 95, pixel arcade, kawaii pastel,
+  celestial galaxy, cozy mocha, esports no-box, plus dark, light,
+  and an accessible high-contrast preset. All CSS-variable driven.
+- **Three display modes** - Transparent messages over gameplay
+  (`bg=off`), one themed backdrop panel (`bg=panel`), or
+  per-message bubbles (`bg=bubble`).
+- **Full emote support** - Native Twitch emotes plus 7TV (including
+  zero-width overlay emotes), BTTV, and FrankerFaceZ, resolved per
+  channel and cached in localStorage.
+- **Badge art without secrets** - Global and per-channel badges
+  (including subscriber badge art) via public, CORS-safe APIs.
+- **Moderation aware** - Deleted messages, timeouts, and bans vanish
+  from the overlay instantly. An optional delay holds non-mod
+  messages so moderation lands before anything renders.
+- **Filters** - Hide known bots, hide `!commands`, hide specific
+  users, or run featured mode showing only chosen users.
 - **URL-only configuration** - Every option is a query parameter. No
-  config files, no dashboard, no state.
-- **Generator page** - Pick options live at `/` and copy a ready OBS
-  source URL.
-- **Message controls** - Max messages, hide commands, hide bots,
-  allow/hide lists, badges, timestamps, animations, and optional
-  auto-hide after N seconds.
-- **Static deploy anywhere** - GitHub Pages by default, or any static
-  host such as Coolify.
+  config files, no dashboard, no stored state.
+- **Generator page** - Pick options live at `/`, watch the demo, and
+  copy a ready OBS source URL.
+- **OBS-optimized** - Transparent from first paint, zero blur
+  filters (safe on CPU-rendered setups), event-driven reconnects
+  that survive hidden-source timer throttling, and a visible
+  connection status pill.
+- **Stable styling hooks** - Every element carries `hb-*` class
+  names as a contract for the OBS Custom CSS field.
 
 ## Getting Started
 
@@ -59,38 +73,46 @@ Your chat. Your colors. Your howl.
 Build an overlay URL with the generator at `/`, or hand-write one:
 
 ```
-/overlay?channel=mrdemonwolf&theme=wolf&bg=off
+/overlay?channel=mrdemonwolf&theme=wolf&bg=bubble&hidebots=true&fade=30
 ```
 
-| Parameter  | Values                                   | Description                              |
-| ---------- | ---------------------------------------- | ---------------------------------------- |
-| `channel`  | Twitch login name                        | Channel to join (required)               |
-| `theme`    | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `arcade`, `galaxy`, `mocha` | Color theme preset |
-| `bg`       | `off`, `panel`, `bubble`                 | Display mode                             |
-| `max`      | `1` to `200` (default `50`)              | Max messages kept on screen              |
-| `hidebots` | flag                                     | Hide known chat bots (Nightbot, etc.)    |
-| `hide`     | comma-separated logins                   | Always hide these users                  |
-| `delay`    | seconds, `0` to `300` (default `0`)      | Hold non-mod messages so deletions land before display |
+| Parameter      | Values                                   | Description                                             |
+| -------------- | ---------------------------------------- | ------------------------------------------------------- |
+| `channel`      | Twitch login name                        | Channel to join (required)                              |
+| `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `arcade`, `galaxy`, `mocha` | Color theme preset |
+| `bg`           | `off`, `panel`, `bubble`                 | Display mode                                            |
+| `max`          | `1` to `200` (default `50`)              | Max messages kept on screen                             |
+| `hidebots`     | flag                                     | Hide known chat bots (Nightbot, etc.)                   |
+| `hide`         | comma-separated logins                   | Always hide these users                                 |
+| `allow`        | comma-separated logins                   | Featured mode: only show these users                    |
+| `hidecommands` | flag                                     | Hide messages starting with `!`                         |
+| `delay`        | seconds, `0` to `300` (default `0`)      | Hold non-mod messages so deletions land before display  |
+| `badges`       | `false` to disable (default on)          | Badge icons before names                                |
+| `timestamps`   | flag                                     | HH:MM before each message                               |
+| `animate`      | `false` to disable (default on)          | Slide/fade entrance animation                           |
+| `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
 
-The full parameter reference (message limits, filters, badges,
-timestamps, animations, auto-hide) is documented on the generator
-page.
+Invalid or missing values fall back to safe defaults; a typo in OBS
+never produces a blank overlay.
 
 In OBS 31 or newer, add a Browser source with the generated URL and
-set Width/Height on the source itself. Leave "Shutdown source when
-not visible" and "Refresh browser when scene becomes active" off.
+set Width and Height on the source itself (try 480 x 800). Leave
+"Shutdown source when not visible" and "Refresh browser when scene
+becomes active" off.
 
 ## Tech Stack
 
-| Layer      | Technology                        |
-| ---------- | --------------------------------- |
-| Framework  | React 19 + TanStack Router (Vite) |
-| Language   | TypeScript (strict)               |
-| Chat       | @twurple/chat (anonymous IRC)     |
-| Styling    | Tailwind CSS 4 + CSS variables    |
-| Monorepo   | Turborepo + Bun workspaces        |
-| Linting    | Biome                             |
-| Deploy     | GitHub Pages (static)             |
+| Layer     | Technology                          |
+| --------- | ----------------------------------- |
+| Framework | React 19 + TanStack Router (Vite)   |
+| Language  | TypeScript (strict)                 |
+| Chat      | @twurple/chat (anonymous IRC)       |
+| Emotes    | 7TV, BTTV, FrankerFaceZ public APIs |
+| Styling   | Tailwind CSS 4 + CSS variables      |
+| UI        | shadcn/ui primitives (packages/ui)  |
+| Monorepo  | Turborepo + Bun workspaces          |
+| Linting   | Biome                               |
+| Deploy    | GitHub Pages (static)               |
 
 ## Development
 
@@ -126,19 +148,64 @@ not visible" and "Refresh browser when scene becomes active" off.
 - TypeScript strict mode across every workspace
 - Biome for linting and formatting
 - Turborepo task caching for fast builds
+- `hb-*` class names on overlay elements are a public contract for
+  OBS Custom CSS overrides; keep them stable
+
+## Deployment
+
+### GitHub Pages (default)
+
+Pushes to `main` build and deploy automatically via
+`.github/workflows/deploy.yml`. One-time setup: in the repository
+settings, set Pages > Source to "GitHub Actions". The site serves at
+`https://mrdemonwolf.github.io/howlbox/` (the build sets
+`BASE_PATH=/howlbox/`; use a custom domain and drop the variable for
+root hosting).
+
+A copy of `index.html` is deployed as `404.html` so the `/overlay`
+route resolves on a static host.
+
+### Coolify or any static host
+
+`bun run build` produces a fully static site in `apps/web/dist`.
+Serve that folder as-is (set `BASE_PATH` at build time if hosting
+under a subpath). No server runtime is required.
+
+## Test URLs
+
+Once deployed, these are ready to paste into an OBS browser source
+(swap the channel for testing against a busier chat):
+
+```
+https://mrdemonwolf.github.io/howlbox/overlay?channel=mrdemonwolf&theme=wolf&bg=off&hidebots=true
+https://mrdemonwolf.github.io/howlbox/overlay?channel=mrdemonwolf&theme=glass&bg=bubble&fade=30
+https://mrdemonwolf.github.io/howlbox/overlay?channel=xqc&theme=terminal&bg=panel&timestamps=true
+```
+
+Suggested source size: 480 x 800 at the default font scale.
 
 ## Project Structure
 
 ```
 howlbox/
 ├── apps/
-│   └── web/          # Overlay + generator app (React, TanStack Router)
+│   └── web/
+│       └── src/
+│           ├── components/
+│           │   ├── chat/      # Overlay renderer + theme CSS variables
+│           │   └── landing/   # Marketing page demo + URL generator
+│           ├── hooks/         # Chat connection, emote/badge loading
+│           ├── lib/
+│           │   ├── emotes/    # 7TV/BTTV/FFZ fetch, cache, resolution
+│           │   ├── overlay/   # URL parameter schema
+│           │   └── twitch/    # Anonymous chat client, badges, colors
+│           └── routes/        # / (landing + generator), /overlay
 ├── packages/
-│   ├── config/       # Shared tsconfig base
-│   ├── env/          # Typed environment access
-│   └── ui/           # Shared shadcn/ui components and styles
-├── biome.json        # Lint and format config
-└── turbo.json        # Turborepo pipeline
+│   ├── config/                # Shared tsconfig base
+│   └── ui/                    # Shared shadcn/ui components and styles
+├── .github/workflows/         # CI deploy to GitHub Pages
+├── biome.json                 # Lint and format config
+└── turbo.json                 # Turborepo pipeline
 ```
 
 ## License

@@ -12,6 +12,8 @@ if (/\/overlay\/?$/.test(window.location.pathname)) {
 
 const router = createRouter({
 	routeTree,
+	// match routes under the GitHub Pages /howlbox/ subpath
+	basepath: import.meta.env.BASE_URL,
 	defaultPreload: "intent",
 	scrollRestoration: true,
 	defaultPendingComponent: () => <Loader />,
