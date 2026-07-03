@@ -15,14 +15,9 @@
  * hardware acceleration off.
  */
 
-/* The app shell paints an opaque theme background. OBS needs the page
-   transparent, so the overlay route tags <html> with .hb-overlay. */
-html.hb-overlay,
-html.hb-overlay body {
-	background: transparent !important;
-	margin: 0;
-	overflow: hidden;
-}
+/* The html.hb-overlay transparency override lives in index.css so it
+   ships in the eager bundle; this route chunk loads too late for
+   first paint. */
 
 .hb-root {
 	/* 2 layers of every glass surface: feTurbulence grain + fill */
@@ -59,9 +54,10 @@ html.hb-overlay body {
 			rgb(255 255 255 / 0.03) 40%,
 			rgb(255 255 255 / 0.09)
 		),
-		linear-gradient(rgb(22 24 32 / 0.6), rgb(22 24 32 / 0.6));
+		linear-gradient(rgb(22 24 32 / 0.72), rgb(22 24 32 / 0.72));
 	--hb-surface-solid: linear-gradient(rgb(44 46 56), rgb(30 32 40));
 	--hb-border: rgb(255 255 255 / 0.35);
+	--hb-glow: 0 1px 2px rgb(0 0 0 / 0.6);
 	--hb-shadow:
 		inset 0 1px 0 rgb(255 255 255 / 0.4),
 		inset -10px -8px 0 -11px rgb(255 255 255 / 0.9),
@@ -194,7 +190,10 @@ html.hb-overlay body {
 		inset 1px 1px 0 #ffffff, inset -1px -1px 0 #868a8e,
 		inset 2px 2px 0 #dfdfdf, inset -2px -2px 0 #5a5e62,
 		2px 2px 0 rgb(0 0 0 / 0.35);
-	--hb-shadow-off: 0 1px 0 #ffffff;
+	--hb-shadow-off:
+		0 0 1px rgb(255 255 255 / 0.9), 1px 1px 0 #ffffff,
+		-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff,
+		0 2px 6px rgb(255 255 255 / 0.6);
 }
 
 /* 8-bit arcade: hard sprite shadows, zero blur anywhere */
@@ -207,7 +206,9 @@ html.hb-overlay body {
 	--hb-surface-solid: #140e2e;
 	--hb-border: rgb(255 210 63 / 0.9);
 	--hb-shadow: 4px 4px 0 rgb(0 0 0 / 0.85), inset 0 0 0 2px rgb(38 28 82);
-	--hb-shadow-off: 2px 2px 0 #000000;
+	--hb-shadow-off:
+		1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000,
+		-1px 1px 0 #000000, 2px 2px 0 #000000;
 }
 
 .hb-root[data-theme="arcade"] .hb-emote {
@@ -252,7 +253,10 @@ html.hb-overlay body {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-	.hb-root {
+	/* .hb-root[data-theme] ties every theme block's specificity and
+	   wins on source order; bare .hb-root alone would lose to them */
+	.hb-root,
+	.hb-root[data-theme] {
 		--hb-surface: var(--hb-surface-solid);
 	}
 }

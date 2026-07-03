@@ -48,22 +48,42 @@ const loginList = z
 	}, z.array(z.string()))
 	.catch([]);
 
+// TanStack Router's search parser JSON-types values: ?channel=123456
+// arrives as a number, ?channel=true as a boolean, ?channel=null as
+// null. All are valid Twitch login shapes, so stringify scalars back.
+const scalarToString = (value: unknown) =>
+	typeof value === "number" || typeof value === "boolean" || value === null
+		? String(value)
+		: value;
+
+// and ?max=true would coerce to Number(true)=1; force it to fall back
+const numberish = (value: unknown) =>
+	typeof value === "boolean" ? Number.NaN : value;
+
 export const overlayParamsSchema = z.object({
 	channel: z
-		.string()
-		.trim()
-		.toLowerCase()
-		.regex(/^[a-z0-9_]{1,25}$/)
-		.optional()
+		.preprocess(
+			scalarToString,
+			z
+				.string()
+				.trim()
+				.toLowerCase()
+				.regex(/^[a-z0-9_]{1,25}$/)
+				.optional(),
+		)
 		.catch(undefined),
 	bg: z.enum(BG_MODES).catch("off"),
 	theme: z.enum(THEMES).catch("wolf"),
-	max: z.coerce.number().int().min(1).max(200).catch(50),
+	max: z
+		.preprocess(numberish, z.coerce.number().int().min(1).max(200))
+		.catch(50),
 	hidebots: boolParam,
 	hide: loginList,
 	// hold non-mod messages N seconds so moderation deletes land
 	// before the overlay ever shows the message
-	delay: z.coerce.number().int().min(0).max(300).catch(0),
+	delay: z
+		.preprocess(numberish, z.coerce.number().int().min(0).max(300))
+		.catch(0),
 });
 
 export type OverlayParams = z.infer<typeof overlayParamsSchema>;

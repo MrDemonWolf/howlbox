@@ -21,4 +21,8 @@ export interface ChatMessageView {
 	timestamp: number;
 }
 
-export type ConnectionStatus = "connecting" | "connected" | "disconnected";
+export type ConnectionStatus =
+	| "connecting"
+	| "connected"
+	| "disconnected"
+	| "join_failed";

@@ -23,49 +23,91 @@ export function connectChat(
 	handlers: ChatHandlers,
 ): () => void {
 	const joined = channel.replace(/^#/, "").toLowerCase();
+	// quit() can race the connect handshake and leave a zombie client
+	// that finishes connecting and auto-reconnects; the closed flag
+	// silences every handler and onConnect re-quits the zombie
+	let closed = false;
 	const client = new ChatClient({
 		channels: [joined],
 		rejoinChannelsOnReconnect: true,
 	});
 
-	// quit() can race the connect handshake and leave a zombie client
-	// that auto-reconnects to its old channel; drop anything that is
-	// not from the channel this connection was created for
-	client.onMessage((msgChannel, user, text, msg) => {
-		if (msgChannel !== joined) {
-			return;
+	client.onMessage((_channel, user, text, msg) => {
+		if (!closed) {
+			handlers.onMessage(toView(user, text, msg, false));
 		}
-		handlers.onMessage(toView(user, text, msg, false));
 	});
-	client.onAction((msgChannel, user, text, msg) => {
-		if (msgChannel !== joined) {
-			return;
+	client.onAction((_channel, user, text, msg) => {
+		if (!closed) {
+			handlers.onMessage(toView(user, text, msg, true));
 		}
-		handlers.onMessage(toView(user, text, msg, true));
 	});
 	client.onMessageRemove((_channel, messageId) => {
-		handlers.onMessageRemove(messageId);
+		if (!closed) {
+			handlers.onMessageRemove(messageId);
+		}
 	});
 	client.onTimeout((_channel, user) => {
-		handlers.onUserPurge(user);
+		if (!closed) {
+			handlers.onUserPurge(user);
+		}
 	});
 	client.onBan((_channel, user) => {
-		handlers.onUserPurge(user);
+		if (!closed) {
+			handlers.onUserPurge(user);
+		}
 	});
 	client.onChatClear(() => {
-		handlers.onClear();
+		if (!closed) {
+			handlers.onClear();
+		}
 	});
 	client.onConnect(() => {
+		if (closed) {
+			client.quit();
+			return;
+		}
 		handlers.onStatus("connected");
 	});
 	client.onDisconnect(() => {
-		handlers.onStatus("disconnected");
+		if (!closed) {
+			handlers.onStatus("disconnected");
+		}
 	});
+	// a banned/suspended/nonexistent channel otherwise reports
+	// "connected" while the overlay stays silently empty
+	client.onJoinFailure((failedChannel) => {
+		if (!closed && failedChannel === joined) {
+			handlers.onStatus("join_failed");
+		}
+	});
+
+	// OBS throttles timers while a source is hidden, which can stall
+	// twurple's timer-based retry; nudge reconnects off events too
+	const nudge = () => {
+		if (!closed && !client.isConnected && !client.isConnecting) {
+			client.reconnect();
+		}
+	};
+	const nudgeWhenVisible = () => {
+		if (document.visibilityState === "visible") {
+			nudge();
+		}
+	};
+	document.addEventListener("visibilitychange", nudgeWhenVisible);
+	window.addEventListener("online", nudge);
+	window.addEventListener("obsSourceVisibleChanged", nudge);
+	window.addEventListener("obsSourceActiveChanged", nudge);
 
 	handlers.onStatus("connecting");
 	client.connect();
 
 	return () => {
+		closed = true;
+		document.removeEventListener("visibilitychange", nudgeWhenVisible);
+		window.removeEventListener("online", nudge);
+		window.removeEventListener("obsSourceVisibleChanged", nudge);
+		window.removeEventListener("obsSourceActiveChanged", nudge);
 		client.quit();
 	};
 }

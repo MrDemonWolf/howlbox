@@ -1,1 +1,11 @@
 @import "@howlbox/ui/globals.css";
+
+/* OBS transparency, eager so it applies at first paint. The class is
+   added synchronously in main.tsx before React renders; the overlay
+   route effect keeps it in sync on SPA navigation. */
+html.hb-overlay,
+html.hb-overlay body {
+	background: transparent !important;
+	margin: 0;
+	overflow: hidden;
+}
