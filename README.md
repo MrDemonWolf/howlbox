@@ -62,11 +62,15 @@ Build an overlay URL with the generator at `/`, or hand-write one:
 /overlay?channel=mrdemonwolf&theme=wolf&bg=off
 ```
 
-| Parameter | Values                                  | Description                            |
-| --------- | --------------------------------------- | -------------------------------------- |
-| `channel` | Twitch login name                       | Channel to join (required)             |
-| `theme`   | `wolf`, `dark`, `light`, `contrast`     | Color theme preset                     |
-| `bg`      | `off`, `panel`, `bubble`                | Display mode                           |
+| Parameter  | Values                                   | Description                              |
+| ---------- | ---------------------------------------- | ---------------------------------------- |
+| `channel`  | Twitch login name                        | Channel to join (required)               |
+| `theme`    | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `arcade`, `galaxy`, `mocha` | Color theme preset |
+| `bg`       | `off`, `panel`, `bubble`                 | Display mode                             |
+| `max`      | `1` to `200` (default `50`)              | Max messages kept on screen              |
+| `hidebots` | flag                                     | Hide known chat bots (Nightbot, etc.)    |
+| `hide`     | comma-separated logins                   | Always hide these users                  |
+| `delay`    | seconds, `0` to `300` (default `0`)      | Hold non-mod messages so deletions land before display |
 
 The full parameter reference (message limits, filters, badges,
 timestamps, animations, auto-hide) is documented on the generator

@@ -103,6 +103,7 @@ function toView(
 		})),
 		parts,
 		isAction,
+		isPrivileged: msg.userInfo.isBroadcaster || msg.userInfo.isMod,
 		timestamp: msg.date.getTime(),
 	};
 }
