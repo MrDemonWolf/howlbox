@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 
+import type { EmoteMap } from "@/lib/emotes/emotes";
+import { type BadgeMap, resolveMessageExtras } from "@/lib/emotes/resolve";
 import { connectChat } from "@/lib/twitch/chat";
 import type { ChatMessageView, ConnectionStatus } from "@/lib/twitch/types";
 
@@ -9,6 +11,10 @@ export interface UseTwitchChatOptions {
 	// land before the overlay shows them; mods/broadcaster skip it
 	delaySeconds?: number;
 	hiddenLogins?: readonly string[];
+	// read at append time; ref identity is stable so late-loading
+	// maps never tear down the connection
+	emotesRef?: RefObject<EmoteMap | null>;
+	badgesRef?: RefObject<BadgeMap | null>;
 }
 
 const DEFAULT_MAX_MESSAGES = 50;
@@ -70,10 +76,15 @@ export function useTwitchChat(
 
 		setMessages([]);
 		const disconnect = connectChat(channel, {
-			onMessage: (message) => {
-				if (!active || hidden.has(message.login)) {
+			onMessage: (raw) => {
+				if (!active || hidden.has(raw.login)) {
 					return;
 				}
+				const message = resolveMessageExtras(
+					raw,
+					options.emotesRef?.current ?? null,
+					options.badgesRef?.current ?? null,
+				);
 				if (delaySeconds > 0 && !message.isPrivileged) {
 					// note: OBS throttles timers while the source is
 					// hidden; messages promote late, but nothing is

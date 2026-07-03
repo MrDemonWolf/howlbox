@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { ChatOverlay } from "@/components/chat/chat-overlay";
+import { useBadgeMap, useEmoteMap } from "@/hooks/use-emotes";
 import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import { overlayParamsSchema } from "@/lib/overlay/params";
 import { KNOWN_BOTS } from "@/lib/twitch/bots";
@@ -19,10 +20,14 @@ function OverlayPage() {
 	const hiddenLogins = params.hidebots
 		? [...KNOWN_BOTS, ...params.hide]
 		: params.hide;
+	const emotesRef = useEmoteMap(params.channel);
+	const badgesRef = useBadgeMap(params.channel);
 	const { messages, status } = useTwitchChat(params.channel, {
 		maxMessages: params.max,
 		delaySeconds: params.delay,
 		hiddenLogins,
+		emotesRef,
+		badgesRef,
 	});
 
 	useEffect(() => {
