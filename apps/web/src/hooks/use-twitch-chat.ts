@@ -21,22 +21,46 @@ export function useTwitchChat(
 		if (!channel) {
 			return;
 		}
+		// stale-closure guard: after cleanup, a torn-down connection
+		// must not be able to push state (double-mounts, HMR, races)
+		let active = true;
 		setMessages([]);
-		return connectChat(channel, {
+		const disconnect = connectChat(channel, {
 			onMessage: (message) => {
-				setMessages((prev) => [...prev, message].slice(-maxMessages));
+				if (!active) {
+					return;
+				}
+				setMessages((prev) =>
+					prev.some((m) => m.id === message.id)
+						? prev
+						: [...prev, message].slice(-maxMessages),
+				);
 			},
 			onMessageRemove: (messageId) => {
-				setMessages((prev) => prev.filter((m) => m.id !== messageId));
+				if (active) {
+					setMessages((prev) => prev.filter((m) => m.id !== messageId));
+				}
 			},
 			onUserPurge: (login) => {
-				setMessages((prev) => prev.filter((m) => m.login !== login));
+				if (active) {
+					setMessages((prev) => prev.filter((m) => m.login !== login));
+				}
 			},
 			onClear: () => {
-				setMessages([]);
+				if (active) {
+					setMessages([]);
+				}
 			},
-			onStatus: setStatus,
+			onStatus: (status) => {
+				if (active) {
+					setStatus(status);
+				}
+			},
 		});
+		return () => {
+			active = false;
+			disconnect();
+		};
 	}, [channel, maxMessages]);
 
 	return { messages, status };

@@ -22,15 +22,25 @@ export function connectChat(
 	channel: string,
 	handlers: ChatHandlers,
 ): () => void {
+	const joined = channel.replace(/^#/, "").toLowerCase();
 	const client = new ChatClient({
-		channels: [channel],
+		channels: [joined],
 		rejoinChannelsOnReconnect: true,
 	});
 
-	client.onMessage((_channel, user, text, msg) => {
+	// quit() can race the connect handshake and leave a zombie client
+	// that auto-reconnects to its old channel; drop anything that is
+	// not from the channel this connection was created for
+	client.onMessage((msgChannel, user, text, msg) => {
+		if (msgChannel !== joined) {
+			return;
+		}
 		handlers.onMessage(toView(user, text, msg, false));
 	});
-	client.onAction((_channel, user, text, msg) => {
+	client.onAction((msgChannel, user, text, msg) => {
+		if (msgChannel !== joined) {
+			return;
+		}
 		handlers.onMessage(toView(user, text, msg, true));
 	});
 	client.onMessageRemove((_channel, messageId) => {
