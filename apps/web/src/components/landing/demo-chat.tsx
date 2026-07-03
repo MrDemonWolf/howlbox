@@ -22,7 +22,7 @@ function text(value: string) {
 	return { type: "text" as const, text: value };
 }
 
-const SCRIPT: Omit<ChatMessageView, "id" | "timestamp">[] = [
+const SCRIPT: Omit<ChatMessageView, "id" | "timestamp" | "badgeUrls">[] = [
 	{
 		channelId: null,
 		login: "moonhowler",
@@ -138,7 +138,7 @@ export function DemoChat() {
 			count++;
 			if (script) {
 				setMessages((prev) =>
-					[...prev, { ...script, id, timestamp }].slice(-7),
+					[...prev, { ...script, id, timestamp, badgeUrls: [] }].slice(-7),
 				);
 			}
 		};
