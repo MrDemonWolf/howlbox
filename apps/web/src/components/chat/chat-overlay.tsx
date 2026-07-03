@@ -15,7 +15,12 @@ const PANEL_CLASSES =
 
 // themes with light surfaces need pale user colors darkened; every
 // other combination (incl. bg=off over gameplay) lightens dark ones
-const LIGHT_SURFACE_THEMES = new Set(["light", "cozy", "retro95", "mocha"]);
+export const LIGHT_SURFACE_THEMES = new Set([
+	"light",
+	"cozy",
+	"retro95",
+	"mocha",
+]);
 
 const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
 	connecting: "connecting to chat",

@@ -9,3 +9,15 @@ html.hb-overlay body {
 	margin: 0;
 	overflow: hidden;
 }
+
+/* landing demo-chat entrance; transform/opacity only */
+@keyframes hb-demo-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+}
+
+.hb-demo-in {
+	animation: hb-demo-in 300ms ease-out;
+}
