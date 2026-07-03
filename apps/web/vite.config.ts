@@ -9,6 +9,9 @@ export default defineConfig({
 	},
 	resolve: {
 		tsconfigPaths: true,
+		// packages/ui declares its own react; without dedupe the
+		// base-ui field components resolve a second copy and crash
+		dedupe: ["react", "react-dom"],
 	},
 	plugins: [
 		tailwindcss(),
