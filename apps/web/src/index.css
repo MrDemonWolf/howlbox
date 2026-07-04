@@ -21,3 +21,103 @@ html.hb-overlay body {
 .hb-demo-in {
 	animation: hb-demo-in 300ms ease-out;
 }
+
+/* transparency checker for overlay previews: what OBS shows behind a
+   browser source when no video sits under it. Pure CSS, no PNG asset. */
+.hb-checker {
+	/* mid-grey grid, like OBS's own transparency preview: authentic and
+	   legible for both light-text and dark-text themes in bg=off */
+	background-color: #6a7078;
+	background-image:
+		linear-gradient(
+			45deg,
+			#565c64 25%,
+			transparent 25%,
+			transparent 75%,
+			#565c64 75%
+		),
+		linear-gradient(
+			45deg,
+			#565c64 25%,
+			transparent 25%,
+			transparent 75%,
+			#565c64 75%
+		);
+	background-size: 22px 22px;
+	background-position:
+		0 0,
+		11px 11px;
+}
+
+/* ---- Broadcast Night atmosphere (landing/config only, never the
+   overlay: blur + big layers are fine off-OBS) ---- */
+
+/* aurora mesh: cerulean / violet / teal drifting slowly behind all
+   content, blurred into a soft field of light */
+.hb-aurora {
+	position: fixed;
+	inset: -25%;
+	background:
+		radial-gradient(38% 46% at 22% 18%, rgb(0 172 237 / 0.24), transparent 60%),
+		radial-gradient(42% 42% at 82% 12%, rgb(124 92 255 / 0.2), transparent 60%),
+		radial-gradient(48% 50% at 68% 82%, rgb(0 209 178 / 0.14), transparent 62%),
+		radial-gradient(46% 54% at 12% 88%, rgb(0 110 200 / 0.18), transparent 62%);
+	filter: blur(36px);
+	animation: hb-aurora-drift 26s ease-in-out infinite alternate;
+	will-change: transform;
+}
+
+@keyframes hb-aurora-drift {
+	from {
+		transform: translate3d(-2%, -1%, 0) scale(1.05);
+	}
+	to {
+		transform: translate3d(3%, 2%, 0) scale(1.14);
+	}
+}
+
+/* fine film grain, overlay-blended for depth */
+.hb-grain {
+	position: fixed;
+	inset: 0;
+	opacity: 0.5;
+	mix-blend-mode: overlay;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* broadcast grid, fading out below the fold */
+.hb-grid {
+	position: fixed;
+	inset: 0;
+	background-image:
+		linear-gradient(rgb(255 255 255 / 0.028) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(255 255 255 / 0.028) 1px, transparent 1px);
+	background-size: 52px 52px;
+	-webkit-mask-image: radial-gradient(
+		120% 75% at 50% 0%,
+		black,
+		transparent 72%
+	);
+	mask-image: radial-gradient(120% 75% at 50% 0%, black, transparent 72%);
+}
+
+/* staggered page-load reveal; stagger via inline animation-delay */
+@keyframes hb-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(18px);
+	}
+}
+
+.hb-reveal {
+	animation: hb-reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hb-aurora {
+		animation: none;
+	}
+	.hb-reveal {
+		animation: none;
+	}
+}
