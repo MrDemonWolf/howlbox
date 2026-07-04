@@ -54,10 +54,18 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 - `apps/web/src/components/chat/` - renderer (Tailwind classes) +
   `overlay.css` (theme variable blocks only). `ChatMessageRow` is
   memoized; keep its props primitive/stable.
-- `apps/web/src/routes/` - `/` landing + generator, `/overlay` the
-  OBS page. `main.tsx` adds the `hb-overlay` html class synchronously
-  before React so OBS never sees an opaque flash; the transparency
-  CSS lives in eager `index.css`.
+- `apps/web/src/routes/` - `/` landing (hero + editorial feature
+  index + `ThemeWall` + CTA), `/config` the URL builder
+  (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the OBS page.
+  Shared landing chrome is `components/landing/site-chrome.tsx`:
+  `PageBackground` (aurora + grain + broadcast grid, all `.hb-*` in
+  `index.css`, landing-only, never the overlay), the `MONO` machine
+  voice + `Eyebrow` kicker, header/footer/OBS steps. `ThemeWall`
+  renders all 13 themes with the REAL `ChatMessageRow` over a static
+  sample; the canned live stream is `demo-messages.ts`. `main.tsx`
+  adds the `hb-overlay` html class synchronously before React so OBS
+  never sees an opaque flash; the transparency CSS lives in eager
+  `index.css`.
 
 ## OBS constraints (research-verified; do not violate)
 
