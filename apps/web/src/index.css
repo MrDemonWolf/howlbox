@@ -101,6 +101,15 @@ html.hb-overlay body {
 	mask-image: radial-gradient(120% 75% at 50% 0%, black, transparent 72%);
 }
 
+/* keyboard focus ring: no visible indicator shipped by default, which
+   fails WCAG 2.4.7 for keyboard users. Cerulean ring, offset off the
+   dark canvas. Scoped away from the chrome-less OBS overlay route. */
+html:not(.hb-overlay) :focus-visible {
+	outline: 2px solid #33c1f5;
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
 /* staggered page-load reveal; stagger via inline animation-delay */
 @keyframes hb-reveal {
 	from {

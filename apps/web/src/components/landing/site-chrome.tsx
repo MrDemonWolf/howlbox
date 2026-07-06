@@ -121,7 +121,7 @@ export function OBSSteps() {
 					</li>
 				))}
 			</ol>
-			<p className={`mt-6 text-white/40 text-xs ${MONO}`}>
+			<p className={`mt-6 text-white/55 text-xs ${MONO}`}>
 				Power users: every node carries a stable hb-* class for the OBS Custom
 				CSS field.
 			</p>
@@ -133,11 +133,20 @@ export function SiteFooter() {
 	return (
 		<footer className="border-white/10 border-t">
 			<div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-6 py-12 text-center">
-				<div className="flex items-center gap-2">
-					<PawPrint className="size-4 text-[#00ACED]" />
-					<span className={`font-bold text-white ${DISPLAY_FONT}`}>
-						HowlBox
-					</span>
+				<div className="flex flex-col items-center gap-2">
+					<div className="flex items-center gap-2">
+						<PawPrint className="size-4 text-[#00ACED]" />
+						<span className={`font-bold text-white ${DISPLAY_FONT}`}>
+							HowlBox
+						</span>
+						<span className={`text-[0.62rem] text-white/55 ${MONO}`}>
+							by MrDemonWolf, Inc.
+						</span>
+					</div>
+					<p className="max-w-xs text-pretty text-white/55 text-xs leading-relaxed">
+						A self-hosted, client-only Twitch chat overlay for OBS browser
+						sources.
+					</p>
 				</div>
 				<div
 					className={`flex flex-wrap justify-center gap-6 text-[0.7rem] text-white/50 ${MONO}`}
@@ -167,7 +176,7 @@ export function SiteFooter() {
 						MIT License
 					</a>
 				</div>
-				<p className="text-sm text-white/45">
+				<p className="text-sm text-white/60">
 					Made with love by{" "}
 					<a
 						className="text-white/70 hover:text-white"
