@@ -134,7 +134,7 @@ function LandingPage() {
 							</div>
 
 							<div
-								className={`hb-reveal flex flex-wrap gap-x-5 gap-y-2 text-[0.68rem] text-white/40 ${MONO}`}
+								className={`hb-reveal flex flex-wrap gap-x-5 gap-y-2 text-[0.68rem] text-white/55 ${MONO}`}
 								style={{ animationDelay: "460ms" }}
 							>
 								{TRUST.map((item) => (

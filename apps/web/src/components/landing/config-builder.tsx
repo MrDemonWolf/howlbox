@@ -173,7 +173,7 @@ export function ConfigBuilder() {
 						<span className="size-2.5 rounded-full bg-[#ff5f57]" />
 						<span className="size-2.5 rounded-full bg-[#febc2e]" />
 						<span className="size-2.5 rounded-full bg-[#28c840]" />
-						<span className={`ml-1 text-[0.6rem] text-white/40 ${MONO}`}>
+						<span className={`ml-1 text-[0.6rem] text-white/55 ${MONO}`}>
 							obs browser source
 						</span>
 					</div>
@@ -380,7 +380,7 @@ function Fieldset({
 }) {
 	return (
 		<section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-			<h3 className={`text-[0.65rem] text-white/45 ${MONO}`}>{title}</h3>
+			<h3 className={`text-[0.65rem] text-white/60 ${MONO}`}>{title}</h3>
 			{children}
 		</section>
 	);

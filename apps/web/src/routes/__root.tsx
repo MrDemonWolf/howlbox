@@ -10,20 +10,17 @@ export type RouterAppContext = Record<string, never>;
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
 	component: RootComponent,
+	// static SEO + social tags live in index.html (crawlers do not run JS);
+	// this only keeps the in-browser tab title/description in sync
 	head: () => ({
 		meta: [
 			{
-				title: "HowlBox",
+				title: "HowlBox - Self-hosted Twitch chat overlay for OBS",
 			},
 			{
 				name: "description",
-				content: "Themed self-hosted Twitch chat overlay for OBS",
-			},
-		],
-		links: [
-			{
-				rel: "icon",
-				href: "/favicon.ico",
+				content:
+					"A themed Twitch chat overlay you host yourself. Thirteen themes, every emote, no login and no keys. The whole overlay is one URL.",
 			},
 		],
 	}),
