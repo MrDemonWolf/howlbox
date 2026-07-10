@@ -1,7 +1,7 @@
 import type { OverlayParams } from "@/lib/overlay/params";
 import type { ChatMessageView, ConnectionStatus } from "@/lib/twitch/types";
 
-import { ChatMessageRow } from "./chat-message";
+import { MessageList } from "./message-list";
 
 interface ChatOverlayProps {
 	messages: ChatMessageView[];
@@ -13,18 +13,6 @@ interface ChatOverlayProps {
 	animate: boolean;
 	fadeSeconds: number;
 }
-
-const PANEL_CLASSES =
-	"m-2 rounded-(--hb-radius) border border-(--hb-border) p-3 [background:var(--hb-surface)] [box-shadow:var(--hb-shadow)]";
-
-// themes with light surfaces need pale user colors darkened; every
-// other combination (incl. bg=off over gameplay) lightens dark ones
-export const LIGHT_SURFACE_THEMES = new Set([
-	"light",
-	"cozy",
-	"retro95",
-	"mocha",
-]);
 
 const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
 	connecting: "connecting to chat",
@@ -42,9 +30,6 @@ export function ChatOverlay({
 	animate,
 	fadeSeconds,
 }: ChatOverlayProps) {
-	const surfaceTone =
-		bg !== "off" && LIGHT_SURFACE_THEMES.has(theme) ? "light" : "dark";
-
 	return (
 		<div
 			className="hb-root fixed inset-0 flex flex-col justify-end overflow-hidden text-(--hb-text) leading-snug [font-family:var(--hb-font)] [font-size:var(--hb-font-size)]"
@@ -56,24 +41,15 @@ export function ChatOverlay({
 					{STATUS_LABEL[status]}
 				</div>
 			)}
-			<div
-				className={`hb-messages flex min-h-0 flex-col justify-end overflow-hidden p-2 [mask-image:var(--hb-mask)] ${
-					bg === "bubble" ? "gap-1.5" : "gap-1"
-				} ${bg === "panel" ? PANEL_CLASSES : ""}`}
-			>
-				{messages.map((message) => (
-					<ChatMessageRow
-						animate={animate}
-						bg={bg}
-						fadeSeconds={fadeSeconds}
-						key={message.id}
-						message={message}
-						showBadges={showBadges}
-						showTimestamps={showTimestamps}
-						surfaceTone={surfaceTone}
-					/>
-				))}
-			</div>
+			<MessageList
+				animate={animate}
+				bg={bg}
+				fadeSeconds={fadeSeconds}
+				messages={messages}
+				showBadges={showBadges}
+				showTimestamps={showTimestamps}
+				theme={theme}
+			/>
 		</div>
 	);
 }

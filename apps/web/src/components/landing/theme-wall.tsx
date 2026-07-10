@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { ChatMessageRow } from "@/components/chat/chat-message";
-import { LIGHT_SURFACE_THEMES } from "@/components/chat/chat-overlay";
+import { LIGHT_SURFACE_THEMES } from "@/components/chat/message-list";
 import { THEMES } from "@/lib/overlay/params";
 import { THEME_LABEL } from "@/lib/overlay/theme-meta";
 import type { ChatMessageView } from "@/lib/twitch/types";

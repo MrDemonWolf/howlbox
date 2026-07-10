@@ -1,5 +1,6 @@
-import { ChatMessageRow } from "@/components/chat/chat-message";
-import { LIGHT_SURFACE_THEMES } from "@/components/chat/chat-overlay";
+import { cn } from "@howlbox/ui/lib/utils";
+
+import { MessageList } from "@/components/chat/message-list";
 import { useDemoStream } from "@/components/landing/demo-messages";
 import type { BG_MODES, THEMES } from "@/lib/overlay/params";
 
@@ -21,12 +22,8 @@ interface OverlayPreviewProps {
 	backdrop?: "checker" | "gameplay";
 }
 
-// mirrors ChatOverlay's markup but scoped to a card (absolute, not
-// fixed) and layered over a gameplay stand-in, so bg=off transparency
-// reads honestly.
-const PANEL_CLASSES =
-	"m-2 rounded-(--hb-radius) border border-(--hb-border) p-3 [background:var(--hb-surface)] [box-shadow:var(--hb-shadow)]";
-
+// Wraps the shared MessageList in a card (absolute, not fixed) layered
+// over a gameplay stand-in, so bg=off transparency reads honestly.
 export function OverlayPreview({
 	theme,
 	bg,
@@ -38,44 +35,37 @@ export function OverlayPreview({
 	backdrop = "gameplay",
 }: OverlayPreviewProps) {
 	const messages = useDemoStream(8);
-	const surfaceTone =
-		bg !== "off" && LIGHT_SURFACE_THEMES.has(theme) ? "light" : "dark";
 
 	return (
 		<div
-			className={`relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl ${className}`}
+			className={cn(
+				"relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl",
+				className,
+			)}
 		>
 			{/* backdrop behind the (possibly transparent) overlay */}
 			<div
-				className={`absolute inset-0 ${
+				className={cn(
+					"absolute inset-0",
 					backdrop === "checker"
 						? "hb-checker"
-						: "bg-[linear-gradient(135deg,#1b2735_0%,#2d4a3e_38%,#6b4f2e_72%,#3d2b4f_100%)]"
-				}`}
+						: "bg-[linear-gradient(135deg,#1b2735_0%,#2d4a3e_38%,#6b4f2e_72%,#3d2b4f_100%)]",
+				)}
 			/>
 			<div
 				className="hb-root absolute inset-0 flex flex-col justify-end overflow-hidden text-(--hb-text) leading-snug [font-family:var(--hb-font)] [font-size:var(--hb-font-size)]"
 				data-bg={bg}
 				data-theme={theme}
 			>
-				<div
-					className={`hb-messages flex min-h-0 flex-col justify-end overflow-hidden p-2 [mask-image:var(--hb-mask)] ${
-						bg === "bubble" ? "gap-1.5" : "gap-1"
-					} ${bg === "panel" ? PANEL_CLASSES : ""}`}
-				>
-					{messages.map((message) => (
-						<ChatMessageRow
-							animate={animate}
-							bg={bg}
-							fadeSeconds={fadeSeconds}
-							key={message.id}
-							message={message}
-							showBadges={showBadges}
-							showTimestamps={showTimestamps}
-							surfaceTone={surfaceTone}
-						/>
-					))}
-				</div>
+				<MessageList
+					animate={animate}
+					bg={bg}
+					fadeSeconds={fadeSeconds}
+					messages={messages}
+					showBadges={showBadges}
+					showTimestamps={showTimestamps}
+					theme={theme}
+				/>
 			</div>
 		</div>
 	);

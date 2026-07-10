@@ -1,7 +1,8 @@
 // Third-party emote resolution: 7TV + BTTV + FFZ, global + channel.
 // All endpoints are public, no auth, browser-CORS safe (verified).
-// Cached in localStorage so OBS reloads don't hammer the APIs;
-// expired cache is served as a fallback when a fetch fails.
+// Fetch + stale-if-error localStorage cache live in @/lib/cache.
+
+import { cachedJson, getJson } from "@/lib/cache";
 
 export interface ThirdPartyEmote {
 	url: string;
@@ -9,52 +10,6 @@ export interface ThirdPartyEmote {
 }
 
 export type EmoteMap = Map<string, ThirdPartyEmote>;
-
-const CACHE_PREFIX = "hb-cache-v1:";
-
-async function cached<T>(
-	key: string,
-	ttlMs: number,
-	fetcher: () => Promise<T>,
-): Promise<T | null> {
-	const storageKey = CACHE_PREFIX + key;
-	let stale: T | null = null;
-	try {
-		const raw = localStorage.getItem(storageKey);
-		if (raw) {
-			const entry = JSON.parse(raw) as { t: number; v: T };
-			if (Date.now() - entry.t < ttlMs) {
-				return entry.v;
-			}
-			stale = entry.v;
-		}
-	} catch {
-		// ignore bad cache entries
-	}
-	try {
-		const value = await fetcher();
-		try {
-			localStorage.setItem(
-				storageKey,
-				JSON.stringify({ t: Date.now(), v: value }),
-			);
-		} catch {
-			// storage full: still return the fresh value
-		}
-		return value;
-	} catch {
-		// ponytail: stale-if-error beats a bundled snapshot for v1
-		return stale;
-	}
-}
-
-async function getJson(url: string): Promise<unknown> {
-	const res = await fetch(url);
-	if (!res.ok) {
-		throw new Error(`${url} -> ${res.status}`);
-	}
-	return res.json();
-}
 
 interface SevenTvEmote {
 	name?: string;
@@ -136,8 +91,10 @@ export async function fetchEmoteMap(login: string): Promise<EmoteMap> {
 	const map: EmoteMap = new Map();
 
 	// FFZ room gives channel emotes AND the twitch id 7TV/BTTV need
-	const ffzRoom = await cached(`ffz-room:${login}`, 60 * 60_000, () =>
-		getJson(`https://api.frankerfacez.com/v1/room/${login}`),
+	const ffzRoom = await cachedJson(
+		`ffz-room:${login}`,
+		60 * 60_000,
+		`https://api.frankerfacez.com/v1/room/${login}`,
 	);
 	const room = ffzRoom as {
 		room?: { twitch_id?: number; set?: number };
@@ -148,25 +105,33 @@ export async function fetchEmoteMap(login: string): Promise<EmoteMap> {
 
 	const [sevenGlobal, bttvGlobal, ffzGlobal, sevenChannel, bttvChannel] =
 		await Promise.all([
-			cached("7tv-global", 6 * 60 * 60_000, () =>
-				getJson("https://7tv.io/v3/emote-sets/global"),
+			cachedJson(
+				"7tv-global",
+				6 * 60 * 60_000,
+				"https://7tv.io/v3/emote-sets/global",
 			),
-			cached("bttv-global", 6 * 60 * 60_000, () =>
-				getJson("https://api.betterttv.net/3/cached/emotes/global"),
+			cachedJson(
+				"bttv-global",
+				6 * 60 * 60_000,
+				"https://api.betterttv.net/3/cached/emotes/global",
 			),
-			cached("ffz-global", 6 * 60 * 60_000, () =>
-				getJson("https://api.frankerfacez.com/v1/set/global"),
+			cachedJson(
+				"ffz-global",
+				6 * 60 * 60_000,
+				"https://api.frankerfacez.com/v1/set/global",
 			),
 			twitchId
-				? cached(`7tv-user:${twitchId}`, 60 * 60_000, () =>
-						getJson(`https://7tv.io/v3/users/twitch/${twitchId}`),
+				? cachedJson(
+						`7tv-user:${twitchId}`,
+						60 * 60_000,
+						`https://7tv.io/v3/users/twitch/${twitchId}`,
 					)
 				: null,
 			twitchId
-				? cached(`bttv-user:${twitchId}`, 60 * 60_000, () =>
-						getJson(
-							`https://api.betterttv.net/3/cached/users/twitch/${twitchId}`,
-						),
+				? cachedJson(
+						`bttv-user:${twitchId}`,
+						60 * 60_000,
+						`https://api.betterttv.net/3/cached/users/twitch/${twitchId}`,
 					)
 				: null,
 		]);

@@ -16,7 +16,6 @@
 		"@howlbox/ui": "workspace:*",
 		"@tailwindcss/vite": "^4.3.1",
 		"@tanstack/react-router": "^1.168.22",
-		"@twurple/auth": "^8.1.4",
 		"@twurple/chat": "^8.1.4",
 		"lucide-react": "catalog:",
 		"next-themes": "catalog:",
