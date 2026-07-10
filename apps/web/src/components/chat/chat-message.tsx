@@ -1,3 +1,4 @@
+import { cn } from "@howlbox/ui/lib/utils";
 import { memo } from "react";
 
 import type { OverlayParams } from "@/lib/overlay/params";
@@ -85,9 +86,12 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 
 	return (
 		<div
-			className={`hb-message [overflow-wrap:anywhere] ${textShadow} ${
-				bg === "bubble" ? BUBBLE_CLASSES : ""
-			} ${message.isAction ? "italic" : ""}`}
+			className={cn(
+				"hb-message [overflow-wrap:anywhere]",
+				textShadow,
+				bg === "bubble" && BUBBLE_CLASSES,
+				message.isAction && "italic",
+			)}
 			style={animation ? { animation } : undefined}
 		>
 			{showTimestamps && (
