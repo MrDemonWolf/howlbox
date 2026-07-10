@@ -2,6 +2,7 @@ import { Button } from "@howlbox/ui/components/button";
 import { Checkbox } from "@howlbox/ui/components/checkbox";
 import { Input } from "@howlbox/ui/components/input";
 import { Label } from "@howlbox/ui/components/label";
+import { cn } from "@howlbox/ui/lib/utils";
 import { Copy, ExternalLink, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -245,11 +246,12 @@ export function ConfigBuilder() {
 						<div className="flex flex-wrap gap-1.5">
 							{THEMES.map((t) => (
 								<button
-									className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors ${
+									className={cn(
+										"flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
 										t === theme
 											? "border-[#00ACED] bg-[#00ACED]/15 text-foreground"
-											: "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-									}`}
+											: "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground",
+									)}
 									key={t}
 									onClick={() => setTheme(t)}
 									type="button"

@@ -1,4 +1,5 @@
-<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>HowlBox - Self-hosted Twitch chat overlay for OBS</title>
   <defs>
     <radialGradient id="sky" cx="0.5" cy="-0.1" r="1.1">
       <stop offset="0" stop-color="#0b1c44"/>

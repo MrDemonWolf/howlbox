@@ -52,8 +52,16 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   (`?channel=123456` arrives as a number); scalars are stringified in
   preprocess before validation. Every field ends in `.catch(default)`.
 - `apps/web/src/components/chat/` - renderer (Tailwind classes) +
-  `overlay.css` (theme variable blocks only). `ChatMessageRow` is
-  memoized; keep its props primitive/stable.
+  `overlay.css` (per-theme variable blocks + overlay keyframes/mask).
+  `ChatMessageRow` is memoized; keep its props primitive/stable.
+  `message-list.tsx` (`MessageList`) is the shared `hb-messages`
+  column: the live `ChatOverlay` and the landing `OverlayPreview` both
+  render it, owning only their own wrapper/positioning.
+- `apps/web/src/lib/overlay/theme-meta.ts` - `THEME_SWATCH` (picker
+  gradient), `THEME_LABEL` (human name), `BG_LABEL`, each keyed by the
+  enum as a `Record<Theme, ...>` so a new theme fails to compile until
+  it is labeled. The landing/config pickers read these; the enum value
+  stays the URL contract.
 - `apps/web/src/routes/` - `/` landing (hero + editorial feature
   index + `ThemeWall` + CTA), `/config` the URL builder
   (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the OBS page.
@@ -96,10 +104,13 @@ background shorthand, can stack noise/gradients), `--hb-surface-solid`
 (reduced-transparency fallback, REQUIRED), `--hb-border`,
 `--hb-shadow`, `--hb-glow` (text glow in panel/bubble modes),
 `--hb-shadow-off` (bg=off legibility stack, must outline all four
-directions), optional `--hb-mask`. Adding a theme: CSS block + the
-`THEMES` enum in `lib/overlay/params.ts` + a swatch in
-`components/landing/generator.tsx` + the README table. Light-surfaced
-themes also join `LIGHT_SURFACE_THEMES` in `chat-overlay.tsx` (user
+directions), optional `--hb-mask`. `wolf` is the base `.hb-root`
+default (no `[data-theme]` block); the other twelve are override
+blocks. Adding a theme: CSS block + the `THEMES` enum in
+`lib/overlay/params.ts` + `THEME_SWATCH` and `THEME_LABEL` in
+`lib/overlay/theme-meta.ts` (both `Record<Theme, ...>`, so the
+compiler forces the new entry) + the README table. Light-surfaced
+themes also join `LIGHT_SURFACE_THEMES` in `message-list.tsx` (user
 color readability flips direction there).
 
 ## Deploy
