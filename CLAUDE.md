@@ -52,6 +52,12 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 - `apps/web/src/lib/twitch/badges.ts` - badge art via api.ivr.fi
   (Helix-shaped, open CORS, includes channel sub art). Old
   badges.twitch.tv is DNS-dead; Helix needs a token. Never add either.
+  Custom overrides: `badgeart` (inline `set=url`/`set/version=url`
+  pairs) and `badgegist` (a public GitHub gist of the same pairs or a
+  JSON map, fetched tokenless through the cache). Precedence Twitch <
+  gist < inline; a bare `set` key covers every version (resolve.ts
+  falls back to it). `refresh` (minutes) re-fetches emote+badge maps
+  with the cache TTLs bypassed via the `force` arg on `cachedJson`.
 - `apps/web/src/lib/overlay/params.ts` - zod schema for all URL
   params. CRITICAL: TanStack Router JSON-types search values
   (`?channel=123456` arrives as a number); scalars are stringified in
