@@ -1,6 +1,5 @@
 import { Toaster } from "@howlbox/ui/components/sonner";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import {
 	ArrowRight,
 	MonitorPlay,
@@ -237,7 +236,6 @@ function LandingPage() {
 			</div>
 
 			<Toaster richColors />
-			<TanStackRouterDevtools position="bottom-left" />
 		</div>
 	);
 }
