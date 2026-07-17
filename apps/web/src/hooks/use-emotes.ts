@@ -4,58 +4,41 @@ import { type EmoteMap, fetchEmoteMap } from "@/lib/emotes/emotes";
 import type { BadgeMap } from "@/lib/emotes/resolve";
 import { fetchBadgeMap } from "@/lib/twitch/badges";
 
-// Returned as refs (not state) on purpose: the chat hook reads
+// Returned as a ref (not state) on purpose: the chat hook reads
 // .current at append time, so a map arriving after connect never
-// re-triggers the connection effect or re-renders old rows.
-
-export function useEmoteMap(
+// re-triggers the connection effect or re-renders old rows. The
+// `active` guard drops a late resolve after the channel changed.
+function useAsyncRef<T>(
 	channel: string | undefined,
-): RefObject<EmoteMap | null> {
-	const ref = useRef<EmoteMap | null>(null);
+	fetcher: (channel: string) => Promise<T>,
+): RefObject<T | null> {
+	const ref = useRef<T | null>(null);
 	useEffect(() => {
 		ref.current = null;
 		if (!channel) {
 			return;
 		}
 		let active = true;
-		fetchEmoteMap(channel)
-			.then((map) => {
+		fetcher(channel)
+			.then((value) => {
 				if (active) {
-					ref.current = map;
+					ref.current = value;
 				}
 			})
 			.catch(() => {
-				// overlay works without third-party emotes
+				// the overlay works fine without this data
 			});
 		return () => {
 			active = false;
 		};
-	}, [channel]);
+	}, [channel, fetcher]);
 	return ref;
 }
 
-export function useBadgeMap(
-	channel: string | undefined,
-): RefObject<BadgeMap | null> {
-	const ref = useRef<BadgeMap | null>(null);
-	useEffect(() => {
-		ref.current = null;
-		if (!channel) {
-			return;
-		}
-		let active = true;
-		fetchBadgeMap(channel)
-			.then((map) => {
-				if (active) {
-					ref.current = map;
-				}
-			})
-			.catch(() => {
-				// overlay works without badge art
-			});
-		return () => {
-			active = false;
-		};
-	}, [channel]);
-	return ref;
+export function useEmoteMap(channel: string | undefined) {
+	return useAsyncRef<EmoteMap>(channel, fetchEmoteMap);
+}
+
+export function useBadgeMap(channel: string | undefined) {
+	return useAsyncRef<BadgeMap>(channel, fetchBadgeMap);
 }

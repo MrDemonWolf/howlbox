@@ -1,6 +1,7 @@
 import type { OverlayParams } from "@/lib/overlay/params";
 import type { ChatMessageView, ConnectionStatus } from "@/lib/twitch/types";
 
+import { HbRoot } from "./hb-root";
 import { MessageList } from "./message-list";
 
 interface ChatOverlayProps {
@@ -31,11 +32,7 @@ export function ChatOverlay({
 	fadeSeconds,
 }: ChatOverlayProps) {
 	return (
-		<div
-			className="hb-root fixed inset-0 flex flex-col justify-end overflow-hidden text-(--hb-text) leading-snug [font-family:var(--hb-font)] [font-size:var(--hb-font-size)]"
-			data-bg={bg}
-			data-theme={theme}
-		>
+		<HbRoot bg={bg} className="fixed inset-0" theme={theme}>
 			{status !== "connected" && (
 				<div className="hb-status absolute top-2 left-2 rounded-md bg-black/70 px-2 py-1 font-sans text-white text-xs">
 					{STATUS_LABEL[status]}
@@ -50,6 +47,6 @@ export function ChatOverlay({
 				showTimestamps={showTimestamps}
 				theme={theme}
 			/>
-		</div>
+		</HbRoot>
 	);
 }

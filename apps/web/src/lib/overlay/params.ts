@@ -17,6 +17,52 @@ export const THEMES = [
 	"mocha",
 ] as const;
 
+export type BgMode = (typeof BG_MODES)[number];
+export type Theme = (typeof THEMES)[number];
+
+// Resolved default for each non-empty param. Mirrors the schema's
+// per-field .catch() fallbacks below, and is the shared source the
+// config builder serializes against so the two cannot disagree.
+export const OVERLAY_DEFAULTS = {
+	bg: "off",
+	theme: "wolf",
+	max: 50,
+	delay: 0,
+	fade: 0,
+	hidebots: false,
+	hidecommands: false,
+	timestamps: false,
+	badges: true,
+	animate: true,
+} satisfies {
+	bg: BgMode;
+	theme: Theme;
+	max: number;
+	delay: number;
+	fade: number;
+	hidebots: boolean;
+	hidecommands: boolean;
+	timestamps: boolean;
+	badges: boolean;
+	animate: boolean;
+};
+
+// One valid Twitch login: 1-25 chars of lowercase alnum/underscore.
+const LOGIN_RE = /^[a-z0-9_]{1,25}$/;
+// string tokens that read as on / off in a URL param
+const TRUTHY_TOKENS = ["1", "true", "on", "yes"];
+const FALSY_TOKENS = ["0", "false", "off", "no"];
+
+// Split a comma list into valid, lowercased logins, dropping anything
+// that is not a real Twitch login shape. Shared with the config
+// builder so it and the overlay agree on what survives.
+export function normalizeLoginList(raw: string): string[] {
+	return raw
+		.split(",")
+		.map((login) => login.trim().toLowerCase())
+		.filter((login) => LOGIN_RE.test(login));
+}
+
 // Every option rides in the OBS source URL. Invalid or missing values
 // fall back to defaults instead of erroring: a typo in OBS must never
 // produce a blank overlay.
@@ -30,7 +76,7 @@ const boolParam = z
 			return value === 1;
 		}
 		if (typeof value === "string") {
-			return ["", "1", "true", "on", "yes"].includes(value.toLowerCase());
+			return value === "" || TRUTHY_TOKENS.includes(value.toLowerCase());
 		}
 		return false;
 	}, z.boolean())
@@ -49,22 +95,17 @@ const boolParamOn = z
 			return value !== 0;
 		}
 		if (typeof value === "string") {
-			return !["0", "false", "off", "no"].includes(value.toLowerCase());
+			return !FALSY_TOKENS.includes(value.toLowerCase());
 		}
 		return true;
 	}, z.boolean())
 	.catch(true);
 
 const loginList = z
-	.preprocess((value) => {
-		if (typeof value !== "string") {
-			return [];
-		}
-		return value
-			.split(",")
-			.map((login) => login.trim().toLowerCase())
-			.filter((login) => /^[a-z0-9_]{1,25}$/.test(login));
-	}, z.array(z.string()))
+	.preprocess(
+		(value) => (typeof value === "string" ? normalizeLoginList(value) : []),
+		z.array(z.string()),
+	)
 	.catch([]);
 
 // TanStack Router's search parser JSON-types values: ?channel=123456
@@ -83,12 +124,7 @@ export const overlayParamsSchema = z.object({
 	channel: z
 		.preprocess(
 			scalarToString,
-			z
-				.string()
-				.trim()
-				.toLowerCase()
-				.regex(/^[a-z0-9_]{1,25}$/)
-				.optional(),
+			z.string().trim().toLowerCase().regex(LOGIN_RE).optional(),
 		)
 		.catch(undefined),
 	bg: z.enum(BG_MODES).catch("off"),

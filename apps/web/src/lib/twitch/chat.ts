@@ -27,6 +27,9 @@ export function connectChat(
 	// that finishes connecting and auto-reconnects; the closed flag
 	// silences every handler and onConnect re-quits the zombie
 	let closed = false;
+	// bridges the sync gap before reconnect() flips isConnecting, so two
+	// events firing in one tick cannot both trigger a reconnect
+	let reconnecting = false;
 	const client = new ChatClient({
 		channels: [joined],
 		rejoinChannelsOnReconnect: true,
@@ -63,6 +66,7 @@ export function connectChat(
 		}
 	});
 	client.onConnect(() => {
+		reconnecting = false;
 		if (closed) {
 			client.quit();
 			return;
@@ -70,6 +74,7 @@ export function connectChat(
 		handlers.onStatus("connected");
 	});
 	client.onDisconnect(() => {
+		reconnecting = false;
 		if (!closed) {
 			handlers.onStatus("disconnected");
 		}
@@ -85,9 +90,11 @@ export function connectChat(
 	// OBS throttles timers while a source is hidden, which can stall
 	// twurple's timer-based retry; nudge reconnects off events too
 	const nudge = () => {
-		if (!closed && !client.isConnected && !client.isConnecting) {
-			client.reconnect();
+		if (closed || reconnecting || client.isConnected || client.isConnecting) {
+			return;
 		}
+		reconnecting = true;
+		client.reconnect();
 	};
 	const nudgeWhenVisible = () => {
 		if (document.visibilityState === "visible") {
@@ -124,7 +131,6 @@ function toView(
 			parts.push({
 				type: "emote",
 				name: part.name,
-				id: part.id,
 				url: buildEmoteImageUrl(part.id, { size: "2.0" }),
 			});
 		} else if (part.type === "text") {

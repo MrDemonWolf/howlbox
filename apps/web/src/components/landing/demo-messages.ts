@@ -6,7 +6,6 @@ function emote(name: string, id: string) {
 	return {
 		type: "emote" as const,
 		name,
-		id,
 		url: `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/2.0`,
 	};
 }

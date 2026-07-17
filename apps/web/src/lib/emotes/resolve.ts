@@ -18,7 +18,6 @@ function splitTextPart(text: string, emotes: EmoteMap): MessagePart[] {
 			out.push({
 				type: "emote",
 				name: token,
-				id: token,
 				url: emote.url,
 				zeroWidth: emote.zeroWidth,
 			});

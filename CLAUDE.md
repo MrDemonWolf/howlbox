@@ -38,12 +38,17 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   filters (hidden/allowed logins, `!commands`), moderation delay
   buffer (bounded; deletes/timeouts/bans evict pending messages),
   dedupe by id, `active` stale-closure guard.
-- `apps/web/src/lib/emotes/` - 7TV/BTTV/FFZ fetch + cache
-  (localStorage, stale-if-error) and text-part tokenization. FFZ room
-  lookup doubles as login-to-id resolver (ivr.fi fallback). Channel
+- `apps/web/src/lib/emotes/` - 7TV/BTTV/FFZ fetch + cache and
+  text-part tokenization. Fetch/cache is the generic `cachedJson<T>`
+  in `lib/cache.ts` (localStorage, stale-if-error, named TTL consts,
+  `AbortSignal.timeout`, quota-driven eviction). Globals fetch in
+  parallel with the FFZ room; the FFZ room lookup doubles as
+  login-to-id resolver (ivr.fi fallback, itself cached). Channel
   emotes override globals. 7TV `flags & 1` = zero-width overlay
   emote. Resolution happens at APPEND time through stable refs so
-  rows stay memoized and late-loading maps never reconnect chat.
+  rows stay memoized and late-loading maps never reconnect chat;
+  `useEmoteMap`/`useBadgeMap` share a generic `useAsyncRef`
+  (`hooks/use-emotes.ts`).
 - `apps/web/src/lib/twitch/badges.ts` - badge art via api.ivr.fi
   (Helix-shaped, open CORS, includes channel sub art). Old
   badges.twitch.tv is DNS-dead; Helix needs a token. Never add either.
@@ -51,12 +56,21 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   params. CRITICAL: TanStack Router JSON-types search values
   (`?channel=123456` arrives as a number); scalars are stringified in
   preprocess before validation. Every field ends in `.catch(default)`.
+  Exports the `Theme`/`BgMode` types (import them, don't re-derive),
+  `OVERLAY_DEFAULTS` (the shared default set), and `normalizeLoginList`
+  (regex login filter shared with the config builder).
+- `apps/web/src/lib/overlay/url.ts` - `buildOverlayUrl` /
+  `overlayQuery`: serialize a config into the overlay query string,
+  omitting defaults. Inverse of `params.ts`, so it round-trips.
+  `ConfigBuilder` uses it instead of a hand-rolled query ladder.
 - `apps/web/src/components/chat/` - renderer (Tailwind classes) +
   `overlay.css` (per-theme variable blocks + overlay keyframes/mask).
   `ChatMessageRow` is memoized; keep its props primitive/stable.
   `message-list.tsx` (`MessageList`) is the shared `hb-messages`
-  column: the live `ChatOverlay` and the landing `OverlayPreview` both
-  render it, owning only their own wrapper/positioning.
+  column plus `surfaceToneFor(theme, bg)`; `hb-root.tsx` (`HbRoot` +
+  `HB_ROOT_CLASS`) is the shared themed wrapper. `ChatOverlay`, the
+  landing `OverlayPreview`, and `ThemeWall` all render `MessageList`
+  inside `HbRoot`, owning only their own positioning.
 - `apps/web/src/lib/overlay/theme-meta.ts` - `THEME_SWATCH` (picker
   gradient), `THEME_LABEL` (human name), `BG_LABEL`, each keyed by the
   enum as a `Record<Theme, ...>` so a new theme fails to compile until
@@ -69,7 +83,7 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   `PageBackground` (aurora + grain + broadcast grid, all `.hb-*` in
   `index.css`, landing-only, never the overlay), the `MONO` machine
   voice + `Eyebrow` kicker, header/footer/OBS steps. `ThemeWall`
-  renders all 13 themes with the REAL `ChatMessageRow` over a static
+  renders all 13 themes with the REAL `MessageList` over a static
   sample; the canned live stream is `demo-messages.ts`. `main.tsx`
   adds the `hb-overlay` html class synchronously before React so OBS
   never sees an opaque flash; the transparency CSS lives in eager

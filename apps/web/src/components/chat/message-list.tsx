@@ -1,26 +1,34 @@
 import { cn } from "@howlbox/ui/lib/utils";
 
-import type { OverlayParams } from "@/lib/overlay/params";
+import type { BgMode, Theme } from "@/lib/overlay/params";
 import type { ChatMessageView } from "@/lib/twitch/types";
 
 import { ChatMessageRow } from "./chat-message";
 
 // themes with light surfaces need pale user colors darkened; every
 // other combination (incl. bg=off over gameplay) lightens dark ones
-export const LIGHT_SURFACE_THEMES = new Set([
+export const LIGHT_SURFACE_THEMES = new Set<Theme>([
 	"light",
 	"cozy",
 	"retro95",
 	"mocha",
 ]);
 
+export type SurfaceTone = "dark" | "light";
+
+// A light surface only shows behind a panel/bubble; bg=off draws over
+// arbitrary gameplay, so it always takes the dark-tone treatment.
+export function surfaceToneFor(theme: Theme, bg: BgMode): SurfaceTone {
+	return bg !== "off" && LIGHT_SURFACE_THEMES.has(theme) ? "light" : "dark";
+}
+
 const PANEL_CLASSES =
 	"m-2 rounded-(--hb-radius) border border-(--hb-border) p-3 [background:var(--hb-surface)] [box-shadow:var(--hb-shadow)]";
 
 interface MessageListProps {
 	messages: ChatMessageView[];
-	bg: OverlayParams["bg"];
-	theme: OverlayParams["theme"];
+	bg: BgMode;
+	theme: Theme;
 	showBadges: boolean;
 	showTimestamps: boolean;
 	animate: boolean;
@@ -40,8 +48,7 @@ export function MessageList({
 	animate,
 	fadeSeconds,
 }: MessageListProps) {
-	const surfaceTone =
-		bg !== "off" && LIGHT_SURFACE_THEMES.has(theme) ? "light" : "dark";
+	const surfaceTone = surfaceToneFor(theme, bg);
 
 	return (
 		<div

@@ -41,8 +41,8 @@
 	--hb-shadow-off: 0 1px 2px rgb(0 0 0 / 0.85), 0 0 8px rgb(0 0 0 / 0.5);
 }
 
-/* macOS 27 Liquid Glass: near-clear smoke with specular rim shine.
-   Dark base keeps worst-case text contrast bounded over gameplay. */
+/* macOS 26 (Tahoe) Liquid Glass: near-clear smoke with specular rim
+   shine. Dark base keeps worst-case text contrast bounded over gameplay. */
 .hb-root[data-theme="glass"] {
 	--hb-radius: 18px;
 	--hb-text: #ffffff;
