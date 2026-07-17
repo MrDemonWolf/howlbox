@@ -76,13 +76,15 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   enum as a `Record<Theme, ...>` so a new theme fails to compile until
   it is labeled. The landing/config pickers read these; the enum value
   stays the URL contract.
-- `apps/web/src/routes/` - `/` landing (hero + editorial feature
-  index + `ThemeWall` + CTA), `/config` the URL builder
-  (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the OBS page.
-  Shared landing chrome is `components/landing/site-chrome.tsx`:
-  `PageBackground` (aurora + grain + broadcast grid, all `.hb-*` in
-  `index.css`, landing-only, never the overlay), the `MONO` machine
-  voice + `Eyebrow` kicker, header/footer/OBS steps. `ThemeWall`
+- `apps/web/src/routes/` - `/` landing (hero + stats fact band +
+  editorial feature index + `ThemeWall` + CTA), `/config` the URL
+  builder (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the
+  OBS page. Shared landing chrome is
+  `components/landing/site-chrome.tsx`: `PageBackground` (aurora +
+  grain + broadcast grid, all `.hb-*` in `index.css`, landing-only,
+  never the overlay), the `MONO` machine voice + `Eyebrow` kicker,
+  header/footer/OBS steps, and the exported `DISCLAIMER` (footer
+  affiliation line, mirrors the wolfathon pattern). `ThemeWall`
   renders all 13 themes with the REAL `MessageList` over a static
   sample; the canned live stream is `demo-messages.ts`. `main.tsx`
   adds the `hb-overlay` html class synchronously before React so OBS
