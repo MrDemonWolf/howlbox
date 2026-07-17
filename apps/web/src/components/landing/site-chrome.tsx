@@ -51,7 +51,7 @@ export function SiteHeader() {
 					HowlBox
 				</Link>
 				<nav
-					className={`flex items-center gap-6 text-white/60 text-xs max-sm:gap-4 [&>a:not(:last-child)]:max-sm:hidden ${MONO}`}
+					className={`flex flex-wrap items-center justify-end gap-6 text-white/60 text-xs max-sm:gap-3 ${MONO}`}
 				>
 					<Link className="hover:text-white" hash="themes" to="/">
 						Themes
@@ -129,6 +129,11 @@ export function OBSSteps() {
 	);
 }
 
+// HowlBox is an independent tool; keep the affiliation disclaimer honest.
+// Mirrors the Wolfathon footer pattern.
+export const DISCLAIMER =
+	"HowlBox is an independent, open-source tool. Not affiliated with, endorsed by, or sponsored by Twitch Interactive, Amazon, 7TV, BetterTTV, or FrankerFaceZ. Twitch is a trademark of Twitch Interactive, Inc.";
+
 export function SiteFooter() {
 	return (
 		<footer className="border-white/10 border-t">
@@ -139,9 +144,14 @@ export function SiteFooter() {
 						<span className={`font-bold text-white ${DISPLAY_FONT}`}>
 							HowlBox
 						</span>
-						<span className={`text-[0.62rem] text-white/55 ${MONO}`}>
+						<a
+							className={`text-[0.62rem] text-white/55 transition-colors hover:text-white ${MONO}`}
+							href="https://www.mrdemonwolf.com"
+							rel="noreferrer"
+							target="_blank"
+						>
 							by MrDemonWolf, Inc.
-						</span>
+						</a>
 					</div>
 					<p className="max-w-xs text-pretty text-white/55 text-xs leading-relaxed">
 						A self-hosted, client-only Twitch chat overlay for OBS browser
@@ -176,6 +186,9 @@ export function SiteFooter() {
 						MIT License
 					</a>
 				</div>
+				<p className="max-w-2xl text-pretty text-white/45 text-xs leading-relaxed">
+					{DISCLAIMER}
+				</p>
 				<p className="text-sm text-white/60">
 					Made with love by{" "}
 					<a
