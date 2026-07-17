@@ -10,6 +10,7 @@ interface ChatMessageRowProps {
 	bg: OverlayParams["bg"];
 	surfaceTone: "dark" | "light";
 	showBadges: boolean;
+	showPronouns: boolean;
 	showTimestamps: boolean;
 	animate: boolean;
 	fadeSeconds: number;
@@ -27,6 +28,11 @@ const BUBBLE_CLASSES =
 
 const EMOTE_CLASSES =
 	"hb-emote -my-1 inline-block h-[1.6em] min-w-[1.6em] align-middle";
+
+// text badge (pronouns) sized to sit with the image badges: same height,
+// hairline pill in the theme's border/text colors
+const TEXT_BADGE_CLASSES =
+	"hb-pronoun -my-0.5 mr-1 inline-flex h-[1.15em] items-center rounded-[0.35em] border border-(--hb-border) px-[0.35em] align-middle text-[0.8em] leading-none";
 
 type EmotePart = Extract<MessagePart, { type: "emote" }>;
 
@@ -60,10 +66,16 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 	bg,
 	surfaceTone,
 	showBadges,
+	showPronouns,
 	showTimestamps,
 	animate,
 	fadeSeconds,
 }: ChatMessageRowProps) {
+	// image badges follow the badges toggle, text/pronoun badges follow
+	// their own; both share the row in resolved order
+	const badges = message.renderBadges.filter((badge) =>
+		badge.kind === "image" ? showBadges : showPronouns,
+	);
 	// bg=off has no surface to supply contrast, so text carries a
 	// heavy shadow stack; other modes get the theme's glow (if any)
 	const textShadow =
@@ -99,15 +111,23 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 					{formatTime(message.timestamp)}
 				</span>
 			)}
-			{showBadges &&
-				message.badgeUrls.map((url, index) => (
+			{badges.map((badge, index) =>
+				badge.kind === "image" ? (
 					<img
 						alt=""
 						className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
 						key={`${message.id}-badge-${index}`}
-						src={url}
+						src={badge.url}
 					/>
-				))}
+				) : (
+					<span
+						className={TEXT_BADGE_CLASSES}
+						key={`${message.id}-badge-${index}`}
+					>
+						{badge.text}
+					</span>
+				),
+			)}
 			<span className="hb-name font-semibold" style={{ color }}>
 				{message.displayName}
 			</span>

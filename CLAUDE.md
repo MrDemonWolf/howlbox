@@ -59,6 +59,14 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   gist < inline; a bare `set` key covers every version (resolve.ts
   falls back to it). `refresh` (minutes) re-fetches emote+badge maps
   with the cache TTLs bypassed via the `force` arg on `cachedJson`.
+- `apps/web/src/lib/twitch/pronouns.ts` - pronoun badges via
+  pronouns.alejo.io (CORS `*`, no auth; the service 7TV/FFZ read).
+  Per-USER not per-channel, so nothing to prefetch: `warmPronoun`
+  fire-and-forgets a cached lookup on first sight of a login,
+  `resolvePronoun` reads the sync cache at append time. First message
+  from a user can miss the badge; repeats hit. Gated by the `pronouns`
+  param. Badges are a `RenderBadge` union (`types.ts`): image badges +
+  the text pronoun badge share the row, built in `resolve.ts`.
 - `apps/web/src/lib/overlay/params.ts` - zod schema for all URL
   params. CRITICAL: TanStack Router JSON-types search values
   (`?channel=123456` arrives as a number); scalars are stringified in
@@ -104,10 +112,11 @@ Schema lives in `lib/overlay/params.ts`. Full param reference is the
 Usage table in `README.md`; keep both in sync. Defaults:
 `bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=0`,
 `badgeart`/`badgegist` empty, `badges` and `animate` on, all other
-flags off. Ranges: `max` 1-200, `delay` 0-300s, `fade` 0-600s,
-`refresh` 0-1440min. `channel`/`hide`/`allow` validate against the
-Twitch login regex; bad logins are dropped, not errored. Custom badge
-art (`badgeart`, `badgegist`) is parsed/validated in
+flags off (`pronouns` too - opt-in, since it is a per-user
+pronouns.alejo.io lookup). Ranges: `max` 1-200, `delay` 0-300s, `fade`
+0-600s, `refresh` 0-1440min. `channel`/`hide`/`allow` validate against
+the Twitch login regex; bad logins are dropped, not errored. Custom
+badge art (`badgeart`, `badgegist`) is parsed/validated in
 `lib/twitch/badges.ts`.
 
 ## OBS constraints (research-verified; do not violate)

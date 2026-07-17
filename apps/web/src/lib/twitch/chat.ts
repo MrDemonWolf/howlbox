@@ -149,7 +149,7 @@ function toView(
 			set,
 			version,
 		})),
-		badgeUrls: [],
+		renderBadges: [],
 		parts,
 		isAction,
 		isPrivileged: msg.userInfo.isBroadcaster || msg.userInfo.isMod,

@@ -3,6 +3,7 @@ import { type RefObject, useEffect, useState } from "react";
 import type { EmoteMap } from "@/lib/emotes/emotes";
 import { type BadgeMap, resolveMessageExtras } from "@/lib/emotes/resolve";
 import { connectChat } from "@/lib/twitch/chat";
+import { resolvePronoun, warmPronoun } from "@/lib/twitch/pronouns";
 import type { ChatMessageView, ConnectionStatus } from "@/lib/twitch/types";
 
 export interface UseTwitchChatOptions {
@@ -14,6 +15,8 @@ export interface UseTwitchChatOptions {
 	// featured mode: when non-empty, only these logins are shown
 	allowedLogins?: readonly string[];
 	hideCommands?: boolean;
+	// fetch pronoun badges from pronouns.alejo.io (per-user, opt-in)
+	pronouns?: boolean;
 	// read at append time; ref identity is stable so late-loading
 	// maps never tear down the connection
 	emotesRef?: RefObject<EmoteMap | null>;
@@ -31,6 +34,7 @@ export function useTwitchChat(
 	const hiddenKey = (options.hiddenLogins ?? []).join(",");
 	const allowedKey = (options.allowedLogins ?? []).join(",");
 	const hideCommands = options.hideCommands ?? false;
+	const pronouns = options.pronouns ?? false;
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
 	const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
@@ -102,10 +106,16 @@ export function useTwitchChat(
 						return;
 					}
 				}
+				// per-user pronoun: warm the cache on first sight, read
+				// whatever is cached now (first message may miss, repeats hit)
+				if (pronouns) {
+					warmPronoun(raw.login);
+				}
 				const message = resolveMessageExtras(
 					raw,
 					options.emotesRef?.current ?? null,
 					options.badgesRef?.current ?? null,
+					pronouns ? resolvePronoun(raw.login) : null,
 				);
 				if (delaySeconds > 0 && !message.isPrivileged) {
 					// note: OBS throttles timers while the source is
@@ -159,7 +169,15 @@ export function useTwitchChat(
 			dropPending(() => true);
 			disconnect();
 		};
-	}, [channel, maxMessages, delaySeconds, hiddenKey, allowedKey, hideCommands]);
+	}, [
+		channel,
+		maxMessages,
+		delaySeconds,
+		hiddenKey,
+		allowedKey,
+		hideCommands,
+		pronouns,
+	]);
 
 	return { messages, status };
 }

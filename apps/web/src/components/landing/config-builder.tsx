@@ -32,6 +32,7 @@ interface Config {
 	timestamps: boolean;
 	badges: boolean;
 	animate: boolean;
+	pronouns: boolean;
 	hide: string;
 	allow: string;
 	badgeart: string;
@@ -54,6 +55,7 @@ const DEFAULTS: Config = {
 	timestamps: OVERLAY_DEFAULTS.timestamps,
 	badges: OVERLAY_DEFAULTS.badges,
 	animate: OVERLAY_DEFAULTS.animate,
+	pronouns: OVERLAY_DEFAULTS.pronouns,
 	hide: "",
 	allow: "",
 	badgeart: OVERLAY_DEFAULTS.badgeart,
@@ -89,6 +91,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				timestamps: config.timestamps,
 				badges: config.badges,
 				animate: config.animate,
+				pronouns: config.pronouns,
 				hide: normalizeLoginList(config.hide),
 				allow: normalizeLoginList(config.allow),
 				badgeart: config.badgeart.trim(),
@@ -131,6 +134,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 					className="h-96"
 					fadeSeconds={config.fade}
 					showBadges={config.badges}
+					showPronouns={config.pronouns}
 					showTimestamps={config.timestamps}
 					theme={config.theme}
 				/>
@@ -237,6 +241,12 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 						id="cfg-badges"
 						label="Show badges"
 						onChange={(v) => set("badges", v)}
+					/>
+					<Toggle
+						checked={config.pronouns}
+						id="cfg-pronouns"
+						label="Show pronouns (via pronouns.alejo.io)"
+						onChange={(v) => set("pronouns", v)}
 					/>
 					<Toggle
 						checked={config.timestamps}

@@ -39,6 +39,7 @@ export const OVERLAY_DEFAULTS = {
 	badgeart: "",
 	badgegist: "",
 	refresh: 0,
+	pronouns: false,
 } satisfies {
 	bg: BgMode;
 	theme: Theme;
@@ -53,6 +54,7 @@ export const OVERLAY_DEFAULTS = {
 	badgeart: string;
 	badgegist: string;
 	refresh: number;
+	pronouns: boolean;
 };
 
 // One valid Twitch login: 1-25 chars of lowercase alnum/underscore.
@@ -154,6 +156,8 @@ export const overlayParamsSchema = z.object({
 	badges: boolParamOn,
 	timestamps: boolParam,
 	animate: boolParamOn,
+	// pronoun badges from pronouns.alejo.io (per-user third-party lookup)
+	pronouns: boolParam,
 	// auto-hide: fade each message out N seconds after it appears
 	fade: z
 		.preprocess(numberish, z.coerce.number().int().min(0).max(600))
