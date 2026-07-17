@@ -51,7 +51,7 @@ export function SiteHeader() {
 					HowlBox
 				</Link>
 				<nav
-					className={`flex items-center gap-6 text-[0.7rem] text-white/55 max-sm:gap-4 [&>a:not(:last-child)]:max-sm:hidden ${MONO}`}
+					className={`flex items-center gap-6 text-white/60 text-xs max-sm:gap-4 [&>a:not(:last-child)]:max-sm:hidden ${MONO}`}
 				>
 					<Link className="hover:text-white" hash="themes" to="/">
 						Themes

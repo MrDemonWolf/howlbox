@@ -1,6 +1,7 @@
 import { Toaster } from "@howlbox/ui/components/sonner";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { z } from "zod";
 
 import { ConfigBuilder } from "@/components/landing/config-builder";
 import {
@@ -12,8 +13,16 @@ import {
 	SiteFooter,
 	SiteHeader,
 } from "@/components/landing/site-chrome";
+import { THEMES } from "@/lib/overlay/params";
+
+// ?theme=neon from a theme-wall tile preselects that theme; anything
+// else falls back to no preselection, same spirit as the overlay params
+const configSearchSchema = z.object({
+	theme: z.enum(THEMES).optional().catch(undefined),
+});
 
 export const Route = createFileRoute("/config")({
+	validateSearch: (search) => configSearchSchema.parse(search),
 	component: ConfigPage,
 	head: () => ({
 		meta: [
@@ -27,6 +36,8 @@ export const Route = createFileRoute("/config")({
 });
 
 function ConfigPage() {
+	const { theme } = Route.useSearch();
+
 	return (
 		<div className="dark min-h-svh scroll-smooth bg-[#040713] text-white antialiased">
 			<PageBackground />
@@ -56,7 +67,7 @@ function ConfigPage() {
 					</section>
 
 					<section className="mx-auto max-w-6xl px-6 pb-20">
-						<ConfigBuilder />
+						<ConfigBuilder initialTheme={theme} />
 					</section>
 
 					<OBSSteps />
