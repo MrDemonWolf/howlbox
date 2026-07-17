@@ -34,6 +34,8 @@ interface Config {
 	animate: boolean;
 	hide: string;
 	allow: string;
+	badgeart: string;
+	refresh: number;
 }
 
 // Form state. The scalar/toggle defaults come from the shared
@@ -53,6 +55,8 @@ const DEFAULTS: Config = {
 	animate: OVERLAY_DEFAULTS.animate,
 	hide: "",
 	allow: "",
+	badgeart: OVERLAY_DEFAULTS.badgeart,
+	refresh: OVERLAY_DEFAULTS.refresh,
 };
 
 function clampNumber(raw: string, min: number, max: number, fallback: number) {
@@ -85,6 +89,8 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				animate: config.animate,
 				hide: normalizeLoginList(config.hide),
 				allow: normalizeLoginList(config.allow),
+				badgeart: config.badgeart.trim(),
+				refresh: config.refresh,
 			}),
 		[cleanChannel, config],
 	);
@@ -240,6 +246,34 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 						id="cfg-animate"
 						label="Animate messages in"
 						onChange={(v) => set("animate", v)}
+					/>
+				</Fieldset>
+
+				<Fieldset title="Emotes and badges">
+					<div className="grid gap-2">
+						<Label htmlFor="cfg-badgeart">Custom badge art</Label>
+						<Input
+							autoComplete="off"
+							id="cfg-badgeart"
+							onChange={(e) => set("badgeart", e.target.value)}
+							placeholder="moderator=https://example.com/mod.png"
+							value={config.badgeart}
+						/>
+						<p className="text-muted-foreground text-xs">
+							Comma-separated set=url or set/version=url pairs. Overrides the
+							default Twitch art (all global and channel badges load out of the
+							box).
+						</p>
+					</div>
+					<NumberField
+						fallback={0}
+						hint="Re-fetches 7TV, BTTV, FFZ, and badge art mid-stream so new emotes appear without a reload."
+						id="cfg-refresh"
+						label="Refresh emote cache (min, 0 = off)"
+						max={1440}
+						min={0}
+						onCommit={(v) => set("refresh", v)}
+						value={config.refresh}
 					/>
 				</Fieldset>
 

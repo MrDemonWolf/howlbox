@@ -20,8 +20,12 @@ function OverlayPage() {
 	const hiddenLogins = params.hidebots
 		? [...KNOWN_BOTS, ...params.hide]
 		: params.hide;
-	const emotesRef = useEmoteMap(params.channel);
-	const badgesRef = useBadgeMap(params.channel);
+	const emotesRef = useEmoteMap(params.channel, params.refresh);
+	const badgesRef = useBadgeMap(
+		params.channel,
+		params.badgeart,
+		params.refresh,
+	);
 	const { messages, status } = useTwitchChat(params.channel, {
 		maxMessages: params.max,
 		delaySeconds: params.delay,

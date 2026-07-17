@@ -25,17 +25,22 @@ function addSets(map: BadgeMap, sets: HelixBadgeSet[] | null) {
 	}
 }
 
-export async function fetchBadgeMap(login: string): Promise<BadgeMap> {
+export async function fetchBadgeMap(
+	login: string,
+	force = false,
+): Promise<BadgeMap> {
 	const [global, channel] = await Promise.all([
 		cachedJson<HelixBadgeSet[]>(
 			"badges-global",
 			SIX_HOURS_MS,
 			"https://api.ivr.fi/v2/twitch/badges/global",
+			force,
 		),
 		cachedJson<HelixBadgeSet[]>(
 			`badges-channel:${login}`,
 			ONE_HOUR_MS,
 			`https://api.ivr.fi/v2/twitch/badges/channel?login=${encodeURIComponent(login)}`,
+			force,
 		),
 	]);
 	const map: BadgeMap = new Map();
@@ -43,4 +48,24 @@ export async function fetchBadgeMap(login: string): Promise<BadgeMap> {
 	// channel sets override global (per-channel subscriber art)
 	addSets(map, channel);
 	return map;
+}
+
+// Custom badge art from the ?badgeart param. Comma list of
+// "<set>/<version>=<image url>" or "<set>=<image url>" pairs; a bare
+// set key covers every version of that set (resolve.ts falls back to
+// it). Bad entries are dropped, never fatal, same spirit as params.ts.
+export function parseCustomBadgeArt(raw: string): [string, string][] {
+	const out: [string, string][] = [];
+	for (const pair of raw.split(",")) {
+		const eq = pair.indexOf("=");
+		if (eq <= 0) {
+			continue;
+		}
+		const key = pair.slice(0, eq).trim();
+		const url = pair.slice(eq + 1).trim();
+		if (/^[\w-]+(\/[\w-]+)?$/.test(key) && /^https?:\/\//.test(url)) {
+			out.push([key, url]);
+		}
+	}
+	return out;
 }

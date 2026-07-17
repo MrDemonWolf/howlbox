@@ -1,16 +1,21 @@
-import { type RefObject, useEffect, useRef } from "react";
+import { type RefObject, useCallback, useEffect, useRef } from "react";
 
 import { type EmoteMap, fetchEmoteMap } from "@/lib/emotes/emotes";
 import type { BadgeMap } from "@/lib/emotes/resolve";
-import { fetchBadgeMap } from "@/lib/twitch/badges";
+import { fetchBadgeMap, parseCustomBadgeArt } from "@/lib/twitch/badges";
 
 // Returned as a ref (not state) on purpose: the chat hook reads
 // .current at append time, so a map arriving after connect never
 // re-triggers the connection effect or re-renders old rows. The
 // `active` guard drops a late resolve after the channel changed.
+// refreshMinutes > 0 re-runs the fetcher on an interval with the
+// cache TTLs bypassed (mid-stream emote/badge adds show up without a
+// reload). OBS throttles timers in hidden sources, so a tick can land
+// late; nothing is visible then anyway.
 function useAsyncRef<T>(
 	channel: string | undefined,
-	fetcher: (channel: string) => Promise<T>,
+	fetcher: (channel: string, force: boolean) => Promise<T>,
+	refreshMinutes = 0,
 ): RefObject<T | null> {
 	const ref = useRef<T | null>(null);
 	useEffect(() => {
@@ -19,26 +24,51 @@ function useAsyncRef<T>(
 			return;
 		}
 		let active = true;
-		fetcher(channel)
-			.then((value) => {
-				if (active) {
-					ref.current = value;
-				}
-			})
-			.catch(() => {
-				// the overlay works fine without this data
-			});
+		const load = (force: boolean) =>
+			fetcher(channel, force)
+				.then((value) => {
+					if (active) {
+						ref.current = value;
+					}
+				})
+				.catch(() => {
+					// the overlay works fine without this data
+				});
+		load(false);
+		const timer =
+			refreshMinutes > 0
+				? setInterval(() => load(true), refreshMinutes * 60_000)
+				: undefined;
 		return () => {
 			active = false;
+			if (timer !== undefined) {
+				clearInterval(timer);
+			}
 		};
-	}, [channel, fetcher]);
+	}, [channel, fetcher, refreshMinutes]);
 	return ref;
 }
 
-export function useEmoteMap(channel: string | undefined) {
-	return useAsyncRef<EmoteMap>(channel, fetchEmoteMap);
+export function useEmoteMap(channel: string | undefined, refreshMinutes = 0) {
+	return useAsyncRef<EmoteMap>(channel, fetchEmoteMap, refreshMinutes);
 }
 
-export function useBadgeMap(channel: string | undefined) {
-	return useAsyncRef<BadgeMap>(channel, fetchBadgeMap);
+// customArt is the raw ?badgeart string; entries override the fetched
+// Twitch art (global + per-channel sets both ride in fetchBadgeMap).
+export function useBadgeMap(
+	channel: string | undefined,
+	customArt = "",
+	refreshMinutes = 0,
+) {
+	const fetcher = useCallback(
+		async (login: string, force: boolean): Promise<BadgeMap> => {
+			const map = await fetchBadgeMap(login, force);
+			for (const [key, url] of parseCustomBadgeArt(customArt)) {
+				map.set(key, url);
+			}
+			return map;
+		},
+		[customArt],
+	);
+	return useAsyncRef<BadgeMap>(channel, fetcher, refreshMinutes);
 }
