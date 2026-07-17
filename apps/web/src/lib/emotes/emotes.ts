@@ -2,7 +2,7 @@
 // All endpoints are public, no auth, browser-CORS safe (verified).
 // Fetch + stale-if-error localStorage cache live in @/lib/cache.
 
-import { cachedJson, getJson } from "@/lib/cache";
+import { cachedJson, ONE_HOUR_MS, SIX_HOURS_MS } from "@/lib/cache";
 
 export interface ThirdPartyEmote {
 	url: string;
@@ -74,97 +74,106 @@ function addFfz(map: EmoteMap, emoticons: FfzEmote[] | undefined) {
 	}
 }
 
+interface FfzRoomResponse {
+	room?: { twitch_id?: number; set?: number };
+	sets?: Record<string, { emoticons?: FfzEmote[] }>;
+}
+
+interface FfzGlobalResponse {
+	default_sets?: number[];
+	sets?: Record<string, { emoticons?: FfzEmote[] }>;
+}
+
+interface SevenTvSet {
+	emotes?: SevenTvEmote[];
+}
+
+interface SevenTvUser {
+	emote_set?: { emotes?: SevenTvEmote[] };
+}
+
+interface BttvUser {
+	channelEmotes?: BttvEmote[];
+	sharedEmotes?: BttvEmote[];
+}
+
 // FFZ room 404s for channels that never used FFZ, so it cannot be the
-// only login -> numeric id resolver
+// only login -> numeric id resolver. Cached: the mapping never changes.
 async function resolveTwitchId(login: string): Promise<string | null> {
-	try {
-		const users = (await getJson(
-			`https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(login)}`,
-		)) as { id?: string }[];
-		return users[0]?.id ?? null;
-	} catch {
-		return null;
-	}
+	const users = await cachedJson<{ id?: string }[]>(
+		`twitch-id:${login}`,
+		SIX_HOURS_MS,
+		`https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(login)}`,
+	);
+	return users?.[0]?.id ?? null;
 }
 
 export async function fetchEmoteMap(login: string): Promise<EmoteMap> {
 	const map: EmoteMap = new Map();
 
-	// FFZ room gives channel emotes AND the twitch id 7TV/BTTV need
-	const ffzRoom = await cachedJson(
-		`ffz-room:${login}`,
-		60 * 60_000,
-		`https://api.frankerfacez.com/v1/room/${login}`,
-	);
-	const room = ffzRoom as {
-		room?: { twitch_id?: number; set?: number };
-		sets?: Record<string, { emoticons?: FfzEmote[] }>;
-	} | null;
-	const twitchId =
-		room?.room?.twitch_id?.toString() ?? (await resolveTwitchId(login));
+	// First wave: the FFZ room (channel emotes + the twitch id 7TV/BTTV
+	// need) alongside the three globals, which do not depend on the id.
+	const [ffzRoom, sevenGlobal, bttvGlobal, ffzGlobal] = await Promise.all([
+		cachedJson<FfzRoomResponse>(
+			`ffz-room:${login}`,
+			ONE_HOUR_MS,
+			`https://api.frankerfacez.com/v1/room/${login}`,
+		),
+		cachedJson<SevenTvSet>(
+			"7tv-global",
+			SIX_HOURS_MS,
+			"https://7tv.io/v3/emote-sets/global",
+		),
+		cachedJson<BttvEmote[]>(
+			"bttv-global",
+			SIX_HOURS_MS,
+			"https://api.betterttv.net/3/cached/emotes/global",
+		),
+		cachedJson<FfzGlobalResponse>(
+			"ffz-global",
+			SIX_HOURS_MS,
+			"https://api.frankerfacez.com/v1/set/global",
+		),
+	]);
 
-	const [sevenGlobal, bttvGlobal, ffzGlobal, sevenChannel, bttvChannel] =
-		await Promise.all([
-			cachedJson(
-				"7tv-global",
-				6 * 60 * 60_000,
-				"https://7tv.io/v3/emote-sets/global",
-			),
-			cachedJson(
-				"bttv-global",
-				6 * 60 * 60_000,
-				"https://api.betterttv.net/3/cached/emotes/global",
-			),
-			cachedJson(
-				"ffz-global",
-				6 * 60 * 60_000,
-				"https://api.frankerfacez.com/v1/set/global",
-			),
-			twitchId
-				? cachedJson(
-						`7tv-user:${twitchId}`,
-						60 * 60_000,
-						`https://7tv.io/v3/users/twitch/${twitchId}`,
-					)
-				: null,
-			twitchId
-				? cachedJson(
-						`bttv-user:${twitchId}`,
-						60 * 60_000,
-						`https://api.betterttv.net/3/cached/users/twitch/${twitchId}`,
-					)
-				: null,
-		]);
+	const twitchId =
+		ffzRoom?.room?.twitch_id?.toString() ?? (await resolveTwitchId(login));
+
+	// Second wave: the per-channel 7TV/BTTV sets, which need the id.
+	const [sevenChannel, bttvChannel] = await Promise.all([
+		twitchId
+			? cachedJson<SevenTvUser>(
+					`7tv-user:${twitchId}`,
+					ONE_HOUR_MS,
+					`https://7tv.io/v3/users/twitch/${twitchId}`,
+				)
+			: null,
+		twitchId
+			? cachedJson<BttvUser>(
+					`bttv-user:${twitchId}`,
+					ONE_HOUR_MS,
+					`https://api.betterttv.net/3/cached/users/twitch/${twitchId}`,
+				)
+			: null,
+	]);
 
 	// order matters: globals first, channel emotes override on collision
-	addSevenTv(map, (sevenGlobal as { emotes?: SevenTvEmote[] } | null)?.emotes);
-	addBttv(map, (bttvGlobal as BttvEmote[] | null) ?? undefined);
+	addSevenTv(map, sevenGlobal?.emotes);
+	addBttv(map, bttvGlobal ?? undefined);
 
-	const ffzGlobalSets = ffzGlobal as {
-		default_sets?: number[];
-		sets?: Record<string, { emoticons?: FfzEmote[] }>;
-	} | null;
 	// iterate default_sets ONLY; the response carries extra sets
-	for (const setId of ffzGlobalSets?.default_sets ?? []) {
-		addFfz(map, ffzGlobalSets?.sets?.[String(setId)]?.emoticons);
+	for (const setId of ffzGlobal?.default_sets ?? []) {
+		addFfz(map, ffzGlobal?.sets?.[String(setId)]?.emoticons);
 	}
 
-	addSevenTv(
-		map,
-		(sevenChannel as { emote_set?: { emotes?: SevenTvEmote[] } } | null)
-			?.emote_set?.emotes,
-	);
+	addSevenTv(map, sevenChannel?.emote_set?.emotes);
 
-	const bttvUser = bttvChannel as {
-		channelEmotes?: BttvEmote[];
-		sharedEmotes?: BttvEmote[];
-	} | null;
 	// merge BOTH arrays or most channel emotes get dropped
-	addBttv(map, bttvUser?.channelEmotes);
-	addBttv(map, bttvUser?.sharedEmotes);
+	addBttv(map, bttvChannel?.channelEmotes);
+	addBttv(map, bttvChannel?.sharedEmotes);
 
-	if (room?.room?.set !== undefined) {
-		addFfz(map, room.sets?.[String(room.room.set)]?.emoticons);
+	if (ffzRoom?.room?.set !== undefined) {
+		addFfz(map, ffzRoom.sets?.[String(ffzRoom.room.set)]?.emoticons);
 	}
 
 	return map;
