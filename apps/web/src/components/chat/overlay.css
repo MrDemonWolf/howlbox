@@ -304,6 +304,8 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.hb-message {
+		/* biome-ignore lint/complexity/noImportantStyles: must override the
+		   per-message inline `animation` set by ChatMessageRow */
 		animation-duration: 0s !important;
 	}
 }

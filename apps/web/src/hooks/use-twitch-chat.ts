@@ -34,6 +34,10 @@ export function useTwitchChat(
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
 	const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
+	// emotesRef/badgesRef are read via .current at append time on
+	// purpose; adding them to the deps would tear down and rebuild the
+	// chat connection whenever a map loads (see use-emotes.ts).
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional ref-at-append pattern
 	useEffect(() => {
 		if (!channel) {
 			return;
