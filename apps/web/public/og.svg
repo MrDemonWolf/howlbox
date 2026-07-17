@@ -60,7 +60,7 @@
     <rect x="96" y="418" width="270" height="46" rx="23" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.16"/>
     <text x="231" y="447" text-anchor="middle" fill="#c3c9d6">NO LOGIN, NO KEYS</text>
     <rect x="384" y="418" width="178" height="46" rx="23" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.16"/>
-    <text x="473" y="447" text-anchor="middle" fill="#c3c9d6">13 THEMES</text>
+    <text x="473" y="447" text-anchor="middle" fill="#c3c9d6">15 THEMES</text>
   </g>
 
   <!-- url chip -->
@@ -106,7 +106,7 @@
       <text x="44" y="280"><tspan fill="#e7ebf2">paste in OBS, done</tspan></text>
 
       <rect x="24" y="308" width="252" height="46" rx="18" fill="#0b1428" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.14"/>
-      <text x="44" y="337"><tspan fill="#c6a0f6" font-weight="700">SilverFang:</tspan><tspan fill="#e7ebf2" dx="7">13 themes??</tspan></text>
+      <text x="44" y="337"><tspan fill="#c6a0f6" font-weight="700">SilverFang:</tspan><tspan fill="#e7ebf2" dx="7">15 themes??</tspan></text>
     </g>
 
     <!-- theme param footer -->

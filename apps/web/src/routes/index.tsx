@@ -34,8 +34,8 @@ const FEATURES = [
 	},
 	{
 		icon: Palette,
-		title: "Thirteen themes",
-		body: "Wolf glass, Liquid Glass, CRT terminal, synthwave neon, Win95, pixel arcade, kawaii pastel, and more. All CSS-variable driven.",
+		title: "Fifteen themes",
+		body: "Wolf glass, Liquid Glass, CRT terminal, synthwave neon, Win95, Windows XP, Xbox, pixel arcade, kawaii pastel, and more. All CSS-variable driven.",
 	},
 	{
 		icon: MonitorPlay,
@@ -63,7 +63,7 @@ const TRUST = ["Free forever", "MIT open source", "No account, no keys"];
 
 // fact band: the numbers a self-hosting streamer actually shops on
 const STATS = [
-	{ value: "13", label: "themes, one query param each" },
+	{ value: "15", label: "themes, one query param each" },
 	{ value: "3", label: "display modes: text, panel, bubble" },
 	{ value: "4", label: "emote platforms, merged per channel" },
 	{ value: "0", label: "accounts, servers, or fees" },
@@ -205,7 +205,7 @@ function LandingPage() {
 
 					{/* theme wall */}
 					<section className="mx-auto max-w-6xl px-6 py-24" id="themes">
-						<Eyebrow>Thirteen themes</Eyebrow>
+						<Eyebrow>Fifteen themes</Eyebrow>
 						<h2
 							className={`mt-5 mb-4 max-w-2xl text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
 						>
