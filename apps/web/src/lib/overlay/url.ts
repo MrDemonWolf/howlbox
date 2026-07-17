@@ -16,6 +16,7 @@ export interface OverlayConfig {
 	timestamps: boolean;
 	badges: boolean;
 	animate: boolean;
+	pronouns: boolean;
 	hide: string[];
 	allow: string[];
 	badgeart: string;
@@ -59,6 +60,9 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (!config.animate) {
 		qs.set("animate", "false");
+	}
+	if (config.pronouns) {
+		qs.set("pronouns", "true");
 	}
 	if (config.hide.length > 0) {
 		qs.set("hide", config.hide.join(","));

@@ -11,6 +11,7 @@ interface OverlayPreviewProps {
 	theme: Theme;
 	bg: BgMode;
 	showBadges: boolean;
+	showPronouns?: boolean;
 	showTimestamps: boolean;
 	animate: boolean;
 	fadeSeconds: number;
@@ -26,6 +27,7 @@ export function OverlayPreview({
 	theme,
 	bg,
 	showBadges,
+	showPronouns = false,
 	showTimestamps,
 	animate,
 	fadeSeconds,
@@ -57,6 +59,7 @@ export function OverlayPreview({
 					fadeSeconds={fadeSeconds}
 					messages={messages}
 					showBadges={showBadges}
+					showPronouns={showPronouns}
 					showTimestamps={showTimestamps}
 					theme={theme}
 				/>

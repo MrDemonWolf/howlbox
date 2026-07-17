@@ -19,7 +19,7 @@ const SAMPLE: ChatMessageView[] = [
 		displayName: "WolfPup",
 		color: "#00ACED",
 		badges: [],
-		badgeUrls: [],
+		renderBadges: [],
 		parts: [{ type: "text", text: "gg that was clutch" }],
 		isAction: false,
 		isPrivileged: true,
@@ -32,7 +32,7 @@ const SAMPLE: ChatMessageView[] = [
 		displayName: "Nova",
 		color: "#FF6AA2",
 		badges: [],
-		badgeUrls: [],
+		renderBadges: [],
 		parts: [
 			{ type: "text", text: "welcome in " },
 			{
@@ -61,6 +61,7 @@ function ThemeTile({ theme }: { theme: Theme }) {
 						fadeSeconds={0}
 						messages={SAMPLE}
 						showBadges={false}
+						showPronouns={false}
 						showTimestamps={false}
 						theme={theme}
 					/>

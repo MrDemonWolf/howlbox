@@ -13,6 +13,13 @@ export interface ChatBadge {
 	version: string;
 }
 
+// A resolved badge ready to render: either a Twitch/channel image badge
+// or a text badge (pronouns). The badge renderer switches on `kind`, so
+// both ride the same row before the name.
+export type RenderBadge =
+	| { kind: "image"; url: string }
+	| { kind: "text"; text: string };
+
 export interface ChatMessageView {
 	id: string;
 	channelId: string | null;
@@ -20,8 +27,9 @@ export interface ChatMessageView {
 	displayName: string;
 	color: string;
 	badges: ChatBadge[];
-	// resolved badge image URLs, filled at append time when available
-	badgeUrls: string[];
+	// resolved render badges (image + text/pronoun), filled at append
+	// time when available
+	renderBadges: RenderBadge[];
 	parts: MessagePart[];
 	isAction: boolean;
 	// broadcaster or mod: skips the moderation delay

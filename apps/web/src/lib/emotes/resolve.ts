@@ -1,4 +1,8 @@
-import type { ChatMessageView, MessagePart } from "@/lib/twitch/types";
+import type {
+	ChatMessageView,
+	MessagePart,
+	RenderBadge,
+} from "@/lib/twitch/types";
 
 import type { EmoteMap } from "./emotes";
 
@@ -36,6 +40,7 @@ export function resolveMessageExtras(
 	view: ChatMessageView,
 	emotes: EmoteMap | null,
 	badges: BadgeMap | null,
+	pronoun: string | null,
 ): ChatMessageView {
 	const parts =
 		emotes && emotes.size > 0
@@ -43,15 +48,20 @@ export function resolveMessageExtras(
 					part.type === "text" ? splitTextPart(part.text, emotes) : [part],
 				)
 			: view.parts;
-	const badgeUrls = badges
-		? view.badges
-				.map(
-					(badge) =>
-						// bare set key = custom art covering every version
-						badges.get(`${badge.set}/${badge.version}`) ??
-						badges.get(badge.set),
-				)
-				.filter((url): url is string => Boolean(url))
-		: [];
-	return { ...view, parts, badgeUrls };
+	const renderBadges: RenderBadge[] = [];
+	if (badges) {
+		for (const badge of view.badges) {
+			// bare set key = custom art covering every version
+			const url =
+				badges.get(`${badge.set}/${badge.version}`) ?? badges.get(badge.set);
+			if (url) {
+				renderBadges.push({ kind: "image", url });
+			}
+		}
+	}
+	// pronoun rides last, after the native badges (7TV/FFZ convention)
+	if (pronoun) {
+		renderBadges.push({ kind: "text", text: pronoun });
+	}
+	return { ...view, parts, renderBadges };
 }

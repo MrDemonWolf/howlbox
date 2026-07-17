@@ -10,6 +10,7 @@ interface ChatOverlayProps {
 	bg: OverlayParams["bg"];
 	theme: OverlayParams["theme"];
 	showBadges: boolean;
+	showPronouns: boolean;
 	showTimestamps: boolean;
 	animate: boolean;
 	fadeSeconds: number;
@@ -27,6 +28,7 @@ export function ChatOverlay({
 	bg,
 	theme,
 	showBadges,
+	showPronouns,
 	showTimestamps,
 	animate,
 	fadeSeconds,
@@ -44,6 +46,7 @@ export function ChatOverlay({
 				fadeSeconds={fadeSeconds}
 				messages={messages}
 				showBadges={showBadges}
+				showPronouns={showPronouns}
 				showTimestamps={showTimestamps}
 				theme={theme}
 			/>
