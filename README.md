@@ -29,6 +29,10 @@ Your chat. Your colors. Your howl.
   badge (including subscriber and bits art) via public, CORS-safe
   APIs, plus custom badge art overrides inline through the `badgeart`
   parameter or hosted in a public GitHub gist through `badgegist`.
+- **Pronoun badges** - Opt-in (`pronouns=true`) pronoun badges next to
+  names, from pronouns.alejo.io, the service 7TV and FrankerFaceZ read.
+  Each chatter's login is looked up there; enable it only if that
+  third-party call is acceptable for your channel.
 - **Moderation aware** - Deleted messages, timeouts, and bans vanish
   from the overlay instantly. An optional delay holds non-mod messages
   so moderation lands before anything renders.
@@ -92,6 +96,7 @@ one:
 | `hidecommands` | flag                                     | Hide messages starting with `!`                         |
 | `delay`        | seconds, `0` to `300` (default `0`)      | Hold non-mod messages so deletions land before display  |
 | `badges`       | `false` to disable (default on)          | Badge icons before names                                |
+| `pronouns`     | flag                                     | Pronoun badge before names (via pronouns.alejo.io)      |
 | `timestamps`   | flag                                     | HH:MM before each message                               |
 | `animate`      | `false` to disable (default on)          | Slide/fade entrance animation                           |
 | `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
@@ -121,6 +126,8 @@ becomes active" off.
 | Language  | TypeScript (strict)                 |
 | Chat      | @twurple/chat (anonymous IRC)       |
 | Emotes    | 7TV, BTTV, FrankerFaceZ public APIs |
+| Badges    | api.ivr.fi (Twitch badge art)       |
+| Pronouns  | pronouns.alejo.io (opt-in)          |
 | Styling   | Tailwind CSS 4 + CSS variables      |
 | UI        | shadcn/ui primitives (packages/ui)  |
 | Monorepo  | Turborepo + Bun workspaces          |
