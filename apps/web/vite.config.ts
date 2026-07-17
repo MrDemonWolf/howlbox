@@ -7,7 +7,8 @@ export default defineConfig({
 	// GitHub Pages project sites serve at /<repo>/; CI sets BASE_PATH
 	base: process.env.BASE_PATH ?? "/",
 	server: {
-		port: 3001,
+		// PORT lets parallel worktrees run side by side; 3001 stays the default
+		port: process.env.PORT ? Number(process.env.PORT) : 3001,
 	},
 	resolve: {
 		tsconfigPaths: true,
