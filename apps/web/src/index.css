@@ -5,6 +5,8 @@
    route effect keeps it in sync on SPA navigation. */
 html.hb-overlay,
 html.hb-overlay body {
+	/* biome-ignore lint/complexity/noImportantStyles: must beat the UI
+	   package's globals.css body background so OBS sees a clear page */
 	background: transparent !important;
 	margin: 0;
 	overflow: hidden;

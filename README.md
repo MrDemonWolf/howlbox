@@ -14,18 +14,21 @@ Your chat. Your colors. Your howl.
 
 - **Anonymous chat connection** - Read-only Twitch chat over
   `@twurple/chat`. No account, no keys, nothing to expire mid-stream.
-- **13 themes** - Wolf brand glass, macOS-style Liquid Glass, CRT
-  terminal, synthwave neon, Windows 95, pixel arcade, kawaii pastel,
-  celestial galaxy, cozy mocha, esports no-box, plus dark, light, and
-  an accessible high-contrast preset. All CSS-variable driven.
+- **15 themes** - Wolf brand glass, macOS-style Liquid Glass, CRT
+  terminal, synthwave neon, Windows 95, Windows XP, Xbox, pixel
+  arcade, kawaii pastel, celestial galaxy, cozy mocha, esports
+  no-box, plus dark, light, and an accessible high-contrast preset.
+  All CSS-variable driven.
 - **Three display modes** - Transparent messages over gameplay
   (`bg=off`), one themed backdrop panel (`bg=panel`), or per-message
   bubbles (`bg=bubble`).
 - **Full emote support** - Native Twitch emotes plus 7TV (including
   zero-width overlay emotes), BTTV, and FrankerFaceZ, resolved per
   channel and cached in localStorage.
-- **Badge art without secrets** - Global and per-channel badges
-  (including subscriber badge art) via public, CORS-safe APIs.
+- **Badge art without secrets** - Every global and per-channel Twitch
+  badge (including subscriber and bits art) via public, CORS-safe
+  APIs, plus custom badge art overrides inline through the `badgeart`
+  parameter or hosted in a public GitHub gist through `badgegist`.
 - **Moderation aware** - Deleted messages, timeouts, and bans vanish
   from the overlay instantly. An optional delay holds non-mod messages
   so moderation lands before anything renders.
@@ -77,24 +80,33 @@ one:
 /overlay?channel=mrdemonwolf&theme=wolf&bg=bubble&hidebots=true&fade=30
 ```
 
-| Parameter      | Values                                   | Description                                            |
-| -------------- | ---------------------------------------- | ------------------------------------------------------ |
-| `channel`      | Twitch login name                        | Channel to join (required)                             |
-| `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `arcade`, `galaxy`, `mocha` | Color theme preset |
-| `bg`           | `off`, `panel`, `bubble`                 | Display mode (default `off`)                           |
-| `max`          | `1` to `200` (default `50`)              | Max messages kept on screen                            |
-| `hidebots`     | flag                                     | Hide known chat bots (Nightbot, etc.)                  |
-| `hide`         | comma-separated logins                   | Always hide these users                                |
-| `allow`        | comma-separated logins                   | Featured mode: only show these users                   |
-| `hidecommands` | flag                                     | Hide messages starting with `!`                        |
-| `delay`        | seconds, `0` to `300` (default `0`)      | Hold non-mod messages so deletions land before display |
-| `badges`       | `false` to disable (default on)          | Badge icons before names                               |
-| `timestamps`   | flag                                     | HH:MM before each message                              |
-| `animate`      | `false` to disable (default on)          | Slide/fade entrance animation                          |
-| `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears      |
+| Parameter      | Values                                   | Description                                             |
+| -------------- | ---------------------------------------- | ------------------------------------------------------- |
+| `channel`      | Twitch login name                        | Channel to join (required)                              |
+| `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `xp`, `xbox`, `arcade`, `galaxy`, `mocha` | Color theme preset |
+| `bg`           | `off`, `panel`, `bubble`                 | Display mode (default `off`)                            |
+| `max`          | `1` to `200` (default `50`)              | Max messages kept on screen                             |
+| `hidebots`     | flag                                     | Hide known chat bots (Nightbot, etc.)                   |
+| `hide`         | comma-separated logins                   | Always hide these users                                 |
+| `allow`        | comma-separated logins                   | Featured mode: only show these users                    |
+| `hidecommands` | flag                                     | Hide messages starting with `!`                         |
+| `delay`        | seconds, `0` to `300` (default `0`)      | Hold non-mod messages so deletions land before display  |
+| `badges`       | `false` to disable (default on)          | Badge icons before names                                |
+| `timestamps`   | flag                                     | HH:MM before each message                               |
+| `animate`      | `false` to disable (default on)          | Slide/fade entrance animation                           |
+| `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
+| `badgeart`     | comma-separated `set=url` or `set/version=url` pairs | Custom badge art overriding the Twitch defaults |
+| `badgegist`    | public gist id or URL                    | Custom badge art hosted in a gist (same pairs, one per line, or a JSON map) |
+| `refresh`      | minutes, `0` to `1440` (default `0`)     | Re-fetch emote and badge maps every N minutes           |
 
 Invalid or missing values fall back to safe defaults; a typo in OBS
 never produces a blank overlay.
+
+Custom badge art precedence, weakest to strongest: fetched Twitch art,
+then `badgegist`, then inline `badgeart`. A bare `set` key (no
+`/version`) covers every version of that set. The gist is fetched from
+the public GitHub API (no token); at a very short `refresh` interval,
+mind the unauthenticated 60-requests-per-hour rate limit.
 
 In OBS 31 or newer, add a Browser source with the generated URL and
 set Width and Height on the source itself (try 480 x 800). Leave

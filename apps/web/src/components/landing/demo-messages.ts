@@ -75,7 +75,7 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		color: "#8A2BE2",
 		badges: [],
 		badgeUrls: [],
-		parts: [text("13 themes is wild "), emote("LUL", "425618")],
+		parts: [text("15 themes is wild "), emote("LUL", "425618")],
 		isAction: false,
 		isPrivileged: false,
 	},
@@ -108,7 +108,7 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		color: "#1E90FF",
 		badges: [],
 		badgeUrls: [],
-		parts: [text("HeyGuys "), emote("HeyGuys", "30259")],
+		parts: [text("morning stream "), emote("HeyGuys", "30259")],
 		isAction: false,
 		isPrivileged: false,
 	},
@@ -144,6 +144,10 @@ export function useDemoStream(limit = 8, intervalMs = 1700): ChatMessageView[] {
 
 	useEffect(() => {
 		let count = 0;
+		// start empty so an effect re-run (StrictMode double-invoke, HMR)
+		// does not append demo-0.. onto the prior run's messages and
+		// collide the `demo-${count}` keys
+		setMessages([]);
 		const add = () => {
 			const script = DEMO_SCRIPT[count % DEMO_SCRIPT.length];
 			const id = `demo-${count}`;

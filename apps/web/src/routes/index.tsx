@@ -34,8 +34,8 @@ const FEATURES = [
 	},
 	{
 		icon: Palette,
-		title: "Thirteen themes",
-		body: "Wolf glass, Liquid Glass, CRT terminal, synthwave neon, Win95, pixel arcade, kawaii pastel, and more. All CSS-variable driven.",
+		title: "Fifteen themes",
+		body: "Wolf glass, Liquid Glass, CRT terminal, synthwave neon, Win95, Windows XP, Xbox, pixel arcade, kawaii pastel, and more. All CSS-variable driven.",
 	},
 	{
 		icon: MonitorPlay,
@@ -59,7 +59,15 @@ const FEATURES = [
 	},
 ];
 
-const TRUST = ["MIT licensed", "13 themes", "No server, no accounts"];
+const TRUST = ["Free forever", "MIT open source", "No account, no keys"];
+
+// fact band: the numbers a self-hosting streamer actually shops on
+const STATS = [
+	{ value: "15", label: "themes, one query param each" },
+	{ value: "3", label: "display modes: text, panel, bubble" },
+	{ value: "4", label: "emote platforms, merged per channel" },
+	{ value: "0", label: "accounts, servers, or fees" },
+];
 
 function LandingPage() {
 	return (
@@ -71,7 +79,7 @@ function LandingPage() {
 
 				<main>
 					{/* hero */}
-					<section className="mx-auto grid max-w-6xl items-center gap-14 px-6 pt-20 pb-28 lg:grid-cols-[1.05fr_0.95fr]">
+					<section className="mx-auto grid max-w-6xl items-center gap-10 px-6 pt-20 pb-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-20">
 						<div className="flex flex-col items-start gap-6">
 							<div className="hb-reveal [animation-delay:40ms]">
 								<Eyebrow>Twitch chat overlay for OBS</Eyebrow>
@@ -113,7 +121,7 @@ function LandingPage() {
 									<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
 								</Link>
 								<a
-									className="rounded-lg border border-white/15 px-5 py-2.5 font-semibold text-white/85 transition-colors hover:border-white/35 hover:text-white"
+									className="rounded-lg border border-white/10 px-5 py-2.5 font-medium text-white/70 transition-colors hover:border-white/30 hover:text-white"
 									href="https://github.com/mrdemonwolf/howlbox"
 									rel="noreferrer"
 									target="_blank"
@@ -123,7 +131,7 @@ function LandingPage() {
 							</div>
 
 							<div
-								className={`hb-reveal flex flex-wrap gap-x-5 gap-y-2 text-[0.68rem] text-white/55 [animation-delay:460ms] ${MONO}`}
+								className={`hb-reveal flex flex-wrap gap-x-5 gap-y-2 text-[0.72rem] text-white/65 [animation-delay:460ms] ${MONO}`}
 							>
 								{TRUST.map((item) => (
 									<span className="flex items-center gap-2" key={item}>
@@ -140,8 +148,32 @@ function LandingPage() {
 						</div>
 					</section>
 
+					{/* fact band: scannable numbers, no marketese */}
+					<section className="mx-auto max-w-6xl px-6">
+						<dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 lg:grid-cols-4">
+							{STATS.map((stat) => (
+								<div
+									className="flex flex-col gap-1.5 bg-[#050a1a]/60 px-6 py-6"
+									key={stat.label}
+								>
+									<dd
+										className={`order-first font-bold text-4xl text-white tracking-tight ${DISPLAY_FONT}`}
+									>
+										{stat.value}
+									</dd>
+									<dt className={`text-[0.68rem] text-white/60 ${MONO}`}>
+										{stat.label}
+									</dt>
+								</div>
+							))}
+						</dl>
+					</section>
+
 					{/* features as an editorial index */}
-					<section className="mx-auto max-w-6xl px-6 py-24" id="features">
+					<section
+						className="mx-auto max-w-6xl px-6 pt-16 pb-24 lg:pt-24"
+						id="features"
+					>
 						<Eyebrow>Why it's different</Eyebrow>
 						<h2
 							className={`mt-5 mb-14 max-w-2xl text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
@@ -173,7 +205,7 @@ function LandingPage() {
 
 					{/* theme wall */}
 					<section className="mx-auto max-w-6xl px-6 py-24" id="themes">
-						<Eyebrow>Thirteen themes</Eyebrow>
+						<Eyebrow>Fifteen themes</Eyebrow>
 						<h2
 							className={`mt-5 mb-4 max-w-2xl text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
 						>
@@ -194,15 +226,16 @@ function LandingPage() {
 					<section className="mx-auto max-w-6xl px-6 py-16">
 						<div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-3xl border border-[#00ACED]/25 bg-[radial-gradient(120%_140%_at_50%_-25%,rgb(0_172_237/0.2),transparent_68%)] px-6 py-20 text-center">
 							<div className="relative flex flex-col items-center gap-6">
-								<Eyebrow>Ninety seconds</Eyebrow>
+								<Eyebrow>Free and open source</Eyebrow>
 								<h2
 									className={`text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
 								>
-									Ready before your next scene change
+									Live in about ninety seconds
 								</h2>
 								<p className="max-w-xl text-pretty text-white/65 leading-relaxed">
-									Pick a theme, tweak a few options, copy the URL, drop it into
-									an OBS browser source. That is the whole thing.
+									Pick a theme, copy the URL, paste it into an OBS browser
+									source. No account, no fee, no watermark. That is the whole
+									thing.
 								</p>
 								<Link
 									className="group inline-flex items-center gap-2 rounded-lg bg-[#00ACED] px-6 py-3 font-semibold text-[#04121f] transition-all hover:bg-[#33c1f5] hover:shadow-[0_8px_30px_rgb(0_172_237/0.45)]"

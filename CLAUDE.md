@@ -53,6 +53,12 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 - `apps/web/src/lib/twitch/badges.ts` - badge art via api.ivr.fi
   (Helix-shaped, open CORS, includes channel sub art). Old
   badges.twitch.tv is DNS-dead; Helix needs a token. Never add either.
+  Custom overrides: `badgeart` (inline `set=url`/`set/version=url`
+  pairs) and `badgegist` (a public GitHub gist of the same pairs or a
+  JSON map, fetched tokenless through the cache). Precedence Twitch <
+  gist < inline; a bare `set` key covers every version (resolve.ts
+  falls back to it). `refresh` (minutes) re-fetches emote+badge maps
+  with the cache TTLs bypassed via the `force` arg on `cachedJson`.
 - `apps/web/src/lib/overlay/params.ts` - zod schema for all URL
   params. CRITICAL: TanStack Router JSON-types search values
   (`?channel=123456` arrives as a number); scalars are stringified in
@@ -77,14 +83,16 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   enum as a `Record<Theme, ...>` so a new theme fails to compile until
   it is labeled. The landing/config pickers read these; the enum value
   stays the URL contract.
-- `apps/web/src/routes/` - `/` landing (hero + editorial feature
-  index + `ThemeWall` + CTA), `/config` the URL builder
-  (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the OBS page.
-  Shared landing chrome is `components/landing/site-chrome.tsx`:
-  `PageBackground` (aurora + grain + broadcast grid, all `.hb-*` in
-  `index.css`, landing-only, never the overlay), the `MONO` machine
-  voice + `Eyebrow` kicker, header/footer/OBS steps. `ThemeWall`
-  renders all 13 themes with the REAL `MessageList` over a static
+- `apps/web/src/routes/` - `/` landing (hero + stats fact band +
+  editorial feature index + `ThemeWall` + CTA), `/config` the URL
+  builder (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the
+  OBS page. Shared landing chrome is
+  `components/landing/site-chrome.tsx`: `PageBackground` (aurora +
+  grain + broadcast grid, all `.hb-*` in `index.css`, landing-only,
+  never the overlay), the `MONO` machine voice + `Eyebrow` kicker,
+  header/footer/OBS steps, and the exported `DISCLAIMER` (footer
+  affiliation line, mirrors the wolfathon pattern). `ThemeWall`
+  renders all 15 themes with the REAL `MessageList` over a static
   sample; the canned live stream is `demo-messages.ts`. `main.tsx`
   adds the `hb-overlay` html class synchronously before React so OBS
   never sees an opaque flash; the transparency CSS lives in eager
@@ -94,10 +102,13 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 
 Schema lives in `lib/overlay/params.ts`. Full param reference is the
 Usage table in `README.md`; keep both in sync. Defaults:
-`bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `badges` and
-`animate` on, all other flags off. Ranges: `max` 1-200, `delay`
-0-300s, `fade` 0-600s. `channel`/`hide`/`allow` validate against the
-Twitch login regex; bad logins are dropped, not errored.
+`bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=0`,
+`badgeart`/`badgegist` empty, `badges` and `animate` on, all other
+flags off. Ranges: `max` 1-200, `delay` 0-300s, `fade` 0-600s,
+`refresh` 0-1440min. `channel`/`hide`/`allow` validate against the
+Twitch login regex; bad logins are dropped, not errored. Custom badge
+art (`badgeart`, `badgegist`) is parsed/validated in
+`lib/twitch/badges.ts`.
 
 ## OBS constraints (research-verified; do not violate)
 
@@ -129,7 +140,7 @@ background shorthand, can stack noise/gradients), `--hb-surface-solid`
 `--hb-shadow`, `--hb-glow` (text glow in panel/bubble modes),
 `--hb-shadow-off` (bg=off legibility stack, must outline all four
 directions), optional `--hb-mask`. `wolf` is the base `.hb-root`
-default (no `[data-theme]` block); the other twelve are override
+default (no `[data-theme]` block); the other fourteen are override
 blocks. Adding a theme: CSS block + the `THEMES` enum in
 `lib/overlay/params.ts` + `THEME_SWATCH` and `THEME_LABEL` in
 `lib/overlay/theme-meta.ts` (both `Record<Theme, ...>`, so the

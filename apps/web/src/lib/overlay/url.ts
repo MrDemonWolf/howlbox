@@ -18,6 +18,9 @@ export interface OverlayConfig {
 	animate: boolean;
 	hide: string[];
 	allow: string[];
+	badgeart: string;
+	badgegist: string;
+	refresh: number;
 }
 
 // Serialize a config into the overlay query string, dropping any value
@@ -62,6 +65,15 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (config.allow.length > 0) {
 		qs.set("allow", config.allow.join(","));
+	}
+	if (config.badgeart !== OVERLAY_DEFAULTS.badgeart) {
+		qs.set("badgeart", config.badgeart);
+	}
+	if (config.badgegist !== OVERLAY_DEFAULTS.badgegist) {
+		qs.set("badgegist", config.badgegist);
+	}
+	if (config.refresh !== OVERLAY_DEFAULTS.refresh) {
+		qs.set("refresh", String(config.refresh));
 	}
 	return qs.toString();
 }

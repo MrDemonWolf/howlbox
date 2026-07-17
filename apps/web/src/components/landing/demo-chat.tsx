@@ -18,11 +18,11 @@ export function DemoChat() {
 				showTimestamps={false}
 				theme={theme}
 			/>
-			<div className="flex flex-wrap justify-center gap-1.5">
+			<div className="flex flex-wrap justify-center gap-2">
 				{THEMES.map((t) => (
 					<button
 						className={cn(
-							"rounded-full border px-3 py-1 font-medium text-xs transition-colors",
+							"rounded-full border px-3 py-1.5 font-medium text-xs transition-colors",
 							t === theme
 								? "border-[#00ACED] bg-[#00ACED]/15 text-[#7fd7ff]"
 								: "border-white/10 text-white/60 hover:border-white/25 hover:text-white",
