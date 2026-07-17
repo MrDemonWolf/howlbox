@@ -19,6 +19,7 @@ export interface OverlayConfig {
 	hide: string[];
 	allow: string[];
 	badgeart: string;
+	badgegist: string;
 	refresh: number;
 }
 
@@ -67,6 +68,9 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (config.badgeart !== OVERLAY_DEFAULTS.badgeart) {
 		qs.set("badgeart", config.badgeart);
+	}
+	if (config.badgegist !== OVERLAY_DEFAULTS.badgegist) {
+		qs.set("badgegist", config.badgegist);
 	}
 	if (config.refresh !== OVERLAY_DEFAULTS.refresh) {
 		qs.set("refresh", String(config.refresh));

@@ -24,6 +24,7 @@ function OverlayPage() {
 	const badgesRef = useBadgeMap(
 		params.channel,
 		params.badgeart,
+		params.badgegist,
 		params.refresh,
 	);
 	const { messages, status } = useTwitchChat(params.channel, {

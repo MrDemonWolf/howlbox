@@ -35,6 +35,7 @@ interface Config {
 	hide: string;
 	allow: string;
 	badgeart: string;
+	badgegist: string;
 	refresh: number;
 }
 
@@ -56,6 +57,7 @@ const DEFAULTS: Config = {
 	hide: "",
 	allow: "",
 	badgeart: OVERLAY_DEFAULTS.badgeart,
+	badgegist: OVERLAY_DEFAULTS.badgegist,
 	refresh: OVERLAY_DEFAULTS.refresh,
 };
 
@@ -90,6 +92,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				hide: normalizeLoginList(config.hide),
 				allow: normalizeLoginList(config.allow),
 				badgeart: config.badgeart.trim(),
+				badgegist: config.badgegist.trim(),
 				refresh: config.refresh,
 			}),
 		[cleanChannel, config],
@@ -263,6 +266,21 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							Comma-separated set=url or set/version=url pairs. Overrides the
 							default Twitch art (all global and channel badges load out of the
 							box).
+						</p>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="cfg-badgegist">Badge art gist</Label>
+						<Input
+							autoComplete="off"
+							id="cfg-badgegist"
+							onChange={(e) => set("badgegist", e.target.value)}
+							placeholder="https://gist.github.com/you/abc123..."
+							value={config.badgegist}
+						/>
+						<p className="text-muted-foreground text-xs">
+							A public GitHub gist holding the same set=url pairs (one per line)
+							or a JSON map. Edit the gist to update badges without touching
+							this URL. Paste the gist link or its id.
 						</p>
 					</div>
 					<NumberField

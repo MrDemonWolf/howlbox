@@ -2,7 +2,11 @@ import { type RefObject, useCallback, useEffect, useRef } from "react";
 
 import { type EmoteMap, fetchEmoteMap } from "@/lib/emotes/emotes";
 import type { BadgeMap } from "@/lib/emotes/resolve";
-import { fetchBadgeMap, parseCustomBadgeArt } from "@/lib/twitch/badges";
+import {
+	fetchBadgeMap,
+	fetchGistBadgeArt,
+	parseCustomBadgeArt,
+} from "@/lib/twitch/badges";
 
 // Returned as a ref (not state) on purpose: the chat hook reads
 // .current at append time, so a map arriving after connect never
@@ -53,22 +57,33 @@ export function useEmoteMap(channel: string | undefined, refreshMinutes = 0) {
 	return useAsyncRef<EmoteMap>(channel, fetchEmoteMap, refreshMinutes);
 }
 
-// customArt is the raw ?badgeart string; entries override the fetched
-// Twitch art (global + per-channel sets both ride in fetchBadgeMap).
+// customArt is the raw ?badgeart string, gistRef the ?badgegist id/URL;
+// both override the fetched Twitch art (global + per-channel sets ride
+// in fetchBadgeMap). Precedence, weakest to strongest: Twitch < gist <
+// inline, so a one-off inline tweak beats the shared gist.
 export function useBadgeMap(
 	channel: string | undefined,
 	customArt = "",
+	gistRef = "",
 	refreshMinutes = 0,
 ) {
 	const fetcher = useCallback(
 		async (login: string, force: boolean): Promise<BadgeMap> => {
-			const map = await fetchBadgeMap(login, force);
+			const [map, gistPairs] = await Promise.all([
+				fetchBadgeMap(login, force),
+				gistRef
+					? fetchGistBadgeArt(gistRef, force).catch(() => [])
+					: Promise.resolve([] as [string, string][]),
+			]);
+			for (const [key, url] of gistPairs) {
+				map.set(key, url);
+			}
 			for (const [key, url] of parseCustomBadgeArt(customArt)) {
 				map.set(key, url);
 			}
 			return map;
 		},
-		[customArt],
+		[customArt, gistRef],
 	);
 	return useAsyncRef<BadgeMap>(channel, fetcher, refreshMinutes);
 }

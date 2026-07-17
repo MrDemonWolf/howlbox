@@ -37,6 +37,7 @@ export const OVERLAY_DEFAULTS = {
 	badges: true,
 	animate: true,
 	badgeart: "",
+	badgegist: "",
 	refresh: 0,
 } satisfies {
 	bg: BgMode;
@@ -50,6 +51,7 @@ export const OVERLAY_DEFAULTS = {
 	badges: boolean;
 	animate: boolean;
 	badgeart: string;
+	badgegist: string;
 	refresh: number;
 };
 
@@ -159,6 +161,9 @@ export const overlayParamsSchema = z.object({
 	// custom badge art: "set/version=url" or "set=url" pairs, comma
 	// separated; parsed/validated in lib/twitch/badges.ts
 	badgeart: z.preprocess(scalarToString, z.string()).catch(""),
+	// public GitHub gist of custom badge art (id or gist URL); fetched
+	// and merged under the inline badgeart in lib/twitch/badges.ts
+	badgegist: z.preprocess(scalarToString, z.string()).catch(""),
 	// re-fetch emote/badge maps every N minutes, cache bypassed (0 = off)
 	refresh: z
 		.preprocess(numberish, z.coerce.number().int().min(0).max(1440))
