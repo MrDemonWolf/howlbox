@@ -3,7 +3,7 @@
 // badge JSON with open CORS (verified live). Channel response covers
 // per-channel subscriber/bits art. Shared fetch + cache: @/lib/cache.
 
-import { cachedJson } from "@/lib/cache";
+import { cachedJson, ONE_HOUR_MS, SIX_HOURS_MS } from "@/lib/cache";
 import type { BadgeMap } from "@/lib/emotes/resolve";
 
 interface HelixBadgeSet {
@@ -27,20 +27,20 @@ function addSets(map: BadgeMap, sets: HelixBadgeSet[] | null) {
 
 export async function fetchBadgeMap(login: string): Promise<BadgeMap> {
 	const [global, channel] = await Promise.all([
-		cachedJson(
+		cachedJson<HelixBadgeSet[]>(
 			"badges-global",
-			6 * 60 * 60_000,
+			SIX_HOURS_MS,
 			"https://api.ivr.fi/v2/twitch/badges/global",
 		),
-		cachedJson(
+		cachedJson<HelixBadgeSet[]>(
 			`badges-channel:${login}`,
-			60 * 60_000,
+			ONE_HOUR_MS,
 			`https://api.ivr.fi/v2/twitch/badges/channel?login=${encodeURIComponent(login)}`,
 		),
 	]);
 	const map: BadgeMap = new Map();
-	addSets(map, global as HelixBadgeSet[] | null);
+	addSets(map, global);
 	// channel sets override global (per-channel subscriber art)
-	addSets(map, channel as HelixBadgeSet[] | null);
+	addSets(map, channel);
 	return map;
 }

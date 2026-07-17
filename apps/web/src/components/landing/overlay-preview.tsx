@@ -1,13 +1,11 @@
 import { cn } from "@howlbox/ui/lib/utils";
 
+import { HbRoot } from "@/components/chat/hb-root";
 import { MessageList } from "@/components/chat/message-list";
 import { useDemoStream } from "@/components/landing/demo-messages";
-import type { BG_MODES, THEMES } from "@/lib/overlay/params";
+import type { BgMode, Theme } from "@/lib/overlay/params";
 
 import "@/components/chat/overlay.css";
-
-type Theme = (typeof THEMES)[number];
-type BgMode = (typeof BG_MODES)[number];
 
 interface OverlayPreviewProps {
 	theme: Theme;
@@ -52,11 +50,7 @@ export function OverlayPreview({
 						: "bg-[linear-gradient(135deg,#1b2735_0%,#2d4a3e_38%,#6b4f2e_72%,#3d2b4f_100%)]",
 				)}
 			/>
-			<div
-				className="hb-root absolute inset-0 flex flex-col justify-end overflow-hidden text-(--hb-text) leading-snug [font-family:var(--hb-font)] [font-size:var(--hb-font-size)]"
-				data-bg={bg}
-				data-theme={theme}
-			>
+			<HbRoot bg={bg} className="absolute inset-0" theme={theme}>
 				<MessageList
 					animate={animate}
 					bg={bg}
@@ -66,7 +60,7 @@ export function OverlayPreview({
 					showTimestamps={showTimestamps}
 					theme={theme}
 				/>
-			</div>
+			</HbRoot>
 		</div>
 	);
 }

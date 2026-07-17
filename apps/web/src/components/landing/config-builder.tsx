@@ -9,24 +9,48 @@ import { toast } from "sonner";
 
 import { OverlayPreview } from "@/components/landing/overlay-preview";
 import { MONO } from "@/components/landing/site-chrome";
-import { BG_MODES, THEMES } from "@/lib/overlay/params";
+import {
+	BG_MODES,
+	type BgMode,
+	normalizeLoginList,
+	OVERLAY_DEFAULTS,
+	THEMES,
+	type Theme,
+} from "@/lib/overlay/params";
 import { BG_LABEL, THEME_LABEL, THEME_SWATCH } from "@/lib/overlay/theme-meta";
+import { buildOverlayUrl } from "@/lib/overlay/url";
 
-type Theme = (typeof THEMES)[number];
-type BgMode = (typeof BG_MODES)[number];
+interface Config {
+	channel: string;
+	theme: Theme;
+	bg: BgMode;
+	max: number;
+	delay: number;
+	fade: number;
+	hidebots: boolean;
+	hidecommands: boolean;
+	timestamps: boolean;
+	badges: boolean;
+	animate: boolean;
+	hide: string;
+	allow: string;
+}
 
-const DEFAULTS = {
+// Form state. The scalar/toggle defaults come from the shared
+// OVERLAY_DEFAULTS so they can't drift from the overlay; hide/allow are
+// raw comma strings here, normalized only when the URL is built.
+const DEFAULTS: Config = {
 	channel: "",
-	theme: "wolf" as Theme,
-	bg: "off" as BgMode,
-	max: 50,
-	delay: 0,
-	fade: 0,
-	hidebots: false,
-	hidecommands: false,
-	timestamps: false,
-	badges: true,
-	animate: true,
+	theme: OVERLAY_DEFAULTS.theme,
+	bg: OVERLAY_DEFAULTS.bg,
+	max: OVERLAY_DEFAULTS.max,
+	delay: OVERLAY_DEFAULTS.delay,
+	fade: OVERLAY_DEFAULTS.fade,
+	hidebots: OVERLAY_DEFAULTS.hidebots,
+	hidecommands: OVERLAY_DEFAULTS.hidecommands,
+	timestamps: OVERLAY_DEFAULTS.timestamps,
+	badges: OVERLAY_DEFAULTS.badges,
+	animate: OVERLAY_DEFAULTS.animate,
 	hide: "",
 	allow: "",
 };
@@ -35,89 +59,33 @@ function clampNumber(raw: string, min: number, max: number, fallback: number) {
 	return Math.min(max, Math.max(min, Number(raw) || fallback));
 }
 
-// keep only valid Twitch login shapes from a comma list
-function normalizeLogins(raw: string) {
-	return raw
-		.split(",")
-		.map((login) => login.trim().toLowerCase())
-		.filter(Boolean)
-		.join(",");
-}
-
 export function ConfigBuilder() {
-	const [channel, setChannel] = useState(DEFAULTS.channel);
-	const [theme, setTheme] = useState<Theme>(DEFAULTS.theme);
-	const [bg, setBg] = useState<BgMode>(DEFAULTS.bg);
-	const [max, setMax] = useState(DEFAULTS.max);
-	const [delay, setDelay] = useState(DEFAULTS.delay);
-	const [fade, setFade] = useState(DEFAULTS.fade);
-	const [hidebots, setHidebots] = useState(DEFAULTS.hidebots);
-	const [hidecommands, setHidecommands] = useState(DEFAULTS.hidecommands);
-	const [timestamps, setTimestamps] = useState(DEFAULTS.timestamps);
-	const [badges, setBadges] = useState(DEFAULTS.badges);
-	const [animate, setAnimate] = useState(DEFAULTS.animate);
-	const [hide, setHide] = useState(DEFAULTS.hide);
-	const [allow, setAllow] = useState(DEFAULTS.allow);
+	const [config, setConfig] = useState<Config>(DEFAULTS);
 
-	const cleanChannel = channel.trim().toLowerCase().replace(/^@/, "");
+	const set = <K extends keyof Config>(key: K, value: Config[K]) =>
+		setConfig((prev) => ({ ...prev, [key]: value }));
 
-	const url = useMemo(() => {
-		const qs = new URLSearchParams();
-		qs.set("channel", cleanChannel || "your_channel");
-		if (theme !== DEFAULTS.theme) {
-			qs.set("theme", theme);
-		}
-		if (bg !== DEFAULTS.bg) {
-			qs.set("bg", bg);
-		}
-		if (max !== DEFAULTS.max) {
-			qs.set("max", String(max));
-		}
-		if (delay > 0) {
-			qs.set("delay", String(delay));
-		}
-		if (hidebots) {
-			qs.set("hidebots", "true");
-		}
-		const hideList = normalizeLogins(hide);
-		if (hideList) {
-			qs.set("hide", hideList);
-		}
-		const allowList = normalizeLogins(allow);
-		if (allowList) {
-			qs.set("allow", allowList);
-		}
-		if (hidecommands) {
-			qs.set("hidecommands", "true");
-		}
-		if (timestamps) {
-			qs.set("timestamps", "true");
-		}
-		if (!badges) {
-			qs.set("badges", "false");
-		}
-		if (!animate) {
-			qs.set("animate", "false");
-		}
-		if (fade > 0) {
-			qs.set("fade", String(fade));
-		}
-		return `${window.location.origin}${import.meta.env.BASE_URL}overlay?${qs.toString()}`;
-	}, [
-		cleanChannel,
-		theme,
-		bg,
-		max,
-		delay,
-		fade,
-		hidebots,
-		hidecommands,
-		timestamps,
-		badges,
-		animate,
-		hide,
-		allow,
-	]);
+	const cleanChannel = config.channel.trim().toLowerCase().replace(/^@/, "");
+
+	const url = useMemo(
+		() =>
+			buildOverlayUrl({
+				channel: cleanChannel,
+				theme: config.theme,
+				bg: config.bg,
+				max: config.max,
+				delay: config.delay,
+				fade: config.fade,
+				hidebots: config.hidebots,
+				hidecommands: config.hidecommands,
+				timestamps: config.timestamps,
+				badges: config.badges,
+				animate: config.animate,
+				hide: normalizeLoginList(config.hide),
+				allow: normalizeLoginList(config.allow),
+			}),
+		[cleanChannel, config],
+	);
 
 	const copy = async () => {
 		if (!cleanChannel) {
@@ -129,19 +97,7 @@ export function ConfigBuilder() {
 	};
 
 	const reset = () => {
-		setChannel(DEFAULTS.channel);
-		setTheme(DEFAULTS.theme);
-		setBg(DEFAULTS.bg);
-		setMax(DEFAULTS.max);
-		setDelay(DEFAULTS.delay);
-		setFade(DEFAULTS.fade);
-		setHidebots(DEFAULTS.hidebots);
-		setHidecommands(DEFAULTS.hidecommands);
-		setTimestamps(DEFAULTS.timestamps);
-		setBadges(DEFAULTS.badges);
-		setAnimate(DEFAULTS.animate);
-		setHide(DEFAULTS.hide);
-		setAllow(DEFAULTS.allow);
+		setConfig(DEFAULTS);
 		toast.success("Reset to defaults");
 	};
 
@@ -154,18 +110,18 @@ export function ConfigBuilder() {
 						Live preview
 					</span>
 					<span className={`text-[0.6rem] text-white/35 ${MONO}`}>
-						{BG_LABEL[bg]} / {THEME_LABEL[theme]}
+						{BG_LABEL[config.bg]} / {THEME_LABEL[config.theme]}
 					</span>
 				</div>
 				<OverlayPreview
-					animate={animate}
+					animate={config.animate}
 					backdrop="checker"
-					bg={bg}
+					bg={config.bg}
 					className="h-96"
-					fadeSeconds={fade}
-					showBadges={badges}
-					showTimestamps={timestamps}
-					theme={theme}
+					fadeSeconds={config.fade}
+					showBadges={config.badges}
+					showTimestamps={config.timestamps}
+					theme={config.theme}
 				/>
 
 				{/* terminal-style readout: the whole config, as one URL */}
@@ -214,9 +170,9 @@ export function ConfigBuilder() {
 						<Input
 							autoComplete="off"
 							id="cfg-channel"
-							onChange={(e) => setChannel(e.target.value)}
+							onChange={(e) => set("channel", e.target.value)}
 							placeholder="your_channel"
-							value={channel}
+							value={config.channel}
 						/>
 						<p className="text-muted-foreground text-xs">
 							Just the login name, no URL or @.
@@ -231,10 +187,10 @@ export function ConfigBuilder() {
 							{BG_MODES.map((mode) => (
 								<Button
 									key={mode}
-									onClick={() => setBg(mode)}
+									onClick={() => set("bg", mode)}
 									size="sm"
 									type="button"
-									variant={bg === mode ? "default" : "outline"}
+									variant={config.bg === mode ? "default" : "outline"}
 								>
 									{BG_LABEL[mode]}
 								</Button>
@@ -248,12 +204,12 @@ export function ConfigBuilder() {
 								<button
 									className={cn(
 										"flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
-										t === theme
+										t === config.theme
 											? "border-[#00ACED] bg-[#00ACED]/15 text-foreground"
 											: "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground",
 									)}
 									key={t}
-									onClick={() => setTheme(t)}
+									onClick={() => set("theme", t)}
 									type="button"
 								>
 									<span
@@ -266,22 +222,22 @@ export function ConfigBuilder() {
 						</div>
 					</div>
 					<Toggle
-						checked={badges}
+						checked={config.badges}
 						id="cfg-badges"
 						label="Show badges"
-						onChange={setBadges}
+						onChange={(v) => set("badges", v)}
 					/>
 					<Toggle
-						checked={timestamps}
+						checked={config.timestamps}
 						id="cfg-timestamps"
 						label="Show timestamps"
-						onChange={setTimestamps}
+						onChange={(v) => set("timestamps", v)}
 					/>
 					<Toggle
-						checked={animate}
+						checked={config.animate}
 						id="cfg-animate"
 						label="Animate messages in"
-						onChange={setAnimate}
+						onChange={(v) => set("animate", v)}
 					/>
 				</Fieldset>
 
@@ -294,10 +250,10 @@ export function ConfigBuilder() {
 								max={200}
 								min={1}
 								onChange={(e) =>
-									setMax(clampNumber(e.target.value, 1, 200, 50))
+									set("max", clampNumber(e.target.value, 1, 200, 50))
 								}
 								type="number"
-								value={max}
+								value={config.max}
 							/>
 						</div>
 						<div className="grid gap-2">
@@ -307,10 +263,10 @@ export function ConfigBuilder() {
 								max={600}
 								min={0}
 								onChange={(e) =>
-									setFade(clampNumber(e.target.value, 0, 600, 0))
+									set("fade", clampNumber(e.target.value, 0, 600, 0))
 								}
 								type="number"
-								value={fade}
+								value={config.fade}
 							/>
 						</div>
 					</div>
@@ -323,34 +279,36 @@ export function ConfigBuilder() {
 							id="cfg-delay"
 							max={300}
 							min={0}
-							onChange={(e) => setDelay(clampNumber(e.target.value, 0, 300, 0))}
+							onChange={(e) =>
+								set("delay", clampNumber(e.target.value, 0, 300, 0))
+							}
 							type="number"
-							value={delay}
+							value={config.delay}
 						/>
 						<p className="text-muted-foreground text-xs">
 							Holds non-mod messages this long so deletes land first.
 						</p>
 					</div>
 					<Toggle
-						checked={hidebots}
+						checked={config.hidebots}
 						id="cfg-hidebots"
 						label="Hide known bots (Nightbot, StreamElements, ...)"
-						onChange={setHidebots}
+						onChange={(v) => set("hidebots", v)}
 					/>
 					<Toggle
-						checked={hidecommands}
+						checked={config.hidecommands}
 						id="cfg-hidecommands"
 						label="Hide !commands"
-						onChange={setHidecommands}
+						onChange={(v) => set("hidecommands", v)}
 					/>
 					<div className="grid gap-2">
 						<Label htmlFor="cfg-hide">Hide these users</Label>
 						<Input
 							autoComplete="off"
 							id="cfg-hide"
-							onChange={(e) => setHide(e.target.value)}
+							onChange={(e) => set("hide", e.target.value)}
 							placeholder="somebot, anotheruser"
-							value={hide}
+							value={config.hide}
 						/>
 					</div>
 					<div className="grid gap-2">
@@ -358,9 +316,9 @@ export function ConfigBuilder() {
 						<Input
 							autoComplete="off"
 							id="cfg-allow"
-							onChange={(e) => setAllow(e.target.value)}
+							onChange={(e) => set("allow", e.target.value)}
 							placeholder="leave empty to show everyone"
-							value={allow}
+							value={config.allow}
 						/>
 						<p className="text-muted-foreground text-xs">
 							When set, the overlay shows only these logins. Great for an

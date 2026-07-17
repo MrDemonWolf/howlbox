@@ -123,9 +123,8 @@ html:not(.hb-overlay) :focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.hb-aurora {
-		animation: none;
-	}
+	.hb-aurora,
+	.hb-demo-in,
 	.hb-reveal {
 		animation: none;
 	}

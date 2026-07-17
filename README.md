@@ -35,8 +35,9 @@ Your chat. Your colors. Your howl.
   users, or run featured mode showing only chosen users.
 - **URL-only configuration** - Every option is a query parameter. No
   config files, no dashboard, no stored state.
-- **Generator page** - Pick options live at `/`, watch the demo, and
-  copy a ready OBS source URL.
+- **Configurator page** - Pick options live at `/config` with a real
+  overlay preview, then copy a ready OBS source URL. The landing page
+  at `/` shows a theme-switching demo.
 - **OBS-optimized** - Transparent from first paint, zero blur
   filters (safe on CPU-rendered setups), event-driven reconnects
   that survive hidden-source timer throttling, and a visible
@@ -65,12 +66,14 @@ Your chat. Your colors. Your howl.
    bun run dev
    ```
 
-4. Open `http://localhost:3001` to use the generator, then add the
-   generated URL as an OBS browser source.
+4. Open `http://localhost:3001` for the landing page, then head to
+   `http://localhost:3001/config` to build a URL and add it as an OBS
+   browser source.
 
 ## Usage
 
-Build an overlay URL with the generator at `/`, or hand-write one:
+Build an overlay URL with the configurator at `/config`, or hand-write
+one:
 
 ```
 /overlay?channel=mrdemonwolf&theme=wolf&bg=bubble&hidebots=true&fade=30
@@ -151,9 +154,9 @@ becomes active" off.
 - `hb-*` class names on overlay elements are a public contract for
   OBS Custom CSS overrides; keep them stable
 
-## Deployment
+### Deployment
 
-### GitHub Pages (default)
+#### GitHub Pages (default)
 
 Pushes to `main` build and deploy automatically via
 `.github/workflows/deploy.yml`. One-time setup: in the repository
@@ -165,13 +168,13 @@ root hosting).
 A copy of `index.html` is deployed as `404.html` so the `/overlay`
 route resolves on a static host.
 
-### Coolify or any static host
+#### Coolify or any static host
 
 `bun run build` produces a fully static site in `apps/web/dist`.
 Serve that folder as-is (set `BASE_PATH` at build time if hosting
 under a subpath). No server runtime is required.
 
-## Test URLs
+### Test URLs
 
 Once deployed, these are ready to paste into an OBS browser source
 (swap the channel for testing against a busier chat):
@@ -193,13 +196,13 @@ howlbox/
 │       └── src/
 │           ├── components/
 │           │   ├── chat/      # Overlay renderer + theme CSS variables
-│           │   └── landing/   # Marketing page demo + URL generator
+│           │   └── landing/   # Landing demo + /config URL builder
 │           ├── hooks/         # Chat connection, emote/badge loading
 │           ├── lib/
 │           │   ├── emotes/    # 7TV/BTTV/FFZ fetch, cache, resolution
-│           │   ├── overlay/   # URL parameter schema
+│           │   ├── overlay/   # URL param schema + builder
 │           │   └── twitch/    # Anonymous chat client, badges, colors
-│           └── routes/        # / (landing + generator), /overlay
+│           └── routes/        # / landing, /config builder, /overlay
 ├── packages/
 │   ├── config/                # Shared tsconfig base
 │   └── ui/                    # Shared shadcn/ui components and styles

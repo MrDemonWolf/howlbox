@@ -1,6 +1,7 @@
-// Twitch's own default palette, assigned the same way Twitch does for
-// users who never picked a chat color (first + last char code hash),
-// so fallback colors match what viewers see on twitch.tv.
+// Twitch's own default palette. Users who never picked a chat color get
+// one assigned from this list; we approximate that with a first + last
+// char code hash of the login, so an uncolored viewer still gets a
+// stable, on-brand color close to (not always identical to) twitch.tv.
 const TWITCH_DEFAULT_COLORS = [
 	"#FF0000",
 	"#0000FF",
