@@ -1,29 +1,27 @@
 # HowlBox - Themed Twitch Chat Overlay for OBS
 
 HowlBox is a self-hosted, client-only Twitch chat overlay for OBS
-browser sources. It connects to Twitch chat anonymously (no login,
-no OAuth, no API keys), renders native Twitch, 7TV, BTTV, and
-FrankerFaceZ emotes with badge art, and is configured entirely
-through URL query parameters so every OBS source URL is
-self-contained. Built for streamers who want a modern, beautiful
-chat overlay without a third-party overlay service between them and
-their chat.
+browser sources. It joins Twitch chat anonymously (no login, no OAuth,
+no API keys), renders native Twitch, 7TV, BTTV, and FrankerFaceZ
+emotes with badge art, and is configured entirely through URL query
+parameters so every OBS source URL is self-contained. Built for
+streamers who want a modern, beautiful chat overlay without a
+third-party service sitting between them and their chat.
 
 Your chat. Your colors. Your howl.
 
 ## Features
 
 - **Anonymous chat connection** - Read-only Twitch chat over
-  `@twurple/chat`. No account, no keys, nothing to expire
-  mid-stream.
+  `@twurple/chat`. No account, no keys, nothing to expire mid-stream.
 - **15 themes** - Wolf brand glass, macOS-style Liquid Glass, CRT
   terminal, synthwave neon, Windows 95, Windows XP, Xbox, pixel
   arcade, kawaii pastel, celestial galaxy, cozy mocha, esports
   no-box, plus dark, light, and an accessible high-contrast preset.
   All CSS-variable driven.
 - **Three display modes** - Transparent messages over gameplay
-  (`bg=off`), one themed backdrop panel (`bg=panel`), or
-  per-message bubbles (`bg=bubble`).
+  (`bg=off`), one themed backdrop panel (`bg=panel`), or per-message
+  bubbles (`bg=bubble`).
 - **Full emote support** - Native Twitch emotes plus 7TV (including
   zero-width overlay emotes), BTTV, and FrankerFaceZ, resolved per
   channel and cached in localStorage.
@@ -32,8 +30,8 @@ Your chat. Your colors. Your howl.
   APIs, plus custom badge art overrides inline through the `badgeart`
   parameter or hosted in a public GitHub gist through `badgegist`.
 - **Moderation aware** - Deleted messages, timeouts, and bans vanish
-  from the overlay instantly. An optional delay holds non-mod
-  messages so moderation lands before anything renders.
+  from the overlay instantly. An optional delay holds non-mod messages
+  so moderation lands before anything renders.
 - **Filters** - Hide known bots, hide `!commands`, hide specific
   users, or run featured mode showing only chosen users.
 - **URL-only configuration** - Every option is a query parameter. No
@@ -41,12 +39,12 @@ Your chat. Your colors. Your howl.
 - **Configurator page** - Pick options live at `/config` with a real
   overlay preview, then copy a ready OBS source URL. The landing page
   at `/` shows a theme-switching demo.
-- **OBS-optimized** - Transparent from first paint, zero blur
-  filters (safe on CPU-rendered setups), event-driven reconnects
-  that survive hidden-source timer throttling, and a visible
-  connection status pill.
-- **Stable styling hooks** - Every element carries `hb-*` class
-  names as a contract for the OBS Custom CSS field.
+- **OBS-optimized** - Transparent from first paint, zero blur filters
+  (safe on CPU-rendered setups), event-driven reconnects that survive
+  hidden-source timer throttling, and a visible connection status
+  pill.
+- **Stable styling hooks** - Every element carries `hb-*` class names
+  as a contract for the OBS Custom CSS field.
 
 ## Getting Started
 
@@ -66,7 +64,7 @@ Your chat. Your colors. Your howl.
 3. Start the dev server:
 
    ```bash
-   bun run dev
+   bun run dev:web
    ```
 
 4. Open `http://localhost:3001` for the landing page, then head to
@@ -86,7 +84,7 @@ one:
 | -------------- | ---------------------------------------- | ------------------------------------------------------- |
 | `channel`      | Twitch login name                        | Channel to join (required)                              |
 | `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `xp`, `xbox`, `arcade`, `galaxy`, `mocha` | Color theme preset |
-| `bg`           | `off`, `panel`, `bubble`                 | Display mode                                            |
+| `bg`           | `off`, `panel`, `bubble`                 | Display mode (default `off`)                            |
 | `max`          | `1` to `200` (default `50`)              | Max messages kept on screen                             |
 | `hidebots`     | flag                                     | Hide known chat bots (Nightbot, etc.)                   |
 | `hide`         | comma-separated logins                   | Always hide these users                                 |
@@ -144,17 +142,17 @@ becomes active" off.
    bun install
    ```
 
-2. Run the dev server:
+2. Run the web dev server:
 
    ```bash
-   bun run dev
+   bun run dev:web
    ```
 
 ### Development Scripts
 
 - `bun run dev`: Start all apps in development mode
-- `bun run dev:web`: Start only the web app
-- `bun run build`: Build all apps
+- `bun run dev:web`: Start only the web app (port 3001)
+- `bun run build`: Build the static site to `apps/web/dist`
 - `bun run check-types`: Check TypeScript types across the monorepo
 - `bun run check`: Run Biome formatting and linting
 
@@ -163,8 +161,8 @@ becomes active" off.
 - TypeScript strict mode across every workspace
 - Biome for linting and formatting
 - Turborepo task caching for fast builds
-- `hb-*` class names on overlay elements are a public contract for
-  OBS Custom CSS overrides; keep them stable
+- `hb-*` class names on overlay elements are a public contract for OBS
+  Custom CSS overrides; keep them stable
 
 ### Deployment
 
@@ -182,9 +180,9 @@ route resolves on a static host.
 
 #### Coolify or any static host
 
-`bun run build` produces a fully static site in `apps/web/dist`.
-Serve that folder as-is (set `BASE_PATH` at build time if hosting
-under a subpath). No server runtime is required.
+`bun run build` produces a fully static site in `apps/web/dist`. Serve
+that folder as-is (set `BASE_PATH` at build time if hosting under a
+subpath). No server runtime is required.
 
 ### Test URLs
 

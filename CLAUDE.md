@@ -18,8 +18,9 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 
 ## Commands
 
-- `bun run dev:web` - dev server on port 3001 (preview config in
+- `bun run dev:web` - web dev server on port 3001 (preview config in
   `.claude/launch.json`)
+- `bun run dev` - all apps via turbo
 - `bun run check-types` - vite build + tsc across workspaces
 - `bun run check` - biome lint + format (auto-fixes)
 - `bun run build` - static site to `apps/web/dist`
@@ -96,6 +97,18 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   adds the `hb-overlay` html class synchronously before React so OBS
   never sees an opaque flash; the transparency CSS lives in eager
   `index.css`.
+
+## URL params
+
+Schema lives in `lib/overlay/params.ts`. Full param reference is the
+Usage table in `README.md`; keep both in sync. Defaults:
+`bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=0`,
+`badgeart`/`badgegist` empty, `badges` and `animate` on, all other
+flags off. Ranges: `max` 1-200, `delay` 0-300s, `fade` 0-600s,
+`refresh` 0-1440min. `channel`/`hide`/`allow` validate against the
+Twitch login regex; bad logins are dropped, not errored. Custom badge
+art (`badgeart`, `badgegist`) is parsed/validated in
+`lib/twitch/badges.ts`.
 
 ## OBS constraints (research-verified; do not violate)
 
