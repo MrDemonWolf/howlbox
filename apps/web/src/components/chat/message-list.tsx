@@ -31,6 +31,7 @@ interface MessageListProps {
 	bg: BgMode;
 	theme: Theme;
 	showBadges: boolean;
+	showPronouns: boolean;
 	showTimestamps: boolean;
 	animate: boolean;
 	fadeSeconds: number;
@@ -45,6 +46,7 @@ export function MessageList({
 	bg,
 	theme,
 	showBadges,
+	showPronouns,
 	showTimestamps,
 	animate,
 	fadeSeconds,
@@ -67,6 +69,7 @@ export function MessageList({
 					key={message.id}
 					message={message}
 					showBadges={showBadges}
+					showPronouns={showPronouns}
 					showTimestamps={showTimestamps}
 					surfaceTone={surfaceTone}
 				/>
