@@ -6,21 +6,26 @@
       <stop offset="0.45" stop-color="#081231"/>
       <stop offset="1" stop-color="#040713"/>
     </radialGradient>
-    <radialGradient id="aurora" cx="0.28" cy="0.2" r="0.75">
+    <radialGradient id="aurora" cx="0.25" cy="0.2" r="0.75">
       <stop offset="0" stop-color="#00ACED" stop-opacity="0.28"/>
       <stop offset="1" stop-color="#00ACED" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="aurora2" cx="0.82" cy="0.85" r="0.7">
+    <radialGradient id="aurora2" cx="0.85" cy="0.9" r="0.7">
       <stop offset="0" stop-color="#7c5cff" stop-opacity="0.3"/>
       <stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="howl" x1="120" y1="300" x2="720" y2="430" gradientUnits="userSpaceOnUse">
+    <linearGradient id="howl" x1="0" y1="0" x2="1" y2="0">
       <stop stop-color="#00ACED"/>
       <stop offset="1" stop-color="#9d84ff"/>
     </linearGradient>
     <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
       <stop stop-color="#33c1f5"/>
       <stop offset="1" stop-color="#00ACED"/>
+    </linearGradient>
+    <linearGradient id="game" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#22381a"/>
+      <stop offset="0.5" stop-color="#43311a"/>
+      <stop offset="1" stop-color="#16244a"/>
     </linearGradient>
   </defs>
 
@@ -35,40 +40,76 @@
   <rect x="0.5" y="0.5" width="1199" height="629" fill="none" stroke="#00ACED" stroke-opacity="0.15" stroke-width="1"/>
 
   <!-- eyebrow -->
-  <g transform="translate(120 150)">
+  <g transform="translate(96 122)">
     <rect x="0" y="-5" width="28" height="2" rx="1" fill="#00ACED"/>
-    <text x="42" y="0" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="20" letter-spacing="4.4" fill="#7fd7ff" dominant-baseline="middle">TWITCH CHAT OVERLAY FOR OBS</text>
+    <text x="42" y="0" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="19" letter-spacing="4.2" fill="#7fd7ff" dominant-baseline="middle">TWITCH CHAT OVERLAY FOR OBS</text>
   </g>
 
   <!-- wordmark -->
-  <text x="118" y="300" font-family="'Avenir Next','Helvetica Neue',sans-serif" font-weight="800" font-size="140" letter-spacing="-4" fill="#ffffff">HowlBox</text>
+  <text x="94" y="256" font-family="'Avenir Next','Helvetica Neue',sans-serif" font-weight="800" font-size="124" letter-spacing="-4" fill="#ffffff">HowlBox</text>
 
   <!-- tagline -->
-  <text x="120" y="372" font-family="'Avenir Next','Helvetica Neue',sans-serif" font-weight="600" font-size="40" fill="#ffffff" fill-opacity="0.72">Your chat. Your colors. <tspan fill="url(#howl)" font-weight="800">Your howl.</tspan></text>
+  <text x="96" y="322" font-family="'Avenir Next','Helvetica Neue',sans-serif" font-weight="600" font-size="36" fill="#ffffff" fill-opacity="0.72">Your chat. Your colors. <tspan fill="url(#howl)" font-weight="800">Your howl.</tspan></text>
+
+  <!-- fact chips -->
+  <g font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="17" letter-spacing="2.2">
+    <rect x="96" y="360" width="200" height="46" rx="23" fill="#00ACED" fill-opacity="0.12" stroke="#00ACED" stroke-opacity="0.5"/>
+    <text x="196" y="389" text-anchor="middle" fill="#7fd7ff">FREE FOREVER</text>
+    <rect x="314" y="360" width="248" height="46" rx="23" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.16"/>
+    <text x="438" y="389" text-anchor="middle" fill="#c3c9d6">MIT OPEN SOURCE</text>
+    <rect x="96" y="418" width="270" height="46" rx="23" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.16"/>
+    <text x="231" y="447" text-anchor="middle" fill="#c3c9d6">NO LOGIN, NO KEYS</text>
+    <rect x="384" y="418" width="178" height="46" rx="23" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.16"/>
+    <text x="473" y="447" text-anchor="middle" fill="#c3c9d6">13 THEMES</text>
+  </g>
 
   <!-- url chip -->
-  <g transform="translate(120 430)">
-    <rect x="0" y="0" width="620" height="60" rx="14" fill="#000000" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.12"/>
-    <circle cx="30" cy="30" r="5" fill="#00ACED"/>
-    <text x="52" y="30" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="23" fill="#ffffff" fill-opacity="0.55" dominant-baseline="middle">/overlay?channel=<tspan fill="#7fd7ff">you</tspan>&amp;theme=<tspan fill="#7fd7ff">wolf</tspan></text>
-  </g>
-
-  <!-- trust row -->
-  <g font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="18" letter-spacing="2" fill="#ffffff" fill-opacity="0.4">
-    <circle cx="124" cy="540" r="3" fill="#00ACED"/><text x="138" y="546">MIT LICENSED</text>
-    <circle cx="320" cy="540" r="3" fill="#00ACED"/><text x="334" y="546">13 THEMES</text>
-    <circle cx="470" cy="540" r="3" fill="#00ACED"/><text x="484" y="546">NO SERVER, NO ACCOUNTS</text>
-  </g>
-
-  <!-- paw mark, big, right side -->
-  <g transform="translate(880 175) scale(3.6)" fill="url(#mark)" opacity="0.95">
-    <path d="M32 33c-6.6 0-12 4.3-12 9.6 0 3.6 2.8 5.4 6.2 5.4 2.2 0 3.9-1 5.8-1s3.6 1 5.8 1c3.4 0 6.2-1.8 6.2-5.4C44 37.3 38.6 33 32 33Z"/>
-    <ellipse cx="20.5" cy="28" rx="4" ry="5.2"/>
-    <ellipse cx="43.5" cy="28" rx="4" ry="5.2"/>
-    <ellipse cx="27" cy="21.5" rx="3.6" ry="4.8"/>
-    <ellipse cx="37" cy="21.5" rx="3.6" ry="4.8"/>
+  <g transform="translate(96 494)">
+    <rect x="0" y="0" width="560" height="58" rx="14" fill="#000000" fill-opacity="0.45" stroke="#ffffff" stroke-opacity="0.12"/>
+    <circle cx="28" cy="29" r="5" fill="#00ACED"/>
+    <text x="50" y="29" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="22" fill="#ffffff" fill-opacity="0.55" dominant-baseline="middle">/overlay?channel=<tspan fill="#7fd7ff">you</tspan>&amp;theme=<tspan fill="#7fd7ff">wolf</tspan></text>
   </g>
 
   <!-- footer brand line -->
-  <text x="120" y="595" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="18" letter-spacing="2" fill="#ffffff" fill-opacity="0.35">HowlBox BY MrDemonWolf, Inc.</text>
+  <text x="96" y="592" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="17" letter-spacing="2" fill="#ffffff" fill-opacity="0.4">HowlBox BY MrDemonWolf, Inc.</text>
+
+  <!-- product card: chat bubbles over a gameplay-toned backdrop -->
+  <g transform="translate(742 88) rotate(1.6 178 220)">
+    <rect x="0" y="0" width="368" height="452" rx="24" fill="url(#game)"/>
+    <rect x="0" y="0" width="368" height="452" rx="24" fill="#040713" fill-opacity="0.42"/>
+    <rect x="0.5" y="0.5" width="367" height="451" rx="23.5" fill="none" stroke="#ffffff" stroke-opacity="0.16"/>
+
+    <!-- status pill + paw -->
+    <g transform="translate(24 22)">
+      <rect x="0" y="0" width="106" height="34" rx="17" fill="#000000" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.12"/>
+      <circle cx="19" cy="17" r="5" fill="#3ddc84"/>
+      <text x="36" y="23" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="14" letter-spacing="1.8" fill="#a5adbd">LIVE</text>
+    </g>
+    <g transform="translate(286 6) scale(0.9)" fill="url(#mark)" opacity="0.95">
+      <path d="M32 33c-6.6 0-12 4.3-12 9.6 0 3.6 2.8 5.4 6.2 5.4 2.2 0 3.9-1 5.8-1s3.6 1 5.8 1c3.4 0 6.2-1.8 6.2-5.4C44 37.3 38.6 33 32 33Z"/>
+      <ellipse cx="20.5" cy="28" rx="4" ry="5.2"/>
+      <ellipse cx="43.5" cy="28" rx="4" ry="5.2"/>
+      <ellipse cx="27" cy="21.5" rx="3.6" ry="4.8"/>
+      <ellipse cx="37" cy="21.5" rx="3.6" ry="4.8"/>
+    </g>
+
+    <!-- chat bubbles -->
+    <g font-family="'Avenir Next','Helvetica Neue',sans-serif" font-size="17">
+      <rect x="24" y="106" width="312" height="46" rx="18" fill="#0b1428" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.14"/>
+      <text x="44" y="135"><tspan fill="#7fd7ff" font-weight="700">MoonHowler:</tspan><tspan fill="#e7ebf2" dx="7">this overlay is clean</tspan></text>
+
+      <rect x="24" y="166" width="232" height="46" rx="18" fill="#0b1428" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.14"/>
+      <text x="44" y="195"><tspan fill="#f38ba8" font-weight="700">LunaTheWolf:</tspan><tspan fill="#e7ebf2" dx="7">no login??</tspan></text>
+
+      <rect x="24" y="226" width="320" height="68" rx="18" fill="#0b1428" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.14"/>
+      <text x="44" y="254"><tspan fill="#a6e3a1" font-weight="700">PackLeader_Dan:</tspan><tspan fill="#e7ebf2" dx="7">copy URL,</tspan></text>
+      <text x="44" y="280"><tspan fill="#e7ebf2">paste in OBS, done</tspan></text>
+
+      <rect x="24" y="308" width="252" height="46" rx="18" fill="#0b1428" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.14"/>
+      <text x="44" y="337"><tspan fill="#c6a0f6" font-weight="700">SilverFang:</tspan><tspan fill="#e7ebf2" dx="7">13 themes??</tspan></text>
+    </g>
+
+    <!-- theme param footer -->
+    <text x="24" y="416" font-family="'SF Mono','DejaVu Sans Mono',monospace" font-size="14" letter-spacing="1.6" fill="#8b93a5">?theme=wolf&amp;bg=bubble</text>
+  </g>
 </svg>
