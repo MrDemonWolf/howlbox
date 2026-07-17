@@ -108,7 +108,12 @@ async function resolveTwitchId(login: string): Promise<string | null> {
 	return users?.[0]?.id ?? null;
 }
 
-export async function fetchEmoteMap(login: string): Promise<EmoteMap> {
+// force bypasses the cache TTLs (used by the ?refresh param) so a
+// mid-stream emote add shows up without an overlay reload.
+export async function fetchEmoteMap(
+	login: string,
+	force = false,
+): Promise<EmoteMap> {
 	const map: EmoteMap = new Map();
 
 	// First wave: the FFZ room (channel emotes + the twitch id 7TV/BTTV
@@ -118,21 +123,25 @@ export async function fetchEmoteMap(login: string): Promise<EmoteMap> {
 			`ffz-room:${login}`,
 			ONE_HOUR_MS,
 			`https://api.frankerfacez.com/v1/room/${login}`,
+			force,
 		),
 		cachedJson<SevenTvSet>(
 			"7tv-global",
 			SIX_HOURS_MS,
 			"https://7tv.io/v3/emote-sets/global",
+			force,
 		),
 		cachedJson<BttvEmote[]>(
 			"bttv-global",
 			SIX_HOURS_MS,
 			"https://api.betterttv.net/3/cached/emotes/global",
+			force,
 		),
 		cachedJson<FfzGlobalResponse>(
 			"ffz-global",
 			SIX_HOURS_MS,
 			"https://api.frankerfacez.com/v1/set/global",
+			force,
 		),
 	]);
 
@@ -146,6 +155,7 @@ export async function fetchEmoteMap(login: string): Promise<EmoteMap> {
 					`7tv-user:${twitchId}`,
 					ONE_HOUR_MS,
 					`https://7tv.io/v3/users/twitch/${twitchId}`,
+					force,
 				)
 			: null,
 		twitchId
@@ -153,6 +163,7 @@ export async function fetchEmoteMap(login: string): Promise<EmoteMap> {
 					`bttv-user:${twitchId}`,
 					ONE_HOUR_MS,
 					`https://api.betterttv.net/3/cached/users/twitch/${twitchId}`,
+					force,
 				)
 			: null,
 	]);

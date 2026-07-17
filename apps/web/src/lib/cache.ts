@@ -75,10 +75,13 @@ function writeCache<T>(storageKey: string, value: T) {
 
 // Returns the cached value while fresh, the refetched value on a miss,
 // and the stale value if the refetch fails (null when nothing cached).
+// force skips the freshness check (periodic ?refresh re-fetches) but
+// keeps the cached value as the stale-if-error fallback.
 export async function cachedJson<T>(
 	key: string,
 	ttlMs: number,
 	url: string,
+	force = false,
 ): Promise<T | null> {
 	const storageKey = CACHE_PREFIX + key;
 	let stale: T | null = null;
@@ -86,7 +89,7 @@ export async function cachedJson<T>(
 		const raw = localStorage.getItem(storageKey);
 		if (raw) {
 			const entry = JSON.parse(raw) as CacheEntry<T>;
-			if (Date.now() - entry.t < ttlMs) {
+			if (!force && Date.now() - entry.t < ttlMs) {
 				return entry.v;
 			}
 			stale = entry.v;

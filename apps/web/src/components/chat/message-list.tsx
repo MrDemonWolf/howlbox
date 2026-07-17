@@ -11,6 +11,7 @@ export const LIGHT_SURFACE_THEMES = new Set<Theme>([
 	"light",
 	"cozy",
 	"retro95",
+	"xp",
 	"mocha",
 ]);
 

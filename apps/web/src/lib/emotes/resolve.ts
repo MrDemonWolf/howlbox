@@ -45,7 +45,12 @@ export function resolveMessageExtras(
 			: view.parts;
 	const badgeUrls = badges
 		? view.badges
-				.map((badge) => badges.get(`${badge.set}/${badge.version}`))
+				.map(
+					(badge) =>
+						// bare set key = custom art covering every version
+						badges.get(`${badge.set}/${badge.version}`) ??
+						badges.get(badge.set),
+				)
 				.filter((url): url is string => Boolean(url))
 		: [];
 	return { ...view, parts, badgeUrls };

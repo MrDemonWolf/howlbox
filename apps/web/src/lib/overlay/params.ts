@@ -12,6 +12,8 @@ export const THEMES = [
 	"cozy",
 	"nobox",
 	"retro95",
+	"xp",
+	"xbox",
 	"arcade",
 	"galaxy",
 	"mocha",
@@ -34,6 +36,9 @@ export const OVERLAY_DEFAULTS = {
 	timestamps: false,
 	badges: true,
 	animate: true,
+	badgeart: "",
+	badgegist: "",
+	refresh: 0,
 } satisfies {
 	bg: BgMode;
 	theme: Theme;
@@ -45,6 +50,9 @@ export const OVERLAY_DEFAULTS = {
 	timestamps: boolean;
 	badges: boolean;
 	animate: boolean;
+	badgeart: string;
+	badgegist: string;
+	refresh: number;
 };
 
 // One valid Twitch login: 1-25 chars of lowercase alnum/underscore.
@@ -149,6 +157,16 @@ export const overlayParamsSchema = z.object({
 	// auto-hide: fade each message out N seconds after it appears
 	fade: z
 		.preprocess(numberish, z.coerce.number().int().min(0).max(600))
+		.catch(0),
+	// custom badge art: "set/version=url" or "set=url" pairs, comma
+	// separated; parsed/validated in lib/twitch/badges.ts
+	badgeart: z.preprocess(scalarToString, z.string()).catch(""),
+	// public GitHub gist of custom badge art (id or gist URL); fetched
+	// and merged under the inline badgeart in lib/twitch/badges.ts
+	badgegist: z.preprocess(scalarToString, z.string()).catch(""),
+	// re-fetch emote/badge maps every N minutes, cache bypassed (0 = off)
+	refresh: z
+		.preprocess(numberish, z.coerce.number().int().min(0).max(1440))
 		.catch(0),
 });
 

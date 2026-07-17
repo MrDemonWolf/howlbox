@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			{
 				name: "description",
 				content:
-					"A themed Twitch chat overlay you host yourself. Thirteen themes, every emote, no login and no keys. The whole overlay is one URL.",
+					"A themed Twitch chat overlay you host yourself. Fifteen themes, every emote, no login and no keys. The whole overlay is one URL.",
 			},
 		],
 	}),
