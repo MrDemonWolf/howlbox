@@ -73,12 +73,11 @@ function LandingPage() {
 					{/* hero */}
 					<section className="mx-auto grid max-w-6xl items-center gap-14 px-6 pt-20 pb-28 lg:grid-cols-[1.05fr_0.95fr]">
 						<div className="flex flex-col items-start gap-6">
-							<div className="hb-reveal" style={{ animationDelay: "40ms" }}>
+							<div className="hb-reveal [animation-delay:40ms]">
 								<Eyebrow>Twitch chat overlay for OBS</Eyebrow>
 							</div>
 							<h1
-								className={`hb-reveal text-balance font-bold text-6xl leading-[0.98] tracking-[-0.03em] lg:text-[5.5rem] ${DISPLAY_FONT}`}
-								style={{ animationDelay: "120ms" }}
+								className={`hb-reveal text-balance font-bold text-6xl leading-[0.98] tracking-[-0.03em] [animation-delay:120ms] lg:text-[5.5rem] ${DISPLAY_FONT}`}
 							>
 								Your chat.
 								<br />
@@ -88,20 +87,14 @@ function LandingPage() {
 									Your howl.
 								</span>
 							</h1>
-							<p
-								className="hb-reveal max-w-md text-pretty text-lg text-white/65 leading-relaxed"
-								style={{ animationDelay: "220ms" }}
-							>
+							<p className="hb-reveal max-w-md text-pretty text-lg text-white/65 leading-relaxed [animation-delay:220ms]">
 								A themed chat overlay you host yourself. One self-contained URL,
 								no login, no third-party overlay service standing between you
 								and your chat.
 							</p>
 
 							{/* the whole config is one URL: say so, in the machine voice */}
-							<div
-								className="hb-reveal flex w-full max-w-md items-center gap-2 overflow-hidden rounded-xl border border-white/10 bg-black/40 px-3 py-2.5"
-								style={{ animationDelay: "300ms" }}
-							>
+							<div className="hb-reveal flex w-full max-w-md items-center gap-2 overflow-hidden rounded-xl border border-white/10 bg-black/40 px-3 py-2.5 [animation-delay:300ms]">
 								<span className="size-2 shrink-0 rounded-full bg-[#00ACED] shadow-[0_0_8px_#00ACED]" />
 								<code className="truncate font-mono text-[0.8rem] text-white/50">
 									/overlay?channel=
@@ -111,10 +104,7 @@ function LandingPage() {
 								</code>
 							</div>
 
-							<div
-								className="hb-reveal flex flex-wrap gap-3"
-								style={{ animationDelay: "380ms" }}
-							>
+							<div className="hb-reveal flex flex-wrap gap-3 [animation-delay:380ms]">
 								<Link
 									className="group inline-flex items-center gap-2 rounded-lg bg-[#00ACED] px-5 py-2.5 font-semibold text-[#04121f] transition-all hover:bg-[#33c1f5] hover:shadow-[0_8px_30px_rgb(0_172_237/0.4)]"
 									to="/config"
@@ -133,8 +123,7 @@ function LandingPage() {
 							</div>
 
 							<div
-								className={`hb-reveal flex flex-wrap gap-x-5 gap-y-2 text-[0.68rem] text-white/55 ${MONO}`}
-								style={{ animationDelay: "460ms" }}
+								className={`hb-reveal flex flex-wrap gap-x-5 gap-y-2 text-[0.68rem] text-white/55 [animation-delay:460ms] ${MONO}`}
 							>
 								{TRUST.map((item) => (
 									<span className="flex items-center gap-2" key={item}>
@@ -146,10 +135,7 @@ function LandingPage() {
 						</div>
 
 						{/* floating, faintly tilted demo overlay */}
-						<div
-							className="hb-reveal lg:rotate-[1.4deg] lg:transition-transform lg:duration-500 lg:hover:rotate-0"
-							style={{ animationDelay: "260ms" }}
-						>
+						<div className="hb-reveal [animation-delay:260ms] lg:rotate-[1.4deg] lg:transition-transform lg:duration-500 lg:hover:rotate-0">
 							<DemoChat />
 						</div>
 					</section>
