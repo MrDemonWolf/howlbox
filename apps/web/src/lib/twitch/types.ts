@@ -3,7 +3,6 @@ export type MessagePart =
 	| {
 			type: "emote";
 			name: string;
-			id: string;
 			url: string;
 			// 7TV overlay emotes render stacked on the previous emote
 			zeroWidth?: boolean;
