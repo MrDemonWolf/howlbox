@@ -10,6 +10,27 @@ html.hb-overlay body {
 	overflow: hidden;
 }
 
+/* the site chrome always sits on the deep-space canvas; painting it on
+   the root too stops the browser's white default from flashing on
+   overscroll bounce and route transitions */
+html:not(.hb-overlay) {
+	background-color: #040713;
+}
+
+/* keyboard focus ring: no visible indicator shipped by default, which
+   fails WCAG 2.4.7 for keyboard users. Cerulean ring, offset off the
+   dark canvas. Scoped away from the chrome-less OBS overlay route. */
+html:not(.hb-overlay) :focus-visible {
+	outline: 2px solid #33c1f5;
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+/* ---- landing-only utilities (Tailwind @utility so they compose with
+   variants and are generated on demand); the overlay never uses these.
+   Per-theme variables stay in components/chat/overlay.css: they are the
+   OBS Custom CSS contract, not utilities. ---- */
+
 /* landing demo-chat entrance; transform/opacity only */
 @keyframes hb-demo-in {
 	from {
@@ -18,15 +39,35 @@ html.hb-overlay body {
 	}
 }
 
-.hb-demo-in {
+@utility hb-demo-in {
 	animation: hb-demo-in 300ms ease-out;
+
+	@media (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
+}
+
+/* staggered page-load reveal; stagger via [animation-delay:*] utilities */
+@keyframes hb-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(18px);
+	}
+}
+
+@utility hb-reveal {
+	animation: hb-reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+	@media (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
 }
 
 /* transparency checker for overlay previews: what OBS shows behind a
-   browser source when no video sits under it. Pure CSS, no PNG asset. */
-.hb-checker {
-	/* mid-grey grid, like OBS's own transparency preview: authentic and
-	   legible for both light-text and dark-text themes in bg=off */
+   browser source when no video sits under it. Pure CSS, no PNG asset.
+   Mid-grey grid like OBS's own preview: authentic and legible for both
+   light-text and dark-text themes in bg=off. */
+@utility hb-checker {
 	background-color: #6a7078;
 	background-image:
 		linear-gradient(
@@ -50,23 +91,11 @@ html.hb-overlay body {
 }
 
 /* ---- Broadcast Night atmosphere (landing/config only, never the
-   overlay: blur + big layers are fine off-OBS) ---- */
+   overlay) ---- */
 
 /* aurora mesh: cerulean / violet / teal drifting slowly behind all
-   content, blurred into a soft field of light */
-.hb-aurora {
-	position: fixed;
-	inset: -25%;
-	background:
-		radial-gradient(38% 46% at 22% 18%, rgb(0 172 237 / 0.24), transparent 60%),
-		radial-gradient(42% 42% at 82% 12%, rgb(124 92 255 / 0.2), transparent 60%),
-		radial-gradient(48% 50% at 68% 82%, rgb(0 209 178 / 0.14), transparent 62%),
-		radial-gradient(46% 54% at 12% 88%, rgb(0 110 200 / 0.18), transparent 62%);
-	filter: blur(36px);
-	animation: hb-aurora-drift 26s ease-in-out infinite alternate;
-	will-change: transform;
-}
-
+   content. The radial gradients are already soft, so no blur filter:
+   a filtered 150%-viewport fixed layer is what janks weak GPUs. */
 @keyframes hb-aurora-drift {
 	from {
 		transform: translate3d(-2%, -1%, 0) scale(1.05);
@@ -76,8 +105,24 @@ html.hb-overlay body {
 	}
 }
 
+@utility hb-aurora {
+	position: fixed;
+	inset: -25%;
+	background:
+		radial-gradient(38% 46% at 22% 18%, rgb(0 172 237 / 0.24), transparent 60%),
+		radial-gradient(42% 42% at 82% 12%, rgb(124 92 255 / 0.2), transparent 60%),
+		radial-gradient(48% 50% at 68% 82%, rgb(0 209 178 / 0.14), transparent 62%),
+		radial-gradient(46% 54% at 12% 88%, rgb(0 110 200 / 0.18), transparent 62%);
+	animation: hb-aurora-drift 26s ease-in-out infinite alternate;
+	will-change: transform;
+
+	@media (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
+}
+
 /* fine film grain, overlay-blended for depth */
-.hb-grain {
+@utility hb-grain {
 	position: fixed;
 	inset: 0;
 	opacity: 0.5;
@@ -86,7 +131,7 @@ html.hb-overlay body {
 }
 
 /* broadcast grid, fading out below the fold */
-.hb-grid {
+@utility hb-grid {
 	position: fixed;
 	inset: 0;
 	background-image:
@@ -99,33 +144,4 @@ html.hb-overlay body {
 		transparent 72%
 	);
 	mask-image: radial-gradient(120% 75% at 50% 0%, black, transparent 72%);
-}
-
-/* keyboard focus ring: no visible indicator shipped by default, which
-   fails WCAG 2.4.7 for keyboard users. Cerulean ring, offset off the
-   dark canvas. Scoped away from the chrome-less OBS overlay route. */
-html:not(.hb-overlay) :focus-visible {
-	outline: 2px solid #33c1f5;
-	outline-offset: 2px;
-	border-radius: 4px;
-}
-
-/* staggered page-load reveal; stagger via inline animation-delay */
-@keyframes hb-reveal {
-	from {
-		opacity: 0;
-		transform: translateY(18px);
-	}
-}
-
-.hb-reveal {
-	animation: hb-reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.hb-aurora,
-	.hb-demo-in,
-	.hb-reveal {
-		animation: none;
-	}
 }

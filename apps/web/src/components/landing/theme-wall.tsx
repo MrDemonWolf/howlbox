@@ -50,6 +50,7 @@ function ThemeTile({ theme }: { theme: Theme }) {
 	return (
 		<Link
 			className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition-all hover:-translate-y-1 hover:border-[#00ACED]/45 hover:shadow-[0_12px_40px_rgb(0_20_44/0.5)]"
+			search={{ theme }}
 			to="/config"
 		>
 			<div className="relative flex min-h-[9rem] items-end overflow-hidden bg-[linear-gradient(135deg,#0b1017_0%,#141a28_100%)]">
@@ -67,7 +68,7 @@ function ThemeTile({ theme }: { theme: Theme }) {
 			</div>
 			<div className="flex items-center justify-between border-white/5 border-t px-4 py-3">
 				<span className="font-semibold text-sm">{THEME_LABEL[theme]}</span>
-				<code className="font-mono text-white/35 text-xs transition-colors group-hover:text-[#7fd7ff]">
+				<code className="font-mono text-white/50 text-xs transition-colors group-hover:text-[#7fd7ff]">
 					?theme={theme}
 				</code>
 			</div>

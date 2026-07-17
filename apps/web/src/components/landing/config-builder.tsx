@@ -59,8 +59,10 @@ function clampNumber(raw: string, min: number, max: number, fallback: number) {
 	return Math.min(max, Math.max(min, Number(raw) || fallback));
 }
 
-export function ConfigBuilder() {
-	const [config, setConfig] = useState<Config>(DEFAULTS);
+export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
+	const [config, setConfig] = useState<Config>(() =>
+		initialTheme ? { ...DEFAULTS, theme: initialTheme } : DEFAULTS,
+	);
 
 	const set = <K extends keyof Config>(key: K, value: Config[K]) =>
 		setConfig((prev) => ({ ...prev, [key]: value }));
@@ -109,7 +111,7 @@ export function ConfigBuilder() {
 					<span className={`text-[#7fd7ff] text-[0.65rem] ${MONO}`}>
 						Live preview
 					</span>
-					<span className={`text-[0.6rem] text-white/35 ${MONO}`}>
+					<span className={`text-[0.65rem] text-white/50 ${MONO}`}>
 						{BG_LABEL[config.bg]} / {THEME_LABEL[config.theme]}
 					</span>
 				</div>
@@ -130,7 +132,7 @@ export function ConfigBuilder() {
 						<span className="size-2.5 rounded-full bg-[#ff5f57]" />
 						<span className="size-2.5 rounded-full bg-[#febc2e]" />
 						<span className="size-2.5 rounded-full bg-[#28c840]" />
-						<span className={`ml-1 text-[0.6rem] text-white/55 ${MONO}`}>
+						<span className={`ml-1 text-[0.65rem] text-white/55 ${MONO}`}>
 							obs browser source
 						</span>
 					</div>
@@ -243,52 +245,38 @@ export function ConfigBuilder() {
 
 				<Fieldset title="Messages">
 					<div className="grid grid-cols-2 gap-4">
-						<div className="grid gap-2">
-							<Label htmlFor="cfg-max">Max messages</Label>
-							<Input
-								id="cfg-max"
-								max={200}
-								min={1}
-								onChange={(e) =>
-									set("max", clampNumber(e.target.value, 1, 200, 50))
-								}
-								type="number"
-								value={config.max}
-							/>
-						</div>
-						<div className="grid gap-2">
-							<Label htmlFor="cfg-fade">Auto-hide after (s, 0 = never)</Label>
-							<Input
-								id="cfg-fade"
-								max={600}
-								min={0}
-								onChange={(e) =>
-									set("fade", clampNumber(e.target.value, 0, 600, 0))
-								}
-								type="number"
-								value={config.fade}
-							/>
-						</div>
+						<NumberField
+							fallback={50}
+							id="cfg-max"
+							label="Max messages"
+							max={200}
+							min={1}
+							onCommit={(v) => set("max", v)}
+							value={config.max}
+						/>
+						<NumberField
+							fallback={0}
+							id="cfg-fade"
+							label="Auto-hide after (s, 0 = never)"
+							max={600}
+							min={0}
+							onCommit={(v) => set("fade", v)}
+							value={config.fade}
+						/>
 					</div>
 				</Fieldset>
 
 				<Fieldset title="Moderation">
-					<div className="grid gap-2">
-						<Label htmlFor="cfg-delay">Mod delay (seconds)</Label>
-						<Input
-							id="cfg-delay"
-							max={300}
-							min={0}
-							onChange={(e) =>
-								set("delay", clampNumber(e.target.value, 0, 300, 0))
-							}
-							type="number"
-							value={config.delay}
-						/>
-						<p className="text-muted-foreground text-xs">
-							Holds non-mod messages this long so deletes land first.
-						</p>
-					</div>
+					<NumberField
+						fallback={0}
+						hint="Holds non-mod messages this long so deletes land first."
+						id="cfg-delay"
+						label="Mod delay (seconds)"
+						max={300}
+						min={0}
+						onCommit={(v) => set("delay", v)}
+						value={config.delay}
+					/>
 					<Toggle
 						checked={config.hidebots}
 						id="cfg-hidebots"
@@ -340,9 +328,58 @@ function Fieldset({
 }) {
 	return (
 		<section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-			<h3 className={`text-[0.65rem] text-white/60 ${MONO}`}>{title}</h3>
+			{/* h2: the page h1 is "Configure your overlay"; skipping to h3
+			    breaks the outline for screen readers */}
+			<h2 className={`text-[0.65rem] text-white/60 ${MONO}`}>{title}</h2>
 			{children}
 		</section>
+	);
+}
+
+// Number input that tolerates a cleared field while typing: the draft
+// holds the raw text during editing (so backspace doesn't snap to the
+// fallback), commits clamped values as they land, and re-syncs the
+// display to the committed value on blur.
+function NumberField({
+	id,
+	label,
+	min,
+	max,
+	fallback,
+	value,
+	onCommit,
+	hint,
+}: {
+	id: string;
+	label: string;
+	min: number;
+	max: number;
+	fallback: number;
+	value: number;
+	onCommit: (value: number) => void;
+	hint?: string;
+}) {
+	const [draft, setDraft] = useState<string | null>(null);
+
+	return (
+		<div className="grid gap-2">
+			<Label htmlFor={id}>{label}</Label>
+			<Input
+				id={id}
+				max={max}
+				min={min}
+				onBlur={() => setDraft(null)}
+				onChange={(e) => {
+					setDraft(e.target.value);
+					if (e.target.value !== "") {
+						onCommit(clampNumber(e.target.value, min, max, fallback));
+					}
+				}}
+				type="number"
+				value={draft ?? String(value)}
+			/>
+			{hint && <p className="text-muted-foreground text-xs">{hint}</p>}
+		</div>
 	);
 }
 
