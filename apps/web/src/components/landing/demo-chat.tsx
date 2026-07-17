@@ -2,10 +2,8 @@ import { cn } from "@howlbox/ui/lib/utils";
 import { useState } from "react";
 
 import { OverlayPreview } from "@/components/landing/overlay-preview";
-import { THEMES } from "@/lib/overlay/params";
+import { THEMES, type Theme } from "@/lib/overlay/params";
 import { THEME_LABEL } from "@/lib/overlay/theme-meta";
-
-type Theme = (typeof THEMES)[number];
 
 export function DemoChat() {
 	const [theme, setTheme] = useState<Theme>("wolf");

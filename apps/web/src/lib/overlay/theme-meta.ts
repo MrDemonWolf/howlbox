@@ -1,7 +1,4 @@
-import type { BG_MODES, THEMES } from "@/lib/overlay/params";
-
-type Theme = (typeof THEMES)[number];
-type BgMode = (typeof BG_MODES)[number];
+import type { BgMode, Theme } from "@/lib/overlay/params";
 
 // swatch gradient per theme so pickers/gallery read at a glance
 export const THEME_SWATCH: Record<Theme, string> = {
