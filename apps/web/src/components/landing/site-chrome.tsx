@@ -167,8 +167,12 @@ export function SiteFooter() {
 						</FooterGroup>
 						<FooterGroup label="Project">
 							<FooterLink href={GITHUB_URL}>GitHub</FooterLink>
-							<FooterLink href="https://mrdwolf.net/discord">Discord</FooterLink>
-							<FooterLink href="https://www.mrdemonwolf.com">Website</FooterLink>
+							<FooterLink href="https://mrdwolf.net/discord">
+								Discord
+							</FooterLink>
+							<FooterLink href="https://www.mrdemonwolf.com">
+								Website
+							</FooterLink>
 						</FooterGroup>
 						<FooterGroup label="Legal">
 							<FooterLink href={`${GITHUB_URL}/blob/main/LICENSE`}>
@@ -197,7 +201,6 @@ export function SiteFooter() {
 						</a>
 					</p>
 					<div className="flex items-center gap-4 text-white/55">
-						<span>Made with love in the pack.</span>
 						{COMMIT_SHA && (
 							<a
 								className={`text-[0.7rem] underline-offset-4 transition-colors hover:text-white hover:underline ${MONO}`}
