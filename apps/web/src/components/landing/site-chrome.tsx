@@ -185,6 +185,12 @@ export function SiteFooter() {
 					>
 						MIT License
 					</a>
+					<Link className="hover:text-white" to="/privacy">
+						Privacy
+					</Link>
+					<Link className="hover:text-white" to="/terms">
+						Terms
+					</Link>
 				</div>
 				<p className="max-w-2xl text-pretty text-white/45 text-xs leading-relaxed">
 					{DISCLAIMER}
