@@ -144,14 +144,6 @@ export function SiteFooter() {
 						<span className={`font-bold text-white ${DISPLAY_FONT}`}>
 							HowlBox
 						</span>
-						<a
-							className={`text-[0.62rem] text-white/55 transition-colors hover:text-white ${MONO}`}
-							href="https://www.mrdemonwolf.com"
-							rel="noreferrer"
-							target="_blank"
-						>
-							by MrDemonWolf, Inc.
-						</a>
 					</div>
 					<p className="max-w-xs text-pretty text-white/55 text-xs leading-relaxed">
 						A self-hosted, client-only Twitch chat overlay for OBS browser
