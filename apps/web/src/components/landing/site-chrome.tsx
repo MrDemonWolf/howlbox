@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, PawPrint } from "lucide-react";
+import { PawPrint } from "lucide-react";
 
 import "@fontsource-variable/bricolage-grotesque/index.css";
 
@@ -134,57 +134,17 @@ export function OBSSteps() {
 export const DISCLAIMER =
 	"HowlBox is an independent, open-source tool. Not affiliated with, endorsed by, or sponsored by Twitch Interactive, Amazon, 7TV, BetterTTV, or FrankerFaceZ. Twitch is a trademark of Twitch Interactive, Inc.";
 
-// Build-time git SHA, injected by Vite `define` (GitHub Actions sets GITHUB_SHA).
-// Empty string in local dev, so the footer just omits the chip.
-declare const __COMMIT_SHA__: string;
-const COMMIT_SHA = typeof __COMMIT_SHA__ === "string" ? __COMMIT_SHA__ : "";
-
 export function SiteFooter() {
+	// Single compact row (copyright + inline nav), matching the wolfwave
+	// footer; the Twitch/7TV disclaimer sits above it since HowlBox
+	// surfaces those trademarks and wolfwave has no equivalent need.
 	return (
 		<footer className="border-white/10 border-t">
-			<div className="mx-auto w-full max-w-6xl px-6 py-14">
-				<div className="flex flex-col gap-10 md:flex-row md:justify-between">
-					{/* Brand block */}
-					<div className="max-w-sm">
-						<div className="flex items-center gap-2">
-							<PawPrint className="size-5 text-[#00ACED]" />
-							<span className={`font-bold text-lg text-white ${DISPLAY_FONT}`}>
-								HowlBox
-							</span>
-						</div>
-						<p className="mt-4 text-pretty text-sm text-white/55 leading-relaxed">
-							A self-hosted, client-only Twitch chat overlay for OBS browser
-							sources.
-						</p>
-					</div>
-
-					{/* Link groups */}
-					<div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-10">
-						<FooterGroup label="Get started">
-							<FooterLink to="/config">Configure</FooterLink>
-							<FooterLink hash="themes">Themes</FooterLink>
-							<FooterLink hash="setup">Setup</FooterLink>
-						</FooterGroup>
-						<FooterGroup label="Project">
-							<FooterLink href={GITHUB_URL}>GitHub</FooterLink>
-							<FooterLink href="https://mrdwolf.net/discord">Discord</FooterLink>
-							<FooterLink href="https://www.mrdemonwolf.com">Website</FooterLink>
-						</FooterGroup>
-						<FooterGroup label="Legal">
-							<FooterLink href={`${GITHUB_URL}/blob/main/LICENSE`}>
-								MIT License
-							</FooterLink>
-							<FooterLink to="/privacy">Privacy</FooterLink>
-							<FooterLink to="/terms">Terms</FooterLink>
-						</FooterGroup>
-					</div>
-				</div>
-
-				<p className="mt-10 max-w-2xl text-pretty text-white/55 text-xs leading-relaxed">
+			<div className="mx-auto w-full max-w-6xl px-6 py-10">
+				<p className="text-pretty text-white/45 text-xs leading-relaxed">
 					{DISCLAIMER}
 				</p>
-
-				<div className="mt-8 flex flex-col gap-3 border-white/10 border-t pt-6 text-sm text-white/55 sm:flex-row sm:items-center sm:justify-between">
+				<div className="mt-6 flex flex-col items-center justify-between gap-4 border-white/10 border-t pt-6 text-sm text-white/55 sm:flex-row">
 					<p>
 						© {new Date().getFullYear()} HowlBox by{" "}
 						<a
@@ -196,78 +156,32 @@ export function SiteFooter() {
 							MrDemonWolf, Inc.
 						</a>
 					</p>
-					<div className="flex items-center gap-4 text-white/55">
-						<span>Made with love in the pack.</span>
-						{COMMIT_SHA && (
-							<a
-								className={`text-[0.7rem] underline-offset-4 transition-colors hover:text-white hover:underline ${MONO}`}
-								href={`${GITHUB_URL}/commit/${COMMIT_SHA}`}
-								rel="noreferrer"
-								target="_blank"
-								title={`Deployed commit ${COMMIT_SHA}`}
-							>
-								{COMMIT_SHA.slice(0, 7)}
-							</a>
-						)}
-					</div>
+					<nav className="flex flex-wrap items-center justify-center gap-6">
+						<a
+							className="transition-colors hover:text-white"
+							href={GITHUB_URL}
+							rel="noreferrer"
+							target="_blank"
+						>
+							GitHub
+						</a>
+						<a
+							className="transition-colors hover:text-white"
+							href="https://mrdwolf.net/discord"
+							rel="noreferrer"
+							target="_blank"
+						>
+							Discord
+						</a>
+						<Link className="transition-colors hover:text-white" to="/privacy">
+							Privacy
+						</Link>
+						<Link className="transition-colors hover:text-white" to="/terms">
+							Terms
+						</Link>
+					</nav>
 				</div>
 			</div>
 		</footer>
-	);
-}
-
-function FooterGroup({
-	label,
-	children,
-}: {
-	label: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<div>
-			<p className={`text-[#7fd7ff] text-[0.7rem] ${MONO}`}>{label}</p>
-			<ul className="mt-4 space-y-2.5">{children}</ul>
-		</div>
-	);
-}
-
-// One link renderer for the three link shapes the footer needs: an external
-// site (href), an internal route (to), or a same-page hash target (hash).
-function FooterLink({
-	href,
-	to,
-	hash,
-	children,
-}: {
-	href?: string;
-	to?: string;
-	hash?: string;
-	children: React.ReactNode;
-}) {
-	const className =
-		"inline-flex items-center gap-1 rounded-sm text-sm text-white/55 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00ACED]/60";
-
-	if (href) {
-		return (
-			<li>
-				<a className={className} href={href} rel="noreferrer" target="_blank">
-					{children}
-					<ArrowUpRight aria-hidden className="size-3 opacity-60" />
-					<span className="sr-only">(opens in a new tab)</span>
-				</a>
-			</li>
-		);
-	}
-
-	return (
-		<li>
-			<Link
-				className={`${className} hover:underline hover:underline-offset-4`}
-				hash={hash}
-				to={hash ? "/" : to}
-			>
-				{children}
-			</Link>
-		</li>
 	);
 }
