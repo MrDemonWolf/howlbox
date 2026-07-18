@@ -242,12 +242,26 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 						label="Show badges"
 						onChange={(v) => set("badges", v)}
 					/>
-					<Toggle
-						checked={config.pronouns}
-						id="cfg-pronouns"
-						label="Show pronouns (via pronouns.alejo.io)"
-						onChange={(v) => set("pronouns", v)}
-					/>
+					<div className="grid gap-1.5">
+						<Toggle
+							checked={config.pronouns}
+							id="cfg-pronouns"
+							label="Show pronouns"
+							onChange={(v) => set("pronouns", v)}
+						/>
+						<p className="text-muted-foreground text-xs">
+							Pronoun data from{" "}
+							<a
+								className="underline hover:text-foreground"
+								href="https://pronouns.alejo.io/"
+								rel="noreferrer"
+								target="_blank"
+							>
+								pronouns.alejo.io
+							</a>
+							.
+						</p>
+					</div>
 					<Toggle
 						checked={config.timestamps}
 						id="cfg-timestamps"
