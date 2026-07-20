@@ -111,11 +111,21 @@ const boolParamOn = z
 	}, z.boolean())
 	.catch(true);
 
+// Accepts both shapes this param arrives in. First load it is the raw
+// comma string from the OBS URL. But TanStack Router re-serializes the
+// validated search back into the address bar, so the NEXT parse sees the
+// already-split array (?hide=["badbot"]) and would otherwise drop every
+// login on the round trip.
 const loginList = z
-	.preprocess(
-		(value) => (typeof value === "string" ? normalizeLoginList(value) : []),
-		z.array(z.string()),
-	)
+	.preprocess((value) => {
+		if (typeof value === "string") {
+			return normalizeLoginList(value);
+		}
+		if (Array.isArray(value)) {
+			return normalizeLoginList(value.join(","));
+		}
+		return [];
+	}, z.array(z.string()))
 	.catch([]);
 
 // TanStack Router's search parser JSON-types values: ?channel=123456
