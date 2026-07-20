@@ -103,7 +103,7 @@ one:
 | `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
 | `badgeart`     | comma-separated `set=url` or `set/version=url` pairs | Custom badge art overriding the Twitch defaults |
 | `badgegist`    | public gist id or URL                    | Custom badge art hosted in a gist (same pairs, one per line, or a JSON map) |
-| `refresh`      | minutes, `0` to `1440` (default `0`)     | Re-fetch emote and badge maps every N minutes           |
+| `refresh`      | minutes, `0` or `5` to `1440` (default `5`) | Re-fetch emote and badge maps every N minutes (`0` = off) |
 
 Invalid or missing values fall back to safe defaults; a typo in OBS
 never produces a blank overlay.
@@ -111,8 +111,9 @@ never produces a blank overlay.
 Custom badge art precedence, weakest to strongest: fetched Twitch art,
 then `badgegist`, then inline `badgeart`. A bare `set` key (no
 `/version`) covers every version of that set. The gist is fetched from
-the public GitHub API (no token); at a very short `refresh` interval,
-mind the unauthenticated 60-requests-per-hour rate limit.
+the public GitHub API (no token), which allows 60 unauthenticated
+requests per hour per IP; the `5`-minute default `refresh` (and its
+5-minute floor) keeps a gist well under that, so no tuning is needed.
 
 In OBS 31 or newer, add a Browser source with the generated URL and
 set Width and Height on the source itself (try 480 x 800). Leave

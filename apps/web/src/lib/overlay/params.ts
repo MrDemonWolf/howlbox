@@ -39,7 +39,7 @@ export const OVERLAY_DEFAULTS = {
 	animate: true,
 	badgeart: "",
 	badgegist: "",
-	refresh: 0,
+	refresh: 5,
 	pronouns: false,
 } satisfies {
 	bg: BgMode;
@@ -185,10 +185,13 @@ export const overlayParamsSchema = z.object({
 	// public GitHub gist of custom badge art (id or gist URL); fetched
 	// and merged under the inline badgeart in lib/twitch/badges.ts
 	badgegist: z.preprocess(scalarToString, z.string()).catch(""),
-	// re-fetch emote/badge maps every N minutes, cache bypassed (0 = off)
+	// re-fetch emote/badge maps every N minutes, cache bypassed. 0 = off;
+	// a 5-minute floor keeps the small upstream APIs (ivr.fi, the gist)
+	// well under their rate limits even when left on all stream.
 	refresh: z
 		.preprocess(numberish, z.coerce.number().int().min(0).max(1440))
-		.catch(0),
+		.catch(5)
+		.transform((v) => (v > 0 && v < 5 ? 5 : v)),
 });
 
 export type OverlayParams = z.infer<typeof overlayParamsSchema>;
