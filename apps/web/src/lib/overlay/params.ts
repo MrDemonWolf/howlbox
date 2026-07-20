@@ -28,6 +28,7 @@ export type Theme = (typeof THEMES)[number];
 export const OVERLAY_DEFAULTS = {
 	bg: "off",
 	theme: "wolf",
+	size: 100,
 	max: 50,
 	delay: 0,
 	fade: 0,
@@ -43,6 +44,7 @@ export const OVERLAY_DEFAULTS = {
 } satisfies {
 	bg: BgMode;
 	theme: Theme;
+	size: number;
 	max: number;
 	delay: number;
 	fade: number;
@@ -149,6 +151,11 @@ export const overlayParamsSchema = z.object({
 		.catch(undefined),
 	bg: z.enum(BG_MODES).catch("off"),
 	theme: z.enum(THEMES).catch("wolf"),
+	// text scale as a percentage of the theme's own --hb-font-size, so a
+	// theme that ships smaller type (arcade) stays proportionally smaller
+	size: z
+		.preprocess(numberish, z.coerce.number().int().min(50).max(300))
+		.catch(100),
 	max: z
 		.preprocess(numberish, z.coerce.number().int().min(1).max(200))
 		.catch(50),
