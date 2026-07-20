@@ -124,19 +124,25 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 		[cleanChannel, config],
 	);
 
+	// copy is disabled without a channel, so the button can't fire empty;
+	// the guard stays as a keyboard/programmatic backstop.
 	const copy = async () => {
 		if (!cleanChannel) {
-			toast.error("Enter your channel name first");
 			return;
 		}
 		await navigator.clipboard.writeText(url);
 		toast.success("Overlay URL copied, paste it into OBS");
 	};
 
+	// destructive: one click wipes every field. Snapshot first and hand
+	// the old config back through an Undo action on the toast.
 	const reset = () => {
+		const previous = config;
 		setConfig(DEFAULTS);
 		setImportDraft("");
-		toast.success("Reset to defaults");
+		toast.success("Reset to defaults", {
+			action: { label: "Undo", onClick: () => setConfig(previous) },
+		});
 	};
 
 	// Load an existing overlay link back into the form. Anything the
@@ -177,7 +183,9 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 			{/* left: sticky live preview + the URL it writes */}
 			<div className="flex flex-col gap-4 lg:sticky lg:top-24">
 				<div className="flex items-center justify-between">
-					<span className={`text-[#7fd7ff] text-[0.65rem] ${MONO}`}>
+					<span
+						className={`text-[0.65rem] text-[color:var(--site-brand-soft)] ${MONO}`}
+					>
 						Live preview
 					</span>
 					<span
@@ -190,7 +198,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 					animate={config.animate}
 					backdrop="checker"
 					bg={config.bg}
-					className="h-96"
+					className="h-64 sm:h-96"
 					fadeSeconds={config.fade}
 					showBadges={config.badges}
 					showPronouns={config.pronouns}
@@ -211,7 +219,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							obs browser source
 						</span>
 					</div>
-					<div className="break-all p-4 font-mono text-[#7fd7ff] text-sm leading-relaxed">
+					<div className="break-all p-4 font-mono text-[color:var(--site-brand-soft)] text-sm leading-relaxed">
 						{url}
 					</div>
 				</div>
@@ -219,15 +227,21 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				<div className="flex flex-wrap gap-2">
 					<button
 						className="hb-btn hb-btn-primary"
+						disabled={!cleanChannel}
 						onClick={copy}
 						type="button"
 					>
 						<Copy className="size-4" /> Copy URL
 					</button>
 					<a
-						className="hb-btn hb-btn-secondary"
+						aria-disabled={!cleanChannel}
+						className={cn(
+							"hb-btn hb-btn-secondary",
+							!cleanChannel && "pointer-events-none opacity-50",
+						)}
 						href={url}
 						rel="noreferrer"
+						tabIndex={cleanChannel ? undefined : -1}
 						target="_blank"
 					>
 						<ExternalLink className="size-4" /> Open preview
@@ -236,6 +250,11 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 						<RotateCcw className="size-4" /> Reset
 					</button>
 				</div>
+				{!cleanChannel && (
+					<p className="text-[color:var(--site-txt-2)] text-xs">
+						Enter your channel above to copy or open the overlay.
+					</p>
+				)}
 			</div>
 
 			{/* right: the controls, grouped */}
@@ -316,7 +335,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 									className={cn(
 										"flex min-h-11 items-center gap-2 rounded-[0.7rem] border px-3 text-left text-sm transition-colors",
 										t === config.theme
-											? "border-[#00ACED] bg-[#00ACED]/15 text-white"
+											? "border-[color:var(--site-brand)] bg-[color:var(--site-brand-tint)] text-white"
 											: "border-white/10 text-[color:var(--site-txt-2)] hover:border-white/30 hover:text-white",
 									)}
 									key={t}
@@ -356,7 +375,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							))}
 						</div>
 						<input
-							className="mt-1 h-11 w-full accent-[#00ACED]"
+							className="mt-1 h-11 w-full accent-[color:var(--site-brand)]"
 							id="cfg-size"
 							max={300}
 							min={50}
@@ -479,53 +498,81 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 					</Field>
 				</Fieldset>
 
-				{/* the long tail, folded away: most streamers never open this */}
+				{/* the long tail, folded away: most streamers never open this.
+				    Two unrelated jobs live here (swapping badge art, and how
+				    often emotes refetch), so each gets its own labeled row. */}
 				<details className="hb-card group">
 					<summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5">
-						<span className={`text-[0.65rem] text-white/60 ${MONO}`}>
-							Custom badges and cache
+						<span className="flex flex-col gap-0.5">
+							<h2 className={`text-[0.7rem] text-white/75 ${MONO}`}>
+								Advanced
+							</h2>
+							<span className="text-[color:var(--site-txt-2)] text-xs">
+								Custom badge art and how often emotes refresh
+							</span>
 						</span>
-						<ChevronDown className="size-4 text-white/40 transition-transform group-open:rotate-180" />
+						<ChevronDown className="size-4 shrink-0 text-white/40 transition-transform group-open:rotate-180" />
 					</summary>
-					<div className="flex flex-col gap-4 px-5 pt-1 pb-5">
-						<Field
-							hint="Comma-separated set=url or set/version=url pairs. Overrides the default Twitch art (all global and channel badges load out of the box)."
-							htmlFor="cfg-badgeart"
-							label="Custom badge art"
-						>
-							<Input
-								autoComplete="off"
-								className={FIELD}
-								id="cfg-badgeart"
-								onChange={(e) => set("badgeart", e.target.value)}
-								placeholder="moderator=https://example.com/mod.png"
-								value={config.badgeart}
-							/>
-						</Field>
-						<Field
-							hint="A public GitHub gist holding the same set=url pairs (one per line) or a JSON map. Edit the gist to update badges without touching this URL."
-							htmlFor="cfg-badgegist"
-							label="Badge art gist"
-						>
-							<Input
-								autoComplete="off"
-								className={FIELD}
-								id="cfg-badgegist"
-								onChange={(e) => set("badgegist", e.target.value)}
-								placeholder="https://gist.github.com/you/abc123..."
-								value={config.badgegist}
-							/>
-						</Field>
-						<NumberField
-							fallback={0}
-							hint="Re-fetches 7TV, BTTV, FFZ, and badge art mid-stream so new emotes appear without a reload. 0 turns it off."
-							id="cfg-refresh"
-							label="Refresh emote cache (minutes)"
-							max={1440}
-							min={0}
-							onCommit={(v) => set("refresh", v)}
-							value={config.refresh}
-						/>
+					<div className="flex flex-col gap-5 px-5 pt-1 pb-5">
+						<div className="flex flex-col gap-4">
+							<p className="text-[color:var(--site-txt-2)] text-xs leading-relaxed">
+								Every global and channel badge already loads on its own. Use
+								these only to swap in your own art, keyed by badge{" "}
+								<code className="text-white/70">set</code> (and optional{" "}
+								<code className="text-white/70">/version</code>).
+							</p>
+							<Field
+								hint="One or more set=url pairs, comma separated. Example above targets the moderator badge."
+								htmlFor="cfg-badgeart"
+								label="Replace badge art"
+							>
+								<Input
+									autoComplete="off"
+									className={FIELD}
+									id="cfg-badgeart"
+									onChange={(e) => set("badgeart", e.target.value)}
+									placeholder="moderator=https://example.com/mod.png"
+									value={config.badgeart}
+								/>
+							</Field>
+							<Field
+								hint="Same set=url pairs (one per line) or a JSON map, in a public gist. Edit the gist to change badges without touching this URL."
+								htmlFor="cfg-badgegist"
+								label="...or point at a GitHub gist"
+							>
+								<Input
+									autoComplete="off"
+									className={FIELD}
+									id="cfg-badgegist"
+									onChange={(e) => set("badgegist", e.target.value)}
+									placeholder="https://gist.github.com/you/abc123..."
+									value={config.badgegist}
+								/>
+							</Field>
+						</div>
+
+						<div className="border-white/5 border-t pt-4">
+							<Field
+								hint="Pulls new 7TV, BTTV, FFZ, and badge art mid-stream so fresh emotes show up without reloading OBS. Off, or every 5 to 60 minutes; a gentle interval keeps the smaller emote APIs happy."
+								htmlFor="cfg-refresh"
+								label={`Refresh emotes (${config.refresh === 0 ? "off" : `every ${config.refresh} min`})`}
+							>
+								<input
+									className="mt-1 h-11 w-full accent-[color:var(--site-brand)]"
+									id="cfg-refresh"
+									max={60}
+									min={0}
+									onChange={(e) => set("refresh", Number(e.target.value))}
+									step={5}
+									type="range"
+									value={Math.min(60, config.refresh)}
+								/>
+								<div className="flex justify-between text-[0.7rem] text-[color:var(--site-txt-2)]">
+									<span>Off</span>
+									<span>60 min</span>
+								</div>
+							</Field>
+						</div>
 					</div>
 				</details>
 			</div>
@@ -547,7 +594,7 @@ function Fieldset({
 			{/* h2: the page h1 is "Configure your overlay"; skipping to h3
 			    breaks the outline for screen readers */}
 			<div className="flex flex-col gap-1.5">
-				<h2 className={`text-[0.65rem] text-white/60 ${MONO}`}>{title}</h2>
+				<h2 className={`text-[0.7rem] text-white/75 ${MONO}`}>{title}</h2>
 				{hint && (
 					<p className="text-[color:var(--site-txt-2)] text-sm leading-relaxed">
 						{hint}
@@ -657,7 +704,12 @@ function Toggle({
 					id={id}
 					onCheckedChange={(value) => onChange(value === true)}
 				/>
-				<Label className="font-normal text-sm" htmlFor={id}>
+				{/* label fills the row so the tap/click target is 44px tall,
+				    not just the 20px box */}
+				<Label
+					className="flex min-h-11 flex-1 items-center font-normal text-sm"
+					htmlFor={id}
+				>
 					{label}
 				</Label>
 			</div>
