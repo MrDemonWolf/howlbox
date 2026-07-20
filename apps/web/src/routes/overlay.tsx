@@ -63,6 +63,7 @@ function OverlayPage() {
 			showBadges={params.badges}
 			showPronouns={params.pronouns}
 			showTimestamps={params.timestamps}
+			size={params.size}
 			status={status}
 			theme={params.theme}
 		/>

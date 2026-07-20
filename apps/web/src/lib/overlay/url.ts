@@ -8,6 +8,7 @@ export interface OverlayConfig {
 	channel: string;
 	theme: Theme;
 	bg: BgMode;
+	size: number;
 	max: number;
 	delay: number;
 	fade: number;
@@ -36,6 +37,9 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (config.bg !== OVERLAY_DEFAULTS.bg) {
 		qs.set("bg", config.bg);
+	}
+	if (config.size !== OVERLAY_DEFAULTS.size) {
+		qs.set("size", String(config.size));
 	}
 	if (config.max !== OVERLAY_DEFAULTS.max) {
 		qs.set("max", String(config.max));
