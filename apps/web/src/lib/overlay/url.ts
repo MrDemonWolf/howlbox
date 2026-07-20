@@ -1,6 +1,7 @@
 import {
 	type BgMode,
 	OVERLAY_DEFAULTS,
+	overlayParamsSchema,
 	type Theme,
 } from "@/lib/overlay/params";
 
@@ -88,4 +89,30 @@ export function overlayQuery(config: OverlayConfig): string {
 
 export function buildOverlayUrl(config: OverlayConfig): string {
 	return `${window.location.origin}${import.meta.env.BASE_URL}overlay?${overlayQuery(config)}`;
+}
+
+// Read an existing overlay link back into a config, so a streamer can
+// paste the URL already in OBS and keep editing it. Accepts a full URL,
+// a bare query string, or "?a=b". Every field runs back through
+// overlayParamsSchema, so a hand-edited or truncated link degrades to
+// defaults exactly like the overlay itself would render it. Returns null
+// only when there are no params at all (nothing to import).
+export function parseOverlayUrl(raw: string) {
+	const trimmed = raw.trim();
+	if (!trimmed) {
+		return null;
+	}
+	// take everything after the first "?" when present, else treat the
+	// whole string as the query (paste of "channel=x&theme=neon")
+	const queryStart = trimmed.indexOf("?");
+	const query = queryStart === -1 ? trimmed : trimmed.slice(queryStart + 1);
+	const search = new URLSearchParams(query.split("#")[0]);
+	// Require at least one param the overlay actually knows, so pasting
+	// unrelated text reports an error instead of silently wiping the form
+	// back to defaults.
+	const known = new Set(Object.keys(overlayParamsSchema.shape));
+	if (![...search.keys()].some((key) => known.has(key))) {
+		return null;
+	}
+	return overlayParamsSchema.parse(Object.fromEntries(search));
 }
