@@ -1,13 +1,12 @@
 import { Toaster } from "@howlbox/ui/components/sonner";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { ConfigBuilder } from "@/components/landing/config-builder";
 import {
+	BackLink,
 	DISPLAY_FONT,
-	Eyebrow,
-	MONO,
+	Kicker,
 	OBSSteps,
 	PageBackground,
 	SiteFooter,
@@ -47,22 +46,19 @@ function ConfigPage() {
 
 				<main>
 					<section className="mx-auto max-w-6xl px-6 pt-12 pb-8">
-						<Link
-							className={`mb-8 inline-flex items-center gap-1.5 text-[0.7rem] text-white/50 hover:text-white ${MONO}`}
-							to="/"
-						>
-							<ArrowLeft className="size-3.5" /> Home
-						</Link>
-						<Eyebrow>Configurator</Eyebrow>
+						<div className="mb-8">
+							<BackLink />
+						</div>
+						<Kicker index="01">Configurator</Kicker>
 						<h1
 							className={`mt-5 text-balance font-bold text-5xl tracking-[-0.02em] lg:text-6xl ${DISPLAY_FONT}`}
 						>
 							Configure your overlay
 						</h1>
-						<p className="mt-4 max-w-2xl text-pretty text-lg text-white/65 leading-relaxed">
-							Change anything and watch the preview update live. When it looks
-							right, copy the URL into an OBS browser source. No accounts,
-							nothing saved, the link is your whole setup.
+						<p className="mt-4 max-w-2xl text-pretty text-[color:var(--site-txt-2)] text-lg leading-relaxed">
+							Change anything and watch the preview update live. Already running
+							an overlay? Paste its URL at the top of the form and pick up right
+							where you left off.
 						</p>
 					</section>
 
@@ -70,7 +66,7 @@ function ConfigPage() {
 						<ConfigBuilder initialTheme={theme} />
 					</section>
 
-					<OBSSteps />
+					<OBSSteps index="02" />
 				</main>
 
 				<SiteFooter />
