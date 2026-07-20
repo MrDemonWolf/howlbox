@@ -52,13 +52,19 @@ export function MessageList({
 	fadeSeconds,
 }: MessageListProps) {
 	const surfaceTone = surfaceToneFor(theme, bg);
+	// An empty panel is a themed rectangle sitting on the stream with
+	// nothing in it. Drop the panel chrome until there is chat to hold,
+	// so a quiet channel reads as no overlay rather than a dead box.
+	// (bubble draws per message and off draws nothing, so both are
+	// already self-hiding.)
+	const showPanel = bg === "panel" && messages.length > 0;
 
 	return (
 		<div
 			className={cn(
 				"hb-messages flex min-h-0 flex-col justify-end overflow-hidden p-2 [mask-image:var(--hb-mask)]",
 				bg === "bubble" ? "gap-1.5" : "gap-1",
-				bg === "panel" && PANEL_CLASSES,
+				showPanel && PANEL_CLASSES,
 			)}
 		>
 			{messages.map((message) => (
