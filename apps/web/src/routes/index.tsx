@@ -13,10 +13,10 @@ import {
 import { DemoChat } from "@/components/landing/demo-chat";
 import {
 	DISPLAY_FONT,
-	Eyebrow,
 	MONO,
 	OBSSteps,
 	PageBackground,
+	SectionHead,
 	SiteFooter,
 	SiteHeader,
 } from "@/components/landing/site-chrome";
@@ -25,6 +25,8 @@ import { ThemeWall } from "@/components/landing/theme-wall";
 export const Route = createFileRoute("/")({
 	component: LandingPage,
 });
+
+const GITHUB_URL = "https://github.com/mrdemonwolf/howlbox";
 
 const FEATURES = [
 	{
@@ -69,6 +71,29 @@ const STATS = [
 	{ value: "0", label: "accounts, servers, or fees" },
 ];
 
+const FAQ = [
+	{
+		q: "Do I need to log in or connect my Twitch account?",
+		a: "No. HowlBox reads chat over anonymous Twitch IRC, the same way a logged-out viewer does. There is no OAuth step, no token to expire mid-stream, and nothing stored on a server.",
+	},
+	{
+		q: "Where is my configuration saved?",
+		a: "In the URL itself. Every option is a query parameter, so the link in your OBS browser source is your entire setup. Copy it to another machine and you have the same overlay.",
+	},
+	{
+		q: "Can I edit an overlay I already set up?",
+		a: "Yes. Paste the existing URL into the box at the top of the configurator and every control loads with your current settings, ready to change.",
+	},
+	{
+		q: "Does the panel sit on my stream when chat is quiet?",
+		a: "No. The panel backdrop only draws while there are messages to hold, so a silent channel shows nothing at all instead of an empty themed rectangle.",
+	},
+	{
+		q: "Can I host it myself?",
+		a: "That is the point. It is a static client-only site with no backend. Serve the build from GitHub Pages, a home server, or any static host, and nothing about your chat leaves your machine except the anonymous Twitch connection.",
+	},
+];
+
 function LandingPage() {
 	return (
 		<div className="dark min-h-svh scroll-smooth bg-[#040713] text-white antialiased">
@@ -79,11 +104,13 @@ function LandingPage() {
 
 				<main>
 					{/* hero */}
-					<section className="mx-auto grid max-w-6xl items-center gap-10 px-6 pt-20 pb-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-20">
+					<section className="mx-auto grid max-w-6xl items-center gap-10 px-6 pt-20 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-24">
 						<div className="flex flex-col items-start gap-6">
-							<div className="hb-reveal [animation-delay:40ms]">
-								<Eyebrow>Twitch chat overlay for OBS</Eyebrow>
-							</div>
+							<p
+								className={`hb-reveal text-[#7fd7ff] text-xs [animation-delay:40ms] ${MONO}`}
+							>
+								Twitch chat overlay for OBS
+							</p>
 							<h1
 								className={`hb-reveal text-balance font-bold text-6xl leading-[0.98] tracking-[-0.03em] [animation-delay:120ms] lg:text-[5.5rem] ${DISPLAY_FONT}`}
 							>
@@ -95,7 +122,7 @@ function LandingPage() {
 									Your howl.
 								</span>
 							</h1>
-							<p className="hb-reveal max-w-md text-pretty text-lg text-white/65 leading-relaxed [animation-delay:220ms]">
+							<p className="hb-reveal max-w-md text-pretty text-[color:var(--site-txt-2)] text-lg leading-relaxed [animation-delay:220ms]">
 								A themed chat overlay you host yourself. One self-contained URL,
 								no login, no third-party overlay service standing between you
 								and your chat.
@@ -113,16 +140,13 @@ function LandingPage() {
 							</div>
 
 							<div className="hb-reveal flex flex-wrap gap-3 [animation-delay:380ms]">
-								<Link
-									className="group inline-flex items-center gap-2 rounded-lg bg-[#00ACED] px-5 py-2.5 font-semibold text-[#04121f] transition-all hover:bg-[#33c1f5] hover:shadow-[0_8px_30px_rgb(0_172_237/0.4)]"
-									to="/config"
-								>
+								<Link className="hb-btn hb-btn-primary group" to="/config">
 									Build your overlay
 									<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
 								</Link>
 								<a
-									className="rounded-lg border border-white/10 px-5 py-2.5 font-medium text-white/70 transition-colors hover:border-white/30 hover:text-white"
-									href="https://github.com/mrdemonwolf/howlbox"
+									className="hb-btn hb-btn-secondary"
+									href={GITHUB_URL}
 									rel="noreferrer"
 									target="_blank"
 								>
@@ -130,12 +154,10 @@ function LandingPage() {
 								</a>
 							</div>
 
-							<div
-								className={`hb-reveal flex flex-wrap gap-x-5 gap-y-2 text-[0.72rem] text-white/65 [animation-delay:460ms] ${MONO}`}
-							>
+							<div className="hb-reveal flex flex-wrap gap-2 [animation-delay:460ms]">
 								{TRUST.map((item) => (
-									<span className="flex items-center gap-2" key={item}>
-										<span className="size-1 rounded-full bg-[#00ACED]" />
+									<span className="hb-pill" key={item}>
+										<span className="size-1.5 rounded-full bg-[#00ACED]" />
 										{item}
 									</span>
 								))}
@@ -148,20 +170,19 @@ function LandingPage() {
 						</div>
 					</section>
 
-					{/* fact band: scannable numbers, no marketese */}
-					<section className="mx-auto max-w-6xl px-6">
-						<dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 lg:grid-cols-4">
+					{/* 01 fact band: scannable numbers, no marketese */}
+					<section className="mx-auto max-w-6xl px-6 py-16">
+						<dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 							{STATS.map((stat) => (
-								<div
-									className="flex flex-col gap-1.5 bg-[#050a1a]/60 px-6 py-6"
-									key={stat.label}
-								>
+								<div className="hb-card px-6 py-6" key={stat.label}>
 									<dd
 										className={`order-first font-bold text-4xl text-white tracking-tight ${DISPLAY_FONT}`}
 									>
 										{stat.value}
 									</dd>
-									<dt className={`text-[0.68rem] text-white/60 ${MONO}`}>
+									<dt
+										className={`mt-2 text-[0.68rem] text-[color:var(--site-txt-2)] ${MONO}`}
+									>
 										{stat.label}
 									</dt>
 								</div>
@@ -169,86 +190,96 @@ function LandingPage() {
 						</dl>
 					</section>
 
-					{/* features as an editorial index */}
-					<section
-						className="mx-auto max-w-6xl px-6 pt-16 pb-24 lg:pt-24"
-						id="features"
-					>
-						<Eyebrow>Why it's different</Eyebrow>
-						<h2
-							className={`mt-5 mb-14 max-w-2xl text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
-						>
-							Built like a streamer actually needs it
-						</h2>
-						<div className="grid gap-x-12 sm:grid-cols-2">
-							{FEATURES.map((feature, index) => (
+					{/* 02 features */}
+					<section className="mx-auto max-w-6xl px-6 py-20" id="features">
+						<SectionHead
+							align="center"
+							index="01"
+							kicker="Why it's different"
+							sub="Every choice here is the one a streamer would make, not the one a SaaS dashboard would."
+							title="Built like a streamer actually needs it"
+						/>
+						<div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+							{FEATURES.map((feature) => (
 								<div
-									className="group flex gap-5 border-white/10 border-t py-7 transition-colors hover:border-[#00ACED]/40"
+									className="hb-card p-6 transition-colors hover:border-[#00ACED]/40"
 									key={feature.title}
 								>
-									<span className={`pt-1 text-[#00ACED]/70 text-xs ${MONO}`}>
-										{String(index + 1).padStart(2, "0")}
-									</span>
-									<div>
-										<h3 className="mb-2 flex items-center gap-2.5 font-semibold text-lg">
-											<feature.icon className="size-5 text-[#00ACED]" />
-											{feature.title}
-										</h3>
-										<p className="text-sm text-white/55 leading-relaxed">
-											{feature.body}
-										</p>
-									</div>
+									<feature.icon className="size-5 text-[#00ACED]" />
+									<h3 className="mt-4 mb-2 font-semibold text-lg">
+										{feature.title}
+									</h3>
+									<p className="text-[color:var(--site-txt-2)] text-sm leading-relaxed">
+										{feature.body}
+									</p>
 								</div>
 							))}
 						</div>
 					</section>
 
-					{/* theme wall */}
-					<section className="mx-auto max-w-6xl px-6 py-24" id="themes">
-						<Eyebrow>Fifteen themes</Eyebrow>
-						<h2
-							className={`mt-5 mb-4 max-w-2xl text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
-						>
-							Every theme is one query param
-						</h2>
-						<p className="mb-14 max-w-xl text-white/55 leading-relaxed">
-							These are the real surfaces, rendered live. Preview any of them in
-							the configurator, then pin your favorite with{" "}
-							<code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[#7fd7ff] text-sm">
-								?theme=
-							</code>
-							.
-						</p>
-						<ThemeWall />
+					{/* 03 theme wall */}
+					<section className="mx-auto max-w-6xl px-6 py-20" id="themes">
+						<SectionHead
+							align="center"
+							index="02"
+							kicker="Fifteen themes"
+							sub="These are the real surfaces, rendered live. Preview any of them in the configurator, then pin your favorite."
+							title="Every theme is one query param"
+						/>
+						<div className="mt-14">
+							<ThemeWall />
+						</div>
+					</section>
+
+					{/* 04 setup */}
+					<OBSSteps index="03" />
+
+					{/* 05 faq */}
+					<section className="mx-auto max-w-3xl px-6 py-20">
+						<SectionHead
+							align="center"
+							index="04"
+							kicker="Questions"
+							title="The things people ask first"
+						/>
+						<div className="mt-12 flex flex-col gap-3">
+							{FAQ.map((item) => (
+								<details className="hb-card group p-6" key={item.q}>
+									<summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-base">
+										{item.q}
+										<span
+											aria-hidden
+											className="text-2xl text-[color:var(--site-txt-2)] leading-none transition-transform group-open:rotate-45"
+										>
+											+
+										</span>
+									</summary>
+									<p className="mt-4 text-[color:var(--site-txt-2)] leading-relaxed">
+										{item.a}
+									</p>
+								</details>
+							))}
+						</div>
 					</section>
 
 					{/* cta band */}
 					<section className="mx-auto max-w-6xl px-6 py-16">
 						<div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-3xl border border-[#00ACED]/25 bg-[radial-gradient(120%_140%_at_50%_-25%,rgb(0_172_237/0.2),transparent_68%)] px-6 py-20 text-center">
-							<div className="relative flex flex-col items-center gap-6">
-								<Eyebrow>Free and open source</Eyebrow>
-								<h2
-									className={`text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
-								>
-									Live in about ninety seconds
-								</h2>
-								<p className="max-w-xl text-pretty text-white/65 leading-relaxed">
-									Pick a theme, copy the URL, paste it into an OBS browser
-									source. No account, no fee, no watermark. That is the whole
-									thing.
-								</p>
-								<Link
-									className="group inline-flex items-center gap-2 rounded-lg bg-[#00ACED] px-6 py-3 font-semibold text-[#04121f] transition-all hover:bg-[#33c1f5] hover:shadow-[0_8px_30px_rgb(0_172_237/0.45)]"
-									to="/config"
-								>
-									Open the configurator
-									<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-								</Link>
-							</div>
+							<h2
+								className={`text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
+							>
+								Live in about ninety seconds
+							</h2>
+							<p className="max-w-xl text-pretty text-[color:var(--site-txt-2)] leading-relaxed">
+								Pick a theme, copy the URL, paste it into an OBS browser source.
+								No account, no fee, no watermark. That is the whole thing.
+							</p>
+							<Link className="hb-btn hb-btn-primary group" to="/config">
+								Open the configurator
+								<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+							</Link>
 						</div>
 					</section>
-
-					<OBSSteps />
 				</main>
 
 				<SiteFooter />
