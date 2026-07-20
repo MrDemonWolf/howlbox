@@ -28,6 +28,161 @@ html:not(.hb-overlay) :focus-visible {
 	border-radius: 4px;
 }
 
+/* ---- site design system (landing + configurator only) ----
+   One token set and one control scale for the whole site, mirroring the
+   wolfwave docs structure (base / surface / elevated, hairline, single
+   brand fill, one button ladder) in HowlBox's broadcast-dark palette.
+   Prefixed --site-* on purpose: --hb-* is the overlay theme contract in
+   components/chat/overlay.css and must not be shadowed from :root. */
+html:not(.hb-overlay) {
+	--site-brand: #00aced;
+	--site-brand-soft: #7fd7ff;
+	/* label color on a brand fill: near-black clears AA on #00ACED
+	   (white on it does not) */
+	--site-brand-ink: #04121f;
+	--site-brand-tint: rgb(0 172 237 / 0.12);
+
+	--site-base: #040713;
+	--site-surface: rgb(255 255 255 / 0.04);
+	--site-elev: #070d20;
+	--site-txt-1: #f2f7ff;
+	--site-txt-2: rgb(255 255 255 / 0.64);
+	--site-line: rgb(255 255 255 / 0.1);
+
+	--site-radius: 0.7rem;
+	--site-radius-lg: 1.25rem;
+}
+
+/* ---- controls ----
+   Every button, link-button and anchor-CTA on the site renders .hb-btn
+   plus one variant. Two sizes only: default (44px, the touch target) and
+   sm (36px, dense in-form rows). Nothing else may hand-roll padding. */
+.hb-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	min-height: 2.75rem;
+	padding: 0 1.25rem;
+	border: 1px solid transparent;
+	border-radius: var(--site-radius);
+	font-size: 0.9375rem;
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: -0.01em;
+	white-space: nowrap;
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		transform 0.1s ease;
+}
+
+.hb-btn:active {
+	transform: scale(0.98);
+}
+
+.hb-btn:disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.hb-btn-sm {
+	min-height: 2.25rem;
+	padding: 0 0.85rem;
+	font-size: 0.8125rem;
+	border-radius: calc(var(--site-radius) - 0.2rem);
+}
+
+.hb-btn-primary {
+	background-color: var(--site-brand);
+	color: var(--site-brand-ink);
+}
+
+.hb-btn-primary:hover {
+	background-color: #33c1f5;
+}
+
+.hb-btn-secondary {
+	background-color: transparent;
+	border-color: var(--site-line);
+	color: var(--site-txt-1);
+}
+
+.hb-btn-secondary:hover {
+	border-color: rgb(255 255 255 / 0.32);
+	background-color: rgb(255 255 255 / 0.04);
+}
+
+.hb-btn-ghost {
+	background-color: transparent;
+	color: var(--site-txt-2);
+}
+
+.hb-btn-ghost:hover {
+	background-color: rgb(255 255 255 / 0.06);
+	color: var(--site-txt-1);
+}
+
+/* selected state for the segmented pickers (display mode, size preset) */
+.hb-btn-selected {
+	background-color: var(--site-brand-tint);
+	border-color: var(--site-brand);
+	color: #fff;
+}
+
+/* ---- surfaces ---- */
+.hb-card {
+	background-color: var(--site-surface);
+	border: 1px solid var(--site-line);
+	border-radius: var(--site-radius-lg);
+}
+
+.hb-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-height: 2rem;
+	padding: 0 0.8rem;
+	border: 1px solid var(--site-line);
+	border-radius: var(--site-radius);
+	background-color: var(--site-surface);
+	color: var(--site-txt-2);
+	font-size: 0.78rem;
+	font-weight: 500;
+}
+
+/* numbered section kicker: gives the page one spine (01 THEMES, 02 SETUP) */
+.hb-kicker {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+	padding: 0.3rem 0.85rem 0.3rem 0.3rem;
+	border: 1px solid var(--site-line);
+	border-radius: var(--site-radius);
+	background-color: var(--site-surface);
+	font-family:
+		ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--site-txt-2);
+}
+
+.hb-kicker-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.6rem;
+	height: 1.6rem;
+	border-radius: calc(var(--site-radius) - 0.2rem);
+	background-color: var(--site-brand-tint);
+	color: var(--site-brand-soft);
+	letter-spacing: 0;
+}
+
 /* ---- landing-only utilities (Tailwind @utility so they compose with
    variants and are generated on demand); the overlay never uses these.
    Per-theme variables stay in components/chat/overlay.css: they are the

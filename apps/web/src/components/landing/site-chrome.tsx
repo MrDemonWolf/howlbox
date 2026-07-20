@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { PawPrint } from "lucide-react";
+import { ArrowLeft, PawPrint } from "lucide-react";
 
 import "@fontsource-variable/bricolage-grotesque/index.css";
 
@@ -14,7 +14,8 @@ export const DISPLAY_FONT =
 export const MONO =
 	"font-mono uppercase tracking-[0.22em] [font-family:ui-monospace,'SF_Mono',SFMono-Regular,Menlo,Consolas,monospace]";
 
-// section kicker: a cerulean tick + mono label
+// section kicker: a cerulean tick + mono label. Used by the legal pages,
+// which have no numbered spine of their own.
 export function Eyebrow({ children }: { children: React.ReactNode }) {
 	return (
 		<span
@@ -23,6 +24,70 @@ export function Eyebrow({ children }: { children: React.ReactNode }) {
 			<span className="h-px w-7 bg-[#00ACED]" />
 			{children}
 		</span>
+	);
+}
+
+// Numbered kicker chip. Every landing section carries one, so the page
+// reads as a single indexed spine: 01 WHY IT'S DIFFERENT, 02 THEMES, and
+// so on. Styling lives in index.css (.hb-kicker).
+export function Kicker({
+	index,
+	children,
+}: {
+	index: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<span className="hb-kicker">
+			<span className="hb-kicker-num">{index}</span>
+			{children}
+		</span>
+	);
+}
+
+// The one section header on the site: kicker, title, optional sub. Every
+// section uses it so vertical rhythm and type scale cannot drift.
+export function SectionHead({
+	index,
+	kicker,
+	title,
+	sub,
+	align = "left",
+}: {
+	index: string;
+	kicker: string;
+	title: React.ReactNode;
+	sub?: React.ReactNode;
+	align?: "left" | "center";
+}) {
+	const centered = align === "center";
+
+	return (
+		<div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
+			<Kicker index={index}>{kicker}</Kicker>
+			<h2
+				className={`mt-5 text-balance font-bold text-4xl tracking-[-0.02em] lg:text-5xl ${DISPLAY_FONT}`}
+			>
+				{title}
+			</h2>
+			{sub ? (
+				<p className="mt-4 text-pretty text-[color:var(--site-txt-2)] text-lg leading-relaxed">
+					{sub}
+				</p>
+			) : null}
+		</div>
+	);
+}
+
+// Shared "back to home" affordance for the config and legal routes.
+export function BackLink() {
+	return (
+		<Link
+			className={`inline-flex items-center gap-1.5 text-[0.7rem] text-white/50 transition-colors hover:text-white ${MONO}`}
+			to="/"
+		>
+			<ArrowLeft className="size-3.5" /> Home
+		</Link>
 	);
 }
 
@@ -50,27 +115,33 @@ export function SiteHeader() {
 					<PawPrint className="size-5 text-[#00ACED]" />
 					HowlBox
 				</Link>
-				<nav
-					className={`flex flex-wrap items-center justify-end gap-6 text-white/60 text-xs max-sm:gap-3 ${MONO}`}
-				>
-					<Link className="hover:text-white" hash="themes" to="/">
+				{/* the mono machine voice stays on the text links; the CTA is a
+				    real button from the shared ladder, so it must not inherit
+				    the nav's uppercase tracking */}
+				<nav className="flex flex-wrap items-center justify-end gap-5 max-sm:gap-3">
+					<Link
+						className={`text-white/60 text-xs transition-colors hover:text-white ${MONO}`}
+						hash="themes"
+						to="/"
+					>
 						Themes
 					</Link>
-					<Link className="hover:text-white" hash="setup" to="/">
+					<Link
+						className={`text-white/60 text-xs transition-colors hover:text-white ${MONO}`}
+						hash="setup"
+						to="/"
+					>
 						Setup
 					</Link>
 					<a
-						className="hover:text-white"
+						className={`text-white/60 text-xs transition-colors hover:text-white ${MONO}`}
 						href={GITHUB_URL}
 						rel="noreferrer"
 						target="_blank"
 					>
 						GitHub
 					</a>
-					<Link
-						className="rounded-full border border-[#00ACED]/40 bg-[#00ACED]/10 px-3.5 py-1.5 text-[#7fd7ff] transition-colors hover:border-[#00ACED] hover:text-white"
-						to="/config"
-					>
+					<Link className="hb-btn hb-btn-sm hb-btn-primary" to="/config">
 						Configure
 					</Link>
 				</nav>
@@ -98,30 +169,33 @@ const SETUP_STEPS = [
 	},
 ];
 
-export function OBSSteps() {
+export function OBSSteps({ index = "04" }: { index?: string }) {
 	return (
 		<section className="mx-auto max-w-6xl px-6 py-24" id="setup">
-			<Eyebrow>Setup</Eyebrow>
-			<h2
-				className={`mt-5 mb-14 text-balance font-bold text-4xl tracking-tight lg:text-5xl ${DISPLAY_FONT}`}
-			>
-				Into OBS in four steps
-			</h2>
-			<ol className="grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:grid-cols-2 lg:grid-cols-4">
-				{SETUP_STEPS.map((step, index) => (
+			<SectionHead
+				align="center"
+				index={index}
+				kicker="Setup"
+				sub="Four steps, no account, nothing to install. The URL is the whole product."
+				title="Into OBS in four steps"
+			/>
+			<ol className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				{SETUP_STEPS.map((step, stepIndex) => (
 					<li
-						className="group relative bg-[#050a1a]/60 p-6 transition-colors hover:bg-white/[0.03]"
+						className="hb-card p-6 transition-colors hover:border-[#00ACED]/40"
 						key={step.title}
 					>
-						<span className={`text-[#00ACED] text-xs ${MONO}`}>
-							{String(index + 1).padStart(2, "0")}
+						<span className="hb-kicker-num text-xs">
+							{String(stepIndex + 1).padStart(2, "0")}
 						</span>
 						<h3 className="mt-4 mb-2 font-semibold text-lg">{step.title}</h3>
-						<p className="text-sm text-white/55 leading-relaxed">{step.body}</p>
+						<p className="text-[color:var(--site-txt-2)] text-sm leading-relaxed">
+							{step.body}
+						</p>
 					</li>
 				))}
 			</ol>
-			<p className={`mt-6 text-white/55 text-xs ${MONO}`}>
+			<p className={`mt-6 text-center text-white/45 text-xs ${MONO}`}>
 				Power users: every node carries a stable hb-* class for the OBS Custom
 				CSS field.
 			</p>
