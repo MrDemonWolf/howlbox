@@ -117,9 +117,9 @@ export function gistIdFrom(ref: string): string | null {
 // gist API needs no token for public gists and sends open CORS, so it
 // keeps HowlBox client-only. Every file in the gist is parsed and
 // merged. Bad ref or dead gist resolves to [], never fatal.
-// ponytail: unauthenticated gist API is 60 req/hr/IP; a sub-minute
-// ?refresh could exhaust it. Fine at the default (no refresh) and any
-// sane interval; document the ceiling rather than add auth.
+// ponytail: unauthenticated gist API is 60 req/hr/IP. ?refresh has a
+// 5-minute floor, so a gist refetches at most 12x/hr, well under the
+// ceiling even on a shared IP. Document the ceiling rather than add auth.
 export async function fetchGistBadgeArt(
 	ref: string,
 	force = false,
