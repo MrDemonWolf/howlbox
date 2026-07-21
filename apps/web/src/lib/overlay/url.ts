@@ -4,6 +4,7 @@ import {
 	overlayParamsSchema,
 	type Theme,
 } from "@/lib/overlay/params";
+import type { AvatarMode, ChatEventKind } from "@/lib/twitch/types";
 
 export interface OverlayConfig {
 	channel: string;
@@ -24,6 +25,8 @@ export interface OverlayConfig {
 	badgeart: string;
 	badgegist: string;
 	refresh: number;
+	events: ChatEventKind[];
+	avatars: AvatarMode;
 }
 
 // Serialize a config into the overlay query string, dropping any value
@@ -83,6 +86,12 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (config.refresh !== OVERLAY_DEFAULTS.refresh) {
 		qs.set("refresh", String(config.refresh));
+	}
+	if (config.events.length > 0) {
+		qs.set("events", config.events.join(","));
+	}
+	if (config.avatars !== OVERLAY_DEFAULTS.avatars) {
+		qs.set("avatars", config.avatars);
 	}
 	return qs.toString();
 }
