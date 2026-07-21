@@ -10,12 +10,14 @@ import { overlayQuery } from "@/lib/overlay/url";
 import { downscaleAvatar } from "@/lib/twitch/avatars";
 import {
 	cheerTier,
+	createGiftDeduper,
 	describeCommunitySub,
 	describeFirstChat,
 	describeRaid,
 	describeResub,
 	describeSub,
 	describeSubGift,
+	gifterKey,
 	isStandaloneEvent,
 	planLabel,
 } from "@/lib/twitch/events";
@@ -84,6 +86,59 @@ describe("event lines", () => {
 		expect(isStandaloneEvent("cheer")).toBe(false);
 		expect(isStandaloneEvent("first")).toBe(false);
 		expect(isStandaloneEvent("announce")).toBe(false);
+	});
+});
+
+// Sequence captured live from midnightsumo: one submysterygift for five,
+// then exactly five subgift notices from the same gifter. Before the
+// deduper this rendered six rows for one gift bomb.
+describe("mass gift dedupe", () => {
+	test("the per-recipient notices behind a batch are swallowed", () => {
+		const gifts = createGiftDeduper();
+		const key = gifterKey("1234", "nonegoodleft");
+		const t = 1_000_000;
+
+		gifts.announce(key, 5, t);
+		const recipients = [
+			"zosajmp",
+			"Scaleta",
+			"rod2ak",
+			"Milhouse219",
+			"littlebigcampus",
+		];
+		const claimed = recipients.map((_, i) => gifts.claim(key, t + i * 40));
+		expect(claimed).toEqual([true, true, true, true, true]);
+
+		// a sixth gift is not part of the batch and must render
+		expect(gifts.claim(key, t + 300)).toBe(false);
+	});
+
+	test("a standalone gift from the same person still renders", () => {
+		const gifts = createGiftDeduper();
+		const key = gifterKey("1234", "nonegoodleft");
+		expect(gifts.claim(key, 5_000)).toBe(false);
+	});
+
+	test("a batch that never delivers expires instead of eating later gifts", () => {
+		const gifts = createGiftDeduper(60_000);
+		const key = gifterKey("1234", "nonegoodleft");
+		gifts.announce(key, 100, 0);
+		expect(gifts.claim(key, 1_000)).toBe(true);
+		// long after the bomb, an unrelated gift from the same user renders
+		expect(gifts.claim(key, 120_000)).toBe(false);
+	});
+
+	test("gifters do not consume each other's batches", () => {
+		const gifts = createGiftDeduper();
+		gifts.announce(gifterKey("1", "alice"), 2, 0);
+		expect(gifts.claim(gifterKey("2", "bob"), 10)).toBe(false);
+		expect(gifts.claim(gifterKey("1", "alice"), 10)).toBe(true);
+	});
+
+	test("anonymous gifters share one bucket", () => {
+		const gifts = createGiftDeduper();
+		gifts.announce(gifterKey(undefined, undefined), 1, 0);
+		expect(gifts.claim(gifterKey(undefined, undefined), 10)).toBe(true);
 	});
 });
 
