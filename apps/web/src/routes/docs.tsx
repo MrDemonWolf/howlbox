@@ -79,7 +79,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "events",
 					values: "comma-separated: sub, cheer, raid, first, announce, or all",
-					body: "Which events to show. Anonymous IRC carries all of these, so none of it needs an account: sub covers new subs, resubs, single and mass gifts, and Prime upgrades; cheer shows bits with the matching tier art; raid shows the raider and their viewer count; first marks a chatter's first message in the channel, and returning chatters; announce marks the /announce highlight from mods. Unknown values are dropped, and all is shorthand for every kind. A sub or raid row is a whole sentence with no separate name header, while a cheer, first message or announcement decorates the message it came with. Default empty, meaning no events.",
+					body: "Which events to show. Anonymous IRC carries all of these, so none of it needs an account: sub covers new subs, resubs, single and mass gifts, and Prime upgrades; cheer shows bits with the matching tier art; raid shows the raider and their viewer count; first marks a chatter's first message in the channel, and returning chatters; announce marks the /announce highlight from mods. Unknown values are dropped, and all is shorthand for every kind. A sub or raid row is a whole sentence with no separate name header, while a cheer, first message or announcement decorates the message it came with. A mass gift collapses to a single row: Twitch also sends one notice per recipient, and showing those would mean a hundred rows for one gift bomb. Default empty, meaning no events.",
 				},
 			],
 		},
