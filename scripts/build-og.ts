@@ -22,12 +22,13 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const CHROME =
 	process.env.CHROME ??
 	"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const PUBLIC = join(ROOT, "apps/web/public");
 const FONT = join(
 	ROOT,
@@ -168,7 +169,7 @@ try {
 				"--force-device-scale-factor=1",
 				"--window-size=1200,630",
 				`--screenshot=${join(PUBLIC, card.file)}`,
-				`file://${page}`,
+				pathToFileURL(page).href,
 			],
 			{ stdout: "pipe", stderr: "pipe" },
 		);

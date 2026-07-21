@@ -222,9 +222,12 @@ color readability flips direction there).
 ## Deploy
 
 GitHub Pages via `.github/workflows/deploy.yml`: bun build with
-`BASE_PATH=/howlbox/` (vite `base` + router `basepath` read it),
-`404.html` copy of `index.html` for the `/overlay` route. Also runs
-anywhere static (Coolify) by serving `apps/web/dist`.
+`BASE_PATH=/howlbox/` (vite `base` + router `basepath` read it). The
+workflow no longer copies `index.html` to `404.html`; the seo plugin
+writes a noindexed `404.html` during the build, along with a real
+`index.html` per route so `/overlay` and the rest resolve with a 200
+instead of the SPA fallback's 404 status. Also runs anywhere static
+(Coolify) by serving `apps/web/dist`.
 
 ## Verifying changes
 
