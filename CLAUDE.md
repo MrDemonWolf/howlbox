@@ -84,7 +84,13 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   behind the mod delay. Cheermote art is a pure URL off
   static-cdn.jtvnw.net for the global tiers (1/100/1000/5000/10000);
   channel-custom cheer prefixes would need Helix, so they stay text.
-  `events.test.ts` (`bun test`) covers the wording and tier bucketing.
+  A mass gift MUST collapse to one row: Twitch sends one
+  `submysterygift` announcing the count and then one `subgift` per
+  recipient, so rendering both means 101 rows for a 100-gift bomb.
+  `createGiftDeduper` swallows the per-recipient notices behind their
+  batch line (keyed by gifter, counted down, time-boxed so a standalone
+  later gift still renders). `events.test.ts` (`bun test`) covers the
+  wording, tier bucketing and the real captured gift-bomb sequence.
 - `apps/web/src/lib/twitch/avatars.ts` - profile pictures via api.ivr.fi
   (same tokenless open-CORS host as the badges; Helix needs a token).
   Per-USER like pronouns, so same lazy warm/resolve shape, but BATCHED:
