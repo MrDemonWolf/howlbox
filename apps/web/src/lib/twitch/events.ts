@@ -178,6 +178,33 @@ export function describeAnnouncement(): ChatEvent {
 	return { kind: "announce", text: "Announcement" };
 }
 
+// The tags a normal PRIVMSG can carry that turn it into an event row.
+export interface MessageFlags {
+	isCheer: boolean;
+	bits: number;
+	isFirst: boolean;
+	isReturningChatter: boolean;
+}
+
+// Cheers and first-time chatters are tags on an ordinary message rather
+// than USERNOTICE, so this is the whole decision for that path. Pure, so
+// it is checkable without waiting for someone to actually cheer: bits
+// are rare enough that a live channel can go an hour without one.
+export function decorateMessage(
+	flags: MessageFlags,
+	kinds: ReadonlySet<ChatEventKind>,
+): ChatEvent | undefined {
+	// a cheer outranks a first message: it is the rarer signal, and the
+	// bits amount is what the streamer actually wants to see
+	if (kinds.has("cheer") && flags.isCheer && flags.bits > 0) {
+		return describeCheer(flags.bits);
+	}
+	if (kinds.has("first") && (flags.isFirst || flags.isReturningChatter)) {
+		return describeFirstChat(!flags.isFirst);
+	}
+	return undefined;
+}
+
 // isFirst and isReturningChatter are separate tags; first wins when both
 // somehow arrive, since it is the rarer and more interesting one.
 export function describeFirstChat(isReturning: boolean): ChatEvent {

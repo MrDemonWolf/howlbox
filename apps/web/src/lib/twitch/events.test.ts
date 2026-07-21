@@ -11,6 +11,7 @@ import { downscaleAvatar } from "@/lib/twitch/avatars";
 import {
 	cheerTier,
 	createGiftDeduper,
+	decorateMessage,
 	describeCommunitySub,
 	describeFirstChat,
 	describeRaid,
@@ -139,6 +140,84 @@ describe("mass gift dedupe", () => {
 		const gifts = createGiftDeduper();
 		gifts.announce(gifterKey(undefined, undefined), 1, 0);
 		expect(gifts.claim(gifterKey(undefined, undefined), 10)).toBe(true);
+	});
+});
+
+// Bits are rare enough that 30 top channels went seven minutes without
+// one, so the cheer path is pinned down here rather than by waiting.
+describe("message decoration", () => {
+	const ALL = new Set<ChatEventKind>(EVENT_KINDS);
+	const plain = {
+		isCheer: false,
+		bits: 0,
+		isFirst: false,
+		isReturningChatter: false,
+	};
+
+	test("a cheer becomes a cheer row with its tier art", () => {
+		const ev = decorateMessage({ ...plain, isCheer: true, bits: 500 }, ALL);
+		expect(ev?.kind).toBe("cheer");
+		expect(ev?.text).toBe("cheered 500 bits");
+		expect(ev?.cheermoteUrl).toBe(
+			"https://static-cdn.jtvnw.net/bits/dark/animated/100/2.gif",
+		);
+	});
+
+	test("one bit is singular", () => {
+		expect(
+			decorateMessage({ ...plain, isCheer: true, bits: 1 }, ALL)?.text,
+		).toBe("cheered 1 bit");
+	});
+
+	test("a cheer tagged with zero bits is not a cheer", () => {
+		expect(
+			decorateMessage({ ...plain, isCheer: true, bits: 0 }, ALL),
+		).toBeUndefined();
+	});
+
+	test("first and returning chatters are distinguished", () => {
+		expect(decorateMessage({ ...plain, isFirst: true }, ALL)?.text).toBe(
+			"First message in this channel",
+		);
+		expect(
+			decorateMessage({ ...plain, isReturningChatter: true }, ALL)?.text,
+		).toBe("Returning chatter");
+	});
+
+	test("a cheer from a first-time chatter reports the bits", () => {
+		expect(
+			decorateMessage(
+				{ isCheer: true, bits: 100, isFirst: true, isReturningChatter: false },
+				ALL,
+			)?.kind,
+		).toBe("cheer");
+	});
+
+	test("an ordinary message decorates nothing", () => {
+		expect(decorateMessage(plain, ALL)).toBeUndefined();
+	});
+
+	test("kinds that were not requested stay off", () => {
+		const onlyRaid = new Set<ChatEventKind>(["raid"]);
+		expect(
+			decorateMessage({ ...plain, isCheer: true, bits: 500 }, onlyRaid),
+		).toBeUndefined();
+		expect(
+			decorateMessage({ ...plain, isFirst: true }, onlyRaid),
+		).toBeUndefined();
+		// and each kind can be enabled on its own
+		expect(
+			decorateMessage(
+				{ ...plain, isCheer: true, bits: 500 },
+				new Set<ChatEventKind>(["cheer"]),
+			)?.kind,
+		).toBe("cheer");
+		expect(
+			decorateMessage(
+				{ ...plain, isFirst: true },
+				new Set<ChatEventKind>(["first"]),
+			)?.kind,
+		).toBe("first");
 	});
 });
 
