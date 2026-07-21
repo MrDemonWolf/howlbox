@@ -29,49 +29,49 @@ export const Route = createFileRoute("/")({
 
 const GITHUB_URL = "https://github.com/mrdemonwolf/howlbox";
 
-const TRUST = ["Free forever", "MIT open source", "No account, no keys"];
+const TRUST = ["MIT licensed", "No account", "Runs on your host"];
 
 // fact band: the numbers a self-hosting streamer actually shops on
 const STATS = [
-	{ value: "15", label: "themes, one query param each" },
-	{ value: "3", label: "display modes: text, panel, bubble" },
-	{ value: "4", label: "emote platforms, merged per channel" },
+	{ value: "15", label: "themes" },
+	{ value: "3", label: "display modes" },
+	{ value: "4", label: "emote sources, merged per channel" },
 	{ value: "0", label: "accounts, servers, or fees" },
 ];
 
 const AUDIENCES = [
 	{
 		icon: Palette,
-		title: "Streamers who want it to match",
-		body: "Fifteen finished looks, from wolf glass to Win95 to pixel arcade. Pick one, and chat stops looking like a stock widget bolted onto your scene.",
+		title: "You want chat to match your scene",
+		body: "Fifteen finished looks: wolf glass, Win95, Windows XP, Xbox, CRT terminal, synthwave, pixel arcade, kawaii pastel. Swap one with a query param.",
 	},
 	{
 		icon: MonitorPlay,
-		title: "Tinkerers who want the knobs",
-		body: "Every node carries a stable hb-* class, so the OBS Custom CSS field is a real escape hatch. Change anything the params do not cover.",
+		title: "You want the knobs",
+		body: "Every element carries a stable hb-* class, so the OBS Custom CSS field reaches anything the parameters miss. Theme variables are overridable the same way, so you can keep a preset and change one color.",
 	},
 	{
 		icon: ShieldCheck,
-		title: "Self-hosters who want no third party",
-		body: "A static client-only site with no backend. Serve it from GitHub Pages or a home server; nothing about your chat leaves your machine except the anonymous Twitch connection.",
+		title: "You do not want a third party",
+		body: "Static files, no backend. Serve them from GitHub Pages, a home server, or a folder on the streaming box.",
 	},
 ];
 
 const SUPPORT = [
 	{
 		icon: Timer,
-		title: "Mod-friendly",
-		body: "Deleted messages, timeouts, and bans vanish instantly. An optional delay holds non-mod messages so moderation lands first.",
+		title: "Moderation lands first",
+		body: "Deletes, timeouts, and bans clear the overlay immediately. Set delay=10 and non-mod messages wait ten seconds before rendering, so a mod usually beats them to it.",
 	},
 	{
 		icon: Zap,
-		title: "OBS-optimized",
-		body: "Transparent from first paint, zero blur filters, event-driven reconnects that survive hidden-source throttling.",
+		title: "Built for a browser source",
+		body: "Transparent on the first paint, before React runs. No blur filters anywhere, which matters on CPU-rendered setups. Reconnects fire on visibility and network events rather than a timer, because OBS throttles timers in hidden sources.",
 	},
 	{
 		icon: Smile,
-		title: "Every emote",
-		body: "Native Twitch emotes plus 7TV, BTTV, and FrankerFaceZ, resolved per channel and cached.",
+		title: "Emotes from four places",
+		body: "Twitch, 7TV (including zero-width overlays), BTTV, and FrankerFaceZ, resolved per channel and cached in your browser.",
 	},
 ];
 
@@ -113,6 +113,10 @@ const FAQ = [
 	{
 		q: "Do I need to log in or connect my Twitch account?",
 		a: "No. HowlBox reads chat over anonymous Twitch IRC, the same way a logged-out viewer does. There is no OAuth step, no token to expire mid-stream, and nothing stored on a server.",
+	},
+	{
+		q: "What can it not do?",
+		a: "Anything Twitch gates behind a token. It cannot send messages, time anyone out, read your mod queue, or see subs, follows, and bits, because those arrive over EventSub and EventSub needs an authenticated app. It also has no chat history: IRC gives you messages from the moment you connect, so an empty channel is an empty overlay.",
 	},
 	{
 		q: "Where is my configuration saved?",
@@ -171,16 +175,21 @@ function LandingPage() {
 							Twitch chat overlay for OBS
 						</p>
 						<h1 className="hb-reveal hb-display text-balance text-5xl [animation-delay:120ms] lg:text-7xl">
-							Your chat.
-							<br />
-							Your colors.
-							<br />
-							<span className="hb-text-brand">Your howl.</span>
+							{/* block spans rather than <br>: line breaks inside a
+						    heading are announced as one run-on string */}
+							<span className="block">The whole overlay</span>
+							<span className="block">
+								is <span className="hb-text-brand">one URL</span>
+							</span>
 						</h1>
 						<p className="hb-reveal hb-text-2 max-w-md text-pretty text-lg leading-relaxed [animation-delay:220ms]">
-							A themed chat overlay you host yourself. One self-contained URL,
-							no login, no third-party overlay service standing between you and
-							your chat.
+							Paste it into an OBS browser source and you are done. HowlBox
+							reads Twitch chat the way a logged-out viewer does, so there is no
+							account, no OAuth app, and no server.
+						</p>
+						<p className="hb-reveal hb-text-2 max-w-md text-pretty leading-relaxed [animation-delay:250ms]">
+							That cuts both ways. It can never post, ban, or read your mod
+							queue.
 						</p>
 
 						{/* the whole config is one URL: say so, in the machine voice */}
@@ -196,7 +205,7 @@ function LandingPage() {
 
 						<div className="hb-reveal flex flex-wrap gap-3 [animation-delay:380ms]">
 							<Link className="hb-btn hb-btn-primary group" to="/config">
-								Build your overlay
+								Build your URL
 								<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
 							</Link>
 							<a
@@ -205,7 +214,7 @@ function LandingPage() {
 								rel="noreferrer"
 								target="_blank"
 							>
-								Star on GitHub
+								Read the source
 							</a>
 						</div>
 
@@ -247,8 +256,8 @@ function LandingPage() {
 					align="center"
 					index="01"
 					kicker="Who it's for"
-					sub="Every choice here is the one a streamer would make, not the one a SaaS dashboard would."
-					title="Built like a streamer actually needs it"
+					sub="Three reasons people pick a self-hosted overlay over a hosted one."
+					title="Three people this is for"
 				/>
 				<div className="mt-14 grid gap-4 lg:grid-cols-3">
 					{AUDIENCES.map((item) => (
@@ -278,7 +287,7 @@ function LandingPage() {
 					align="center"
 					index="02"
 					kicker="Fifteen themes"
-					sub="These are the real surfaces, rendered live. Preview any of them in the configurator, then pin your favorite."
+					sub="Rendered live, not screenshotted. Click one to open the builder with it selected."
 					title="Every theme is one query param"
 				/>
 				<div className="mt-14">
@@ -329,8 +338,8 @@ function LandingPage() {
 					align="center"
 					index="04"
 					kicker="How it compares"
-					sub="Against a hosted overlay service and against the chat dock OBS already gives you."
-					title="What you give up, and what you don't"
+					sub="Against a hosted overlay service, and against the chat dock OBS already ships."
+					title="What you trade away"
 				/>
 				<div className="hb-card mt-14 overflow-x-auto">
 					<table className="w-full min-w-[36rem] border-collapse text-left">
@@ -382,8 +391,8 @@ function LandingPage() {
 				<SectionHead
 					index="06"
 					kicker="Privacy"
-					sub="There is no server to trust, because there is no server."
-					title="Nothing to leak"
+					sub="Four things worth knowing before you paste a URL into your scene."
+					title="Nothing to leak, because nothing is stored"
 				/>
 				<ul className="hb-text-2 mt-10 grid gap-4 sm:grid-cols-2">
 					{[
@@ -442,17 +451,25 @@ function LandingPage() {
 			{/* cta */}
 			<Band tone="base">
 				<div className="hb-card flex flex-col items-center gap-6 px-6 py-20 text-center">
+					{/* the brand line lands here, at the end, rather than standing
+					    in for the headline the page actually needs up top */}
 					<h2 className="hb-display text-balance text-4xl lg:text-5xl">
-						Live in about ninety seconds
+						Your chat. Your colors.{" "}
+						<span className="hb-text-brand">Your howl.</span>
 					</h2>
 					<p className="hb-text-2 max-w-xl text-pretty leading-relaxed">
-						Pick a theme, copy the URL, paste it into an OBS browser source. No
-						account, no fee, no watermark. That is the whole thing.
+						Pick a theme in the builder, copy the URL it writes, paste it into a
+						browser source.
 					</p>
-					<Link className="hb-btn hb-btn-primary group" to="/config">
-						Open the configurator
-						<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-					</Link>
+					<div className="flex flex-wrap justify-center gap-3">
+						<Link className="hb-btn hb-btn-primary group" to="/config">
+							Build your URL
+							<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+						</Link>
+						<Link className="hb-btn hb-btn-secondary" to="/docs">
+							Read the parameter reference
+						</Link>
+					</div>
 				</div>
 			</Band>
 		</SiteShell>
