@@ -9,7 +9,7 @@ import {
 	ExternalLink,
 	RotateCcw,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { OverlayPreview } from "@/components/landing/overlay-preview";
@@ -148,11 +148,11 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 	// Load an existing overlay link back into the form. Anything the
 	// schema rejects lands on its default, exactly as the overlay would
 	// have rendered it, so a stale or hand-edited link still imports.
-	const importUrl = () => {
-		const parsed = parseOverlayUrl(importDraft);
+	const importUrl = (raw = importDraft) => {
+		const parsed = parseOverlayUrl(raw);
 		if (!parsed) {
 			toast.error("That does not look like an overlay URL");
-			return;
+			return false;
 		}
 		setConfig({
 			channel: parsed.channel ?? "",
@@ -176,6 +176,19 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 		});
 		setImportDraft("");
 		toast.success("Loaded, every control now matches that link");
+		return true;
+	};
+
+	// Pasting a real overlay URL is unambiguous, so skip the Load click.
+	// Anything that does not parse falls through to a normal paste, which
+	// keeps the button meaningful for hand-typed or edited links.
+	const importOnPaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+		const pasted = event.clipboardData.getData("text").trim();
+		if (!parseOverlayUrl(pasted)) {
+			return;
+		}
+		event.preventDefault();
+		importUrl(pasted);
 	};
 
 	return (
@@ -184,7 +197,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 			<div className="flex flex-col gap-4 lg:sticky lg:top-24">
 				<div className="flex items-center justify-between">
 					<span
-						className={`text-[0.65rem] text-[color:var(--site-brand-soft)] ${MONO}`}
+						className={`text-[0.65rem] text-[color:var(--site-brand-text)] ${MONO}`}
 					>
 						Live preview
 					</span>
@@ -208,8 +221,8 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				/>
 
 				{/* terminal-style readout: the whole config, as one URL */}
-				<div className="overflow-hidden rounded-xl border border-white/10 bg-black/50">
-					<div className="flex items-center gap-2 border-white/5 border-b px-3 py-2.5">
+				<div className="hb-hairline overflow-hidden rounded-xl border bg-[color:var(--site-surface)]">
+					<div className="hb-hairline flex items-center gap-2 border-b px-3 py-2.5">
 						<span className="size-2.5 rounded-full bg-[#ff5f57]" />
 						<span className="size-2.5 rounded-full bg-[#febc2e]" />
 						<span className="size-2.5 rounded-full bg-[#28c840]" />
@@ -219,7 +232,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							obs browser source
 						</span>
 					</div>
-					<div className="break-all p-4 font-mono text-[color:var(--site-brand-soft)] text-sm leading-relaxed">
+					<div className="break-all p-4 font-mono text-[color:var(--site-brand-text)] text-sm leading-relaxed">
 						{url}
 					</div>
 				</div>
@@ -261,11 +274,13 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 			<div className="flex flex-col gap-4">
 				{/* import: the fastest path for anyone who already has an overlay */}
 				<Fieldset
-					hint="Already have an overlay in OBS? Paste that URL to load every setting here and keep editing."
+					hint="Already have an overlay in OBS? Paste that URL here and every setting loads on its own."
+					hintId="import-hint"
 					title="Start from an existing link"
 				>
 					<div className="flex flex-col gap-2 sm:flex-row">
 						<Input
+							aria-describedby="import-hint"
 							aria-label="Existing overlay URL"
 							autoComplete="off"
 							className={cn(FIELD, "flex-1")}
@@ -276,13 +291,14 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 									importUrl();
 								}
 							}}
+							onPaste={importOnPaste}
 							placeholder="https://.../overlay?channel=you&theme=neon"
 							value={importDraft}
 						/>
 						<button
 							className="hb-btn hb-btn-secondary"
 							disabled={!importDraft.trim()}
-							onClick={importUrl}
+							onClick={() => importUrl()}
 							type="button"
 						>
 							<ClipboardPaste className="size-4" /> Load
@@ -335,15 +351,15 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 									className={cn(
 										"flex min-h-11 items-center gap-2 rounded-[0.7rem] border px-3 text-left text-sm transition-colors",
 										t === config.theme
-											? "border-[color:var(--site-brand)] bg-[color:var(--site-brand-tint)] text-white"
-											: "border-white/10 text-[color:var(--site-txt-2)] hover:border-white/30 hover:text-white",
+											? "border-[color:var(--site-brand)] bg-[color:var(--site-brand-tint)] text-[color:var(--site-txt-1)]"
+											: "hb-hairline-strong text-[color:var(--site-txt-2)] hover:border-[color:var(--site-brand)] hover:text-[color:var(--site-txt-1)]",
 									)}
 									key={t}
 									onClick={() => set("theme", t)}
 									type="button"
 								>
 									<span
-										className="size-4 shrink-0 rounded-full border border-white/20"
+										className="hb-hairline size-4 shrink-0 rounded-full border"
 										style={{ background: THEME_SWATCH[t] }}
 									/>
 									<span className="truncate">{THEME_LABEL[t]}</span>
@@ -398,7 +414,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							<>
 								Pronoun data from{" "}
 								<a
-									className="underline hover:text-white"
+									className="underline hover:text-[color:var(--site-txt-1)]"
 									href="https://pronouns.alejo.io/"
 									rel="noreferrer"
 									target="_blank"
@@ -504,25 +520,27 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				<details className="hb-card group">
 					<summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5">
 						<span className="flex flex-col gap-0.5">
-							<h2 className={`text-[0.7rem] text-white/75 ${MONO}`}>
+							<h2 className="font-semibold text-[color:var(--site-txt-1)] text-base">
 								Advanced
 							</h2>
 							<span className="text-[color:var(--site-txt-2)] text-xs">
 								Custom badge art and how often emotes refresh
 							</span>
 						</span>
-						<ChevronDown className="size-4 shrink-0 text-white/40 transition-transform group-open:rotate-180" />
+						<ChevronDown className="size-4 shrink-0 text-[color:var(--site-txt-2)] transition-transform group-open:rotate-180" />
 					</summary>
 					<div className="flex flex-col gap-5 px-5 pt-1 pb-5">
 						<div className="flex flex-col gap-4">
 							<p className="text-[color:var(--site-txt-2)] text-xs leading-relaxed">
 								Every global and channel badge already loads on its own. Use
 								these only to swap in your own art, keyed by badge{" "}
-								<code className="text-white/70">set</code> (and optional{" "}
-								<code className="text-white/70">/version</code>).
+								<code className="text-[color:var(--site-txt-1)]">set</code> (and
+								optional{" "}
+								<code className="text-[color:var(--site-txt-1)]">/version</code>
+								).
 							</p>
 							<Field
-								hint="One or more set=url pairs, comma separated. Example above targets the moderator badge."
+								hint="One or more set=url pairs, comma separated, like moderator=https://example.com/mod.png. Add /version after the set to target one tier."
 								htmlFor="cfg-badgeart"
 								label="Replace badge art"
 							>
@@ -551,7 +569,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							</Field>
 						</div>
 
-						<div className="border-white/5 border-t pt-4">
+						<div className="hb-hairline border-t pt-4">
 							<Field
 								hint="Pulls new 7TV, BTTV, FFZ, and badge art mid-stream so fresh emotes show up without reloading OBS. Off, or every 5 to 60 minutes; a gentle interval keeps the smaller emote APIs happy."
 								htmlFor="cfg-refresh"
@@ -583,20 +601,30 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 function Fieldset({
 	title,
 	hint,
+	hintId,
 	children,
 }: {
 	title: string;
 	hint?: string;
+	// set when a control inside points at this hint with aria-describedby
+	hintId?: string;
 	children: React.ReactNode;
 }) {
 	return (
 		<section className="hb-card flex flex-col gap-4 p-5">
 			{/* h2: the page h1 is "Configure your overlay"; skipping to h3
-			    breaks the outline for screen readers */}
+			    breaks the outline for screen readers. Sized like a heading
+			    rather than like a mono micro-label: at 0.7rem uppercase it
+			    rendered smaller than the h3s further down the page. */}
 			<div className="flex flex-col gap-1.5">
-				<h2 className={`text-[0.7rem] text-white/75 ${MONO}`}>{title}</h2>
+				<h2 className="font-semibold text-[color:var(--site-txt-1)] text-base">
+					{title}
+				</h2>
 				{hint && (
-					<p className="text-[color:var(--site-txt-2)] text-sm leading-relaxed">
+					<p
+						className="text-[color:var(--site-txt-2)] text-sm leading-relaxed"
+						id={hintId}
+					>
 						{hint}
 					</p>
 				)}
@@ -619,6 +647,11 @@ function Field({
 	hint?: React.ReactNode;
 	children: React.ReactNode;
 }) {
+	// The hint carries the constraint (allowed range, expected syntax), so
+	// it has to reach screen readers too: give it an id and hand that to
+	// the control through aria-describedby.
+	const hintId = htmlFor && hint ? `${htmlFor}-hint` : undefined;
+
 	return (
 		<div className="grid gap-2">
 			{htmlFor ? (
@@ -626,13 +659,32 @@ function Field({
 			) : (
 				<span className="font-medium text-sm">{label}</span>
 			)}
-			{children}
+			{hintId ? describe(children, hintId) : children}
 			{hint && (
-				<p className="text-[color:var(--site-txt-2)] text-xs leading-relaxed">
+				<p
+					className="text-[color:var(--site-txt-2)] text-xs leading-relaxed"
+					id={hintId}
+				>
 					{hint}
 				</p>
 			)}
 		</div>
+	);
+}
+
+// Field renders whatever control it is handed, so the only place to wire
+// aria-describedby without threading a prop through every call site is
+// the element itself.
+function describe(children: React.ReactNode, hintId: string) {
+	return React.Children.map(children, (child) =>
+		React.isValidElement(child)
+			? React.cloneElement(
+					child as React.ReactElement<{ "aria-describedby"?: string }>,
+					{
+						"aria-describedby": hintId,
+					},
+				)
+			: child,
 	);
 }
 
@@ -699,6 +751,7 @@ function Toggle({
 		<div className="grid gap-1">
 			<div className="flex items-center gap-2.5">
 				<Checkbox
+					aria-describedby={hint ? `${id}-hint` : undefined}
 					checked={checked}
 					className="size-5 rounded-[0.3rem]"
 					id={id}
@@ -714,7 +767,10 @@ function Toggle({
 				</Label>
 			</div>
 			{hint && (
-				<p className="pl-[1.875rem] text-[color:var(--site-txt-2)] text-xs leading-relaxed">
+				<p
+					className="pl-[1.875rem] text-[color:var(--site-txt-2)] text-xs leading-relaxed"
+					id={`${id}-hint`}
+				>
 					{hint}
 				</p>
 			)}
