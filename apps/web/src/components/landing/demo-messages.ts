@@ -98,6 +98,23 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 			text: "SilverFang gifted 5 Tier 1 subs to the community",
 		},
 	},
+	// standalone event that DOES carry a message, the shape a resub takes:
+	// event line, separator, then the user's own text
+	{
+		channelId: null,
+		login: "nightpaws",
+		displayName: "NightPaws",
+		color: "#8A2BE2",
+		badges: [],
+		renderBadges: [],
+		parts: [text("6 months, still the comfiest stream")],
+		isAction: false,
+		isPrivileged: true,
+		event: {
+			kind: "sub",
+			text: "NightPaws resubscribed with Tier 1 for 6 months, 6 in a row",
+		},
+	},
 	{
 		channelId: null,
 		login: "silverfang",
