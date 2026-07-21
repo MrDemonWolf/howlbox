@@ -41,6 +41,7 @@ export function resolveMessageExtras(
 	emotes: EmoteMap | null,
 	badges: BadgeMap | null,
 	pronoun: string | null,
+	avatarUrl: string | null,
 ): ChatMessageView {
 	const parts =
 		emotes && emotes.size > 0
@@ -63,5 +64,5 @@ export function resolveMessageExtras(
 	if (pronoun) {
 		renderBadges.push({ kind: "text", text: pronoun });
 	}
-	return { ...view, parts, renderBadges };
+	return { ...view, parts, renderBadges, avatarUrl: avatarUrl ?? undefined };
 }
