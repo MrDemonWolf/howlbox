@@ -41,7 +41,7 @@ export function OverlayPreview({
 	return (
 		<div
 			className={cn(
-				"relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl",
+				"hb-hairline relative overflow-hidden rounded-2xl border shadow-lg",
 				className,
 			)}
 		>

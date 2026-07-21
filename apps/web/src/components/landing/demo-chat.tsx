@@ -24,8 +24,8 @@ export function DemoChat() {
 						className={cn(
 							"rounded-full border px-3 py-1.5 font-medium text-xs transition-colors",
 							t === theme
-								? "border-[#00ACED] bg-[#00ACED]/15 text-[#7fd7ff]"
-								: "border-white/10 text-white/60 hover:border-white/25 hover:text-white",
+								? "border-[color:var(--site-brand)] bg-[color:var(--site-brand-tint)] text-[color:var(--site-brand-text)]"
+								: "hb-hairline-strong hb-text-2 hover:border-[color:var(--site-brand)] hover:text-[color:var(--site-txt-1)]",
 						)}
 						key={t}
 						onClick={() => setTheme(t)}
