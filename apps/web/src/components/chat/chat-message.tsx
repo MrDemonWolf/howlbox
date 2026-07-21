@@ -41,9 +41,11 @@ const TEXT_BADGE_CLASSES =
 const AVATAR_CLASSES =
 	"hb-avatar -my-0.5 mr-1 inline-block aspect-square h-(--hb-avatar-size) rounded-(--hb-avatar-radius) object-cover align-middle [box-shadow:var(--hb-avatar-ring)]";
 
-// the system line on an event row (sub, raid, cheer, first message)
+// The system line on an event row (sub, raid, cheer, first message).
+// No trailing margin: the line is always followed either by the ": "
+// separator or by nothing, and a margin renders as "7 in a row : text".
 const EVENT_LINE_CLASSES =
-	"hb-event-line mr-1 font-semibold text-[color:var(--hb-event-accent)]";
+	"hb-event-line font-semibold text-[color:var(--hb-event-accent)]";
 
 const CHEERMOTE_CLASSES =
 	"hb-cheermote -my-1 mr-0.5 inline-block h-[1.6em] align-middle";
