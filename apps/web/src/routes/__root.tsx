@@ -3,6 +3,7 @@ import {
 	HeadContent,
 	Outlet,
 } from "@tanstack/react-router";
+import { ThemeProvider } from "next-themes";
 
 import "../index.css";
 
@@ -27,10 +28,13 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
+	// next-themes was already a dependency (sonner reads useTheme); it owns
+	// the light/dark class on <html> and its persistence. main.tsx paints
+	// the same class synchronously so the first frame is not the wrong mode.
 	return (
-		<>
+		<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 			<HeadContent />
 			<Outlet />
-		</>
+		</ThemeProvider>
 	);
 }

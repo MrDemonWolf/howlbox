@@ -8,6 +8,17 @@ import { routeTree } from "./routeTree.gen";
 // or the app shell flashes opaque white in the scene at load
 if (/\/overlay\/?$/.test(window.location.pathname)) {
 	document.documentElement.classList.add("hb-overlay");
+} else {
+	// Resolve light/dark before the first paint, otherwise the page shows
+	// one mode and repaints into the other. next-themes takes over on
+	// mount and reads the same storage key, so this only has to be right
+	// for the very first frame.
+	const stored = localStorage.getItem("theme");
+	const dark =
+		stored === "dark" ||
+		((!stored || stored === "system") &&
+			window.matchMedia("(prefers-color-scheme: dark)").matches);
+	document.documentElement.classList.add(dark ? "dark" : "light");
 }
 
 const router = createRouter({
