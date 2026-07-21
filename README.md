@@ -82,7 +82,7 @@ Your chat. Your colors. Your howl.
 
 Build an overlay URL with the builder at `/config`, or hand-write one:
 
-```
+```text
 /overlay?channel=mrdemonwolf&theme=wolf&bg=bubble&hidebots=true&fade=30
 ```
 
