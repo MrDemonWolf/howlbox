@@ -3,6 +3,8 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+import { seoPlugin } from "./vite-plugin-seo";
+
 export default defineConfig({
 	// GitHub Pages project sites serve at /<repo>/; CI sets BASE_PATH
 	base: process.env.BASE_PATH ?? "/",
@@ -28,5 +30,6 @@ export default defineConfig({
 			autoCodeSplitting: true,
 		}),
 		react(),
+		seoPlugin(),
 	],
 });
