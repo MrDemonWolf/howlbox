@@ -39,6 +39,14 @@
 		inset -8px -6px 0 -9px rgb(0 172 237 / 0.7), 0 8px 28px rgb(3 8 22 / 0.45);
 	--hb-glow: none;
 	--hb-shadow-off: 0 1px 2px rgb(0 0 0 / 0.85), 0 0 8px rgb(0 0 0 / 0.5);
+
+	/* profile pictures (?avatars) and event rows (?events). Every theme
+	   overrides the radius and accent; the size is shared unless a theme
+	   runs unusually small type. */
+	--hb-avatar-size: 1.5em;
+	--hb-avatar-radius: 999px;
+	--hb-avatar-ring: 0 0 0 1px var(--hb-border);
+	--hb-event-accent: #6cc4ff;
 }
 
 /* macOS 26 (Tahoe) Liquid Glass: near-clear smoke with specular rim
@@ -284,6 +292,84 @@
 		inset 0 1px 0 rgb(255 250 240 / 0.9), 0 5px 16px rgb(90 62 40 / 0.28);
 	--hb-shadow-off:
 		0 1px 2px rgb(255 248 238 / 0.9), 0 0 8px rgb(255 248 238 / 0.6);
+}
+
+/* Avatar shape and event accent per theme. Grouped rather than spread
+   through the fifteen blocks above so the shapes can be compared at a
+   glance: soft themes get a circle, pixel and window themes get a hard
+   square, and the accent is each theme's own highlight colour rather
+   than a shared blue. Source order puts these after every theme block,
+   so they win at equal specificity. */
+.hb-root[data-theme="glass"] {
+	--hb-event-accent: #9fe0ff;
+}
+
+.hb-root[data-theme="terminal"] {
+	--hb-avatar-radius: 0;
+	--hb-event-accent: #7dffa4;
+}
+
+.hb-root[data-theme="neon"] {
+	--hb-event-accent: #ff5ccd;
+}
+
+.hb-root[data-theme="dark"] {
+	--hb-event-accent: #a4c8ff;
+}
+
+.hb-root[data-theme="light"] {
+	--hb-avatar-radius: 6px;
+	--hb-event-accent: #0b62b8;
+}
+
+.hb-root[data-theme="contrast"] {
+	--hb-avatar-radius: 0;
+	--hb-avatar-ring: 0 0 0 2px #ffffff;
+	--hb-event-accent: #ffff00;
+}
+
+.hb-root[data-theme="cozy"] {
+	--hb-event-accent: #c2367f;
+}
+
+.hb-root[data-theme="nobox"] {
+	--hb-event-accent: #ffd166;
+}
+
+.hb-root[data-theme="retro95"] {
+	--hb-avatar-radius: 0;
+	--hb-avatar-ring: 1px 1px 0 0 rgb(10 10 10 / 0.9);
+	--hb-event-accent: #000080;
+}
+
+.hb-root[data-theme="xp"] {
+	--hb-avatar-radius: 3px;
+	--hb-event-accent: #0855dd;
+}
+
+.hb-root[data-theme="xbox"] {
+	--hb-event-accent: #7ee87e;
+}
+
+.hb-root[data-theme="arcade"] {
+	--hb-avatar-radius: 0;
+	/* arcade runs 8px type, so a 1.5em picture would tower over it */
+	--hb-avatar-size: 2em;
+	--hb-avatar-ring: 0 0 0 2px rgb(255 210 63 / 0.9);
+	--hb-event-accent: #ffd23f;
+}
+
+.hb-root[data-theme="arcade"] .hb-avatar {
+	image-rendering: pixelated;
+}
+
+.hb-root[data-theme="galaxy"] {
+	--hb-event-accent: #c9a8ff;
+}
+
+.hb-root[data-theme="mocha"] {
+	--hb-avatar-radius: 4px;
+	--hb-event-accent: #9a5b2c;
 }
 
 /* entrance + auto-hide, transform/opacity only (cheap on CPU raster;

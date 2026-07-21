@@ -21,6 +21,25 @@ const MOD_BADGE =
 const BROADCASTER_BADGE =
 	"https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2";
 
+// Twitch's own generic default avatars. The demo chatters are invented,
+// so these stand in rather than borrowing a real person's picture; the
+// live overlay resolves real ones through lib/twitch/avatars.ts.
+const DEFAULT_AVATARS = [
+	"https://static-cdn.jtvnw.net/user-default-pictures-uv/de130ab0-def7-11e9-b668-784f43822e80-profile_image-70x70.png",
+	"https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png",
+	"https://static-cdn.jtvnw.net/user-default-pictures-uv/ce57700a-def9-11e9-842d-784f43822e80-profile_image-70x70.png",
+	"https://static-cdn.jtvnw.net/user-default-pictures-uv/dbdc9198-def8-11e9-8681-784f43822e80-profile_image-70x70.png",
+];
+
+function avatarFor(login: string): string {
+	// stable per login so a chatter keeps the same face across the loop
+	let hash = 0;
+	for (const char of login) {
+		hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+	}
+	return DEFAULT_AVATARS[hash % DEFAULT_AVATARS.length];
+}
+
 type ScriptMessage = Omit<ChatMessageView, "id" | "timestamp">;
 
 export const DEMO_SCRIPT: ScriptMessage[] = [
@@ -62,6 +81,39 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		parts: [text("copy URL, paste in OBS, done")],
 		isAction: false,
 		isPrivileged: true,
+	},
+	// standalone event row: no author header, the line names everyone
+	{
+		channelId: null,
+		login: "silverfang",
+		displayName: "SilverFang",
+		color: "#DAA520",
+		badges: [],
+		renderBadges: [],
+		parts: [],
+		isAction: false,
+		isPrivileged: true,
+		event: {
+			kind: "sub",
+			text: "SilverFang gifted 5 Tier 1 subs to the community",
+		},
+	},
+	// standalone event that DOES carry a message, the shape a resub takes:
+	// event line, separator, then the user's own text
+	{
+		channelId: null,
+		login: "nightpaws",
+		displayName: "NightPaws",
+		color: "#8A2BE2",
+		badges: [],
+		renderBadges: [],
+		parts: [text("6 months, still the comfiest stream")],
+		isAction: false,
+		isPrivileged: true,
+		event: {
+			kind: "sub",
+			text: "NightPaws resubscribed with Tier 1 for 6 months, 6 in a row",
+		},
 	},
 	{
 		channelId: null,
@@ -118,6 +170,23 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		isAction: false,
 		isPrivileged: false,
 	},
+	// attached event row: keeps its author header and message body
+	{
+		channelId: null,
+		login: "timbertail",
+		displayName: "TimberTail",
+		color: "#9ACD32",
+		badges: [],
+		renderBadges: [],
+		parts: [text("keep it up")],
+		isAction: false,
+		isPrivileged: false,
+		event: {
+			kind: "cheer",
+			text: "cheered 500 bits",
+			cheermoteUrl: "https://static-cdn.jtvnw.net/bits/dark/animated/100/2.gif",
+		},
+	},
 	{
 		channelId: null,
 		login: "timbertail",
@@ -162,7 +231,17 @@ export function useDemoStream(limit = 8, intervalMs = 1700): ChatMessageView[] {
 				return;
 			}
 			setMessages((prev) =>
-				[...prev, { ...script, id, timestamp: Date.now() }].slice(-limit),
+				[
+					...prev,
+					{
+						...script,
+						id,
+						timestamp: Date.now(),
+						// filled for every demo row; the renderer only shows it
+						// when the preview is asked for avatars
+						avatarUrl: avatarFor(script.login),
+					},
+				].slice(-limit),
 			);
 		};
 		for (let i = 0; i < Math.min(4, limit); i++) {

@@ -34,6 +34,8 @@ function OverlayPage() {
 		allowedLogins: params.allow,
 		hideCommands: params.hidecommands,
 		pronouns: params.pronouns,
+		events: params.events,
+		avatars: params.avatars,
 		emotesRef,
 		badgesRef,
 	});
@@ -60,6 +62,7 @@ function OverlayPage() {
 			bg={params.bg}
 			fadeSeconds={params.fade}
 			messages={messages}
+			showAvatars={params.avatars !== "off"}
 			showBadges={params.badges}
 			showPronouns={params.pronouns}
 			showTimestamps={params.timestamps}

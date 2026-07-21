@@ -13,5 +13,7 @@
 			"@/*": ["./src/*"],
 			"@howlbox/ui/*": ["../../packages/ui/src/*"]
 		}
-	}
+	},
+	"//": "Tests run on Bun's built-in runner (bun test) and import bun:test, whose types would need a dependency to satisfy tsc. They ship nothing, so they stay out of the app program instead.",
+	"exclude": ["**/*.test.ts", "**/*.test.tsx", "dist"]
 }

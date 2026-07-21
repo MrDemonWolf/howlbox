@@ -23,6 +23,10 @@ const SAMPLE: ChatMessageView[] = [
 		parts: [{ type: "text", text: "gg that was clutch" }],
 		isAction: false,
 		isPrivileged: true,
+		// the wall is where the per-theme avatar shape is visible side by
+		// side (circle on wolf, hard square on terminal and retro95)
+		avatarUrl:
+			"https://static-cdn.jtvnw.net/user-default-pictures-uv/de130ab0-def7-11e9-b668-784f43822e80-profile_image-70x70.png",
 	},
 	{
 		id: "wall-2",
@@ -60,6 +64,7 @@ function ThemeTile({ theme }: { theme: Theme }) {
 						bg="bubble"
 						fadeSeconds={0}
 						messages={SAMPLE}
+						showAvatars={true}
 						showBadges={false}
 						showPronouns={false}
 						showTimestamps={false}

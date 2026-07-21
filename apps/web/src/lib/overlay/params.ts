@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+import {
+	AVATAR_MODES,
+	type AvatarMode,
+	type ChatEventKind,
+	EVENT_KINDS,
+} from "@/lib/twitch/types";
+
 export const BG_MODES = ["off", "panel", "bubble"] as const;
 export const THEMES = [
 	"wolf",
@@ -41,6 +48,8 @@ export const OVERLAY_DEFAULTS = {
 	badgegist: "",
 	refresh: 5,
 	pronouns: false,
+	events: [] as ChatEventKind[],
+	avatars: "off",
 } satisfies {
 	bg: BgMode;
 	theme: Theme;
@@ -57,6 +66,8 @@ export const OVERLAY_DEFAULTS = {
 	badgegist: string;
 	refresh: number;
 	pronouns: boolean;
+	events: ChatEventKind[];
+	avatars: AvatarMode;
 };
 
 // One valid Twitch login: 1-25 chars of lowercase alnum/underscore.
@@ -73,6 +84,17 @@ export function normalizeLoginList(raw: string): string[] {
 		.split(",")
 		.map((login) => login.trim().toLowerCase())
 		.filter((login) => LOGIN_RE.test(login));
+}
+
+// Split a comma list into valid event kinds, dropping unknown tokens.
+// "all" is a shorthand for every kind, so ?events=all keeps working when
+// a new kind is added. Shared with the config builder.
+export function normalizeEventList(raw: string): ChatEventKind[] {
+	const tokens = raw.split(",").map((token) => token.trim().toLowerCase());
+	if (tokens.includes("all")) {
+		return [...EVENT_KINDS];
+	}
+	return EVENT_KINDS.filter((kind) => tokens.includes(kind));
 }
 
 // Every option rides in the OBS source URL. Invalid or missing values
@@ -175,6 +197,24 @@ export const overlayParamsSchema = z.object({
 	animate: boolParamOn,
 	// pronoun badges from pronouns.alejo.io (per-user third-party lookup)
 	pronouns: boolParam,
+	// sub/cheer/raid/first-chat rows; same string-or-array round trip
+	// problem as loginList, since the router re-serializes the result
+	events: z
+		.preprocess(
+			(value) => {
+				if (typeof value === "string") {
+					return normalizeEventList(value);
+				}
+				if (Array.isArray(value)) {
+					return normalizeEventList(value.join(","));
+				}
+				return [];
+			},
+			z.array(z.enum(EVENT_KINDS)),
+		)
+		.catch([]),
+	// profile pictures (per-user third-party lookup, so opt-in)
+	avatars: z.enum(AVATAR_MODES).catch("off"),
 	// auto-hide: fade each message out N seconds after it appears
 	fade: z
 		.preprocess(numberish, z.coerce.number().int().min(0).max(600))
