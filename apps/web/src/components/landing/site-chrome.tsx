@@ -151,7 +151,12 @@ export function SiteHeader() {
 					HowlBox
 				</Link>
 				<nav className="flex flex-wrap items-center justify-end gap-4 max-sm:gap-2">
+					{/* includeHash: this points at a section of the home page, not
+					    at a page. Without it the router matches on the "/" part
+					    alone and announces "Themes" as the current page to anyone
+					    sitting on the home page. */}
 					<Link
+						activeOptions={{ includeHash: true }}
 						className="hb-text-2 text-sm transition-colors hover:text-[color:var(--site-txt-1)] max-sm:hidden"
 						hash="themes"
 						to="/"
