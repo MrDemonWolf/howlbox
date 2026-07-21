@@ -338,7 +338,7 @@ function LandingPage() {
 					title="What you trade away"
 				/>
 				<div className="hb-card mt-14 overflow-x-auto">
-					<table className="w-full min-w-[36rem] border-collapse text-left">
+					<table className="w-full border-collapse sm:min-w-[36rem] text-left">
 						<thead>
 							<tr className="hb-hairline border-b">
 								<th className="p-4 font-semibold text-sm" scope="col">
