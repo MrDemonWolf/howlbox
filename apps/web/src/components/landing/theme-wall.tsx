@@ -49,7 +49,7 @@ const SAMPLE: ChatMessageView[] = [
 function ThemeTile({ theme }: { theme: Theme }) {
 	return (
 		<Link
-			className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition-all hover:-translate-y-1 hover:border-[#00ACED]/45 hover:shadow-[0_12px_40px_rgb(0_20_44/0.5)]"
+			className="hb-card group flex flex-col overflow-hidden transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)]"
 			search={{ theme }}
 			to="/config"
 		>
@@ -67,9 +67,9 @@ function ThemeTile({ theme }: { theme: Theme }) {
 					/>
 				</HbRoot>
 			</div>
-			<div className="flex items-center justify-between border-white/5 border-t px-4 py-3">
+			<div className="hb-hairline flex items-center justify-between border-t px-4 py-3">
 				<span className="font-semibold text-sm">{THEME_LABEL[theme]}</span>
-				<code className="font-mono text-white/50 text-xs transition-colors group-hover:text-[#7fd7ff]">
+				<code className="hb-text-2 font-mono text-xs transition-colors group-hover:text-[color:var(--site-brand-text)]">
 					?theme={theme}
 				</code>
 			</div>
