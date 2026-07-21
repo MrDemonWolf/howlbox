@@ -21,6 +21,7 @@ import {
 	gifterKey,
 	isStandaloneEvent,
 	planLabel,
+	stripCheermoteTokens,
 } from "@/lib/twitch/events";
 import { type ChatEventKind, EVENT_KINDS } from "@/lib/twitch/types";
 
@@ -218,6 +219,38 @@ describe("message decoration", () => {
 				new Set<ChatEventKind>(["first"]),
 			)?.kind,
 		).toBe("first");
+	});
+});
+
+// Captured live from theburntpeanut: a 2500 bit cheer arrives as
+// "Cheer1000 Cheer1000 Cheer100 Cheer100 Cheer100 ...", which buried the
+// message next to a line already saying "cheered 2500 bits".
+describe("cheermote tokens", () => {
+	test("tokens go, the actual message stays", () => {
+		expect(stripCheermoteTokens("Cheer100 thanks for the stream")).toBe(
+			"thanks for the stream",
+		);
+		expect(stripCheermoteTokens("great run Cheer1000 keep going")).toBe(
+			"great run keep going",
+		);
+	});
+
+	test("a cheer that was nothing but tokens empties out", () => {
+		expect(stripCheermoteTokens("Cheer1000 Cheer1000 Cheer100")).toBe("");
+		expect(stripCheermoteTokens("Cheer1 Cheer1 Cheer1")).toBe("");
+	});
+
+	test("edge spacing survives so words do not jam against an emote", () => {
+		expect(stripCheermoteTokens(" Cheer100 nice ")).toBe(" nice ");
+		expect(stripCheermoteTokens("nice Cheer100")).toBe("nice");
+	});
+
+	test("ordinary words with no trailing number are untouched", () => {
+		expect(stripCheermoteTokens("gg that was clutch")).toBe(
+			"gg that was clutch",
+		);
+		// a bare number is not a cheermote token
+		expect(stripCheermoteTokens("top 10 plays")).toBe("top 10 plays");
 	});
 });
 
