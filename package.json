@@ -27,6 +27,7 @@
 		"build": "turbo run build",
 		"check-types": "turbo run check-types",
 		"og": "bun run scripts/build-og.ts",
+		"test": "bun test",
 		"dev:web": "turbo run dev -F web",
 		"check": "biome check --write ."
 	},
