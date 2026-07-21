@@ -12,6 +12,7 @@ interface ChatOverlayProps {
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
+	showAvatars: boolean;
 	animate: boolean;
 	fadeSeconds: number;
 	size: number;
@@ -31,6 +32,7 @@ export function ChatOverlay({
 	showBadges,
 	showPronouns,
 	showTimestamps,
+	showAvatars,
 	animate,
 	fadeSeconds,
 	size,
@@ -47,6 +49,7 @@ export function ChatOverlay({
 				bg={bg}
 				fadeSeconds={fadeSeconds}
 				messages={messages}
+				showAvatars={showAvatars}
 				showBadges={showBadges}
 				showPronouns={showPronouns}
 				showTimestamps={showTimestamps}
