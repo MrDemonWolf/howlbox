@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { BackLink, MONO, SiteShell } from "@/components/landing/site-chrome";
+import { pickActiveSection } from "@/lib/docs/active-section";
 import { THEMES } from "@/lib/overlay/params";
 import { THEME_LABEL } from "@/lib/overlay/theme-meta";
 
@@ -155,6 +158,73 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 		},
 	];
 
+// One list drives the sidebar and the scroll spy, so a new section
+// cannot appear in one and not the other.
+const TOC = [
+	{ id: "quick-start", label: "Quick start" },
+	...GROUPS.map((group) => ({ id: group.id, label: group.title })),
+	{ id: "themes", label: "Theme values" },
+	{ id: "badge-art", label: "Custom badge art" },
+	{ id: "custom-css", label: "Custom CSS" },
+	{ id: "troubleshooting", label: "Troubleshooting" },
+	{ id: "limits", label: "What it will not do" },
+];
+
+/**
+ * Marks the section currently under the header as the active one.
+ *
+ * Reads scroll position rather than trusting IntersectionObserver's
+ * entry order: with sections taller than the viewport, several are
+ * intersecting at once and the observer gives no reliable "topmost"
+ * answer. The last section whose top has passed the header is the one
+ * the reader is in.
+ */
+function useActiveSection(ids: string[]) {
+	const [activeId, setActiveId] = useState(ids[0]);
+
+	useEffect(() => {
+		const pick = () => {
+			const tops = ids.flatMap((id) => {
+				const el = document.getElementById(id);
+				return el ? [{ id, top: el.getBoundingClientRect().top }] : [];
+			});
+			setActiveId(
+				pickActiveSection(tops, {
+					// matches scroll-mt-24 on the sections, plus a little slack
+					line: 120,
+					atBottom:
+						window.innerHeight + window.scrollY >=
+						document.body.scrollHeight - 2,
+				}) ?? ids[0],
+			);
+		};
+
+		pick();
+
+		// The observer is the trigger, not the decision: it fires whenever a
+		// section edge crosses the viewport, including on programmatic
+		// scrolls and layout shifts that never emit a scroll event. The
+		// choice of section still comes from pick(), because with sections
+		// taller than the viewport several intersect at once.
+		const observer = new IntersectionObserver(pick);
+		for (const id of ids) {
+			const el = document.getElementById(id);
+			if (el) {
+				observer.observe(el);
+			}
+		}
+		window.addEventListener("scroll", pick, { passive: true });
+		window.addEventListener("resize", pick);
+		return () => {
+			observer.disconnect();
+			window.removeEventListener("scroll", pick);
+			window.removeEventListener("resize", pick);
+		};
+	}, [ids]);
+
+	return activeId;
+}
+
 const CSS_HOOKS = [
 	{
 		cls: "hb-root",
@@ -206,6 +276,9 @@ const TROUBLE = [
 ];
 
 function DocsPage() {
+	const ids = useMemo(() => TOC.map((item) => item.id), []);
+	const activeId = useActiveSection(ids);
+
 	return (
 		<SiteShell>
 			<div className="mx-auto max-w-6xl px-6 pt-12 pb-24">
@@ -240,31 +313,31 @@ function DocsPage() {
 					>
 						<p className={`hb-text-2 text-[0.65rem] ${MONO}`}>On this page</p>
 						<ul className="mt-4 flex flex-col gap-2.5 text-sm">
-							{[
-								{ href: "#quick-start", label: "Quick start" },
-								...GROUPS.map((g) => ({
-									href: `#${g.id}`,
-									label: g.title,
-								})),
-								{ href: "#themes", label: "Theme values" },
-								{ href: "#badge-art", label: "Custom badge art" },
-								{ href: "#custom-css", label: "Custom CSS" },
-								{ href: "#troubleshooting", label: "Troubleshooting" },
-								{ href: "#limits", label: "What it will not do" },
-							].map((item) => (
-								<li key={item.href}>
-									<a
-										className="hb-text-2 transition-colors hover:text-[color:var(--site-txt-1)]"
-										href={item.href}
-									>
-										{item.label}
-									</a>
-								</li>
-							))}
+							{TOC.map((item) => {
+								const current = item.id === activeId;
+								return (
+									<li key={item.id}>
+										<a
+											aria-current={current ? "location" : undefined}
+											className={
+												current
+													? "-ml-3 block border-[color:var(--site-brand)] border-l-2 pl-[0.625rem] font-medium text-[color:var(--site-txt-1)]"
+													: "-ml-3 block border-transparent border-l-2 pl-[0.625rem] text-[color:var(--site-txt-2)] transition-colors hover:text-[color:var(--site-txt-1)]"
+											}
+											href={`#${item.id}`}
+										>
+											{item.label}
+										</a>
+									</li>
+								);
+							})}
 						</ul>
 					</nav>
 
-					<div className="flex flex-col gap-16">
+					{/* 68ch: prose past roughly 75 characters per line costs the
+					    reader the start of the next line, and this page is read
+					    top to bottom rather than scanned */}
+					<div className="flex max-w-[34rem] flex-col gap-16">
 						{/* quick start */}
 						<section className="scroll-mt-24" id="quick-start">
 							<h2 className="hb-display text-2xl">Quick start</h2>
@@ -272,7 +345,7 @@ function DocsPage() {
 								A HowlBox URL is the site address, then{" "}
 								<code className="hb-code">/overlay</code>, then your options:
 							</p>
-							<pre className="hb-card mt-4 overflow-x-auto p-4">
+							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
 									https://mrdemonwolf.github.io/howlbox/overlay?channel=mrdemonwolf&amp;theme=wolf&amp;bg=bubble
 								</code>
@@ -313,10 +386,25 @@ function DocsPage() {
 											id={`param-${param.name}`}
 											key={param.name}
 										>
-											<dt className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-												<code className="hb-code font-semibold text-base">
-													{param.name}
-												</code>
+											{/* the anchor exists so writeups can deep-link a
+											    single parameter; without a control the reader
+											    has no way to get that URL */}
+											<dt className="group flex flex-wrap items-baseline gap-x-3 gap-y-1">
+												<a
+													className="inline-flex items-baseline gap-1.5"
+													href={`#param-${param.name}`}
+												>
+													<code className="hb-code font-semibold text-base">
+														{param.name}
+													</code>
+													<Link2
+														aria-hidden
+														className="size-3.5 shrink-0 self-center text-[color:var(--site-brand-text)] opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+													/>
+													<span className="sr-only">
+														Link to the {param.name} parameter
+													</span>
+												</a>
 												<span className="hb-text-2 text-sm">
 													{param.values}
 												</span>
@@ -376,7 +464,7 @@ function DocsPage() {
 								Add <code className="hb-code">/version</code> after the set name
 								to target one tier of a badge that has several.
 							</p>
-							<pre className="hb-card mt-4 overflow-x-auto p-4">
+							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
 									&amp;badgeart=moderator=https://example.com/mod.png,subscriber/12=https://example.com/1yr.png
 								</code>
@@ -391,7 +479,7 @@ function DocsPage() {
 								instead of editing the URL in OBS, so badge art can change
 								without touching your scene collection.
 							</p>
-							<pre className="hb-card mt-4 overflow-x-auto p-4">
+							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
 									moderator=https://example.com/mod.png
 									<br />
@@ -443,7 +531,7 @@ function DocsPage() {
 								The theme variables are overridable the same way. To keep a
 								theme but change one color:
 							</p>
-							<pre className="hb-card mt-4 overflow-x-auto p-4">
+							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
 									{".hb-root { --hb-text: #ffd6f2; }"}
 								</code>
