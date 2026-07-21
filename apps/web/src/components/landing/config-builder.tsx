@@ -9,7 +9,7 @@ import {
 	ExternalLink,
 	RotateCcw,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { OverlayPreview } from "@/components/landing/overlay-preview";
@@ -96,6 +96,16 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 
 	const set = <K extends keyof Config>(key: K, value: Config[K]) =>
 		setConfig((prev) => ({ ...prev, [key]: value }));
+
+	// What the preview is currently showing, announced only once the user
+	// stops adjusting. Screen readers get told the overlay changed without
+	// being read a new line for every step of a slider drag.
+	const summary = `${BG_LABEL[config.bg]} / ${THEME_LABEL[config.theme]} / ${config.size}%`;
+	const [settled, setSettled] = useState(summary);
+	useEffect(() => {
+		const timer = setTimeout(() => setSettled(summary), 500);
+		return () => clearTimeout(timer);
+	}, [summary]);
 
 	const cleanChannel = config.channel.trim().toLowerCase().replace(/^@/, "");
 
@@ -201,10 +211,15 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 					>
 						Live preview
 					</span>
+					{/* This line already mirrors the state a sighted user reads off
+					    the preview, so it doubles as the status region rather than
+					    announcing the whole URL. Debounced, or dragging the size
+					    slider fires an announcement per pixel. */}
 					<span
 						className={`text-[0.65rem] text-[color:var(--site-txt-2)] ${MONO}`}
+						role="status"
 					>
-						{BG_LABEL[config.bg]} / {THEME_LABEL[config.theme]} / {config.size}%
+						{settled}
 					</span>
 				</div>
 				<OverlayPreview
@@ -232,9 +247,16 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							obs browser source
 						</span>
 					</div>
-					<div className="break-all p-4 font-mono text-[color:var(--site-brand-text)] text-sm leading-relaxed">
+					{/* labelled so it is identifiable when tabbing or browsing by
+					    region; the announcement itself is the debounced status
+					    below, because reading a 200-character URL aloud on every
+					    keystroke would be unusable */}
+					<section
+						aria-label="Generated overlay URL"
+						className="break-all p-4 font-mono text-[color:var(--site-brand-text)] text-sm leading-relaxed"
+					>
 						{url}
-					</div>
+					</section>
 				</div>
 
 				<div className="flex flex-wrap gap-2">
