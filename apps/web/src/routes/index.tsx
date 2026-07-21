@@ -241,9 +241,7 @@ function LandingPage() {
 								<dd className="hb-display order-first text-4xl">
 									{stat.value}
 								</dd>
-								<dt className="hb-text-2 mt-2 text-sm leading-snug">
-									{stat.label}
-								</dt>
+								<dt className="hb-text-2 mt-2 leading-snug">{stat.label}</dt>
 							</div>
 						))}
 					</dl>
@@ -264,7 +262,7 @@ function LandingPage() {
 						<div className="hb-card p-6" key={item.title}>
 							<item.icon className="size-5 text-[color:var(--site-brand-text)]" />
 							<h3 className="mt-4 mb-2 font-semibold text-lg">{item.title}</h3>
-							<p className="hb-text-2 text-sm leading-relaxed">{item.body}</p>
+							<p className="hb-text-2 leading-relaxed">{item.body}</p>
 						</div>
 					))}
 				</div>
@@ -275,7 +273,7 @@ function LandingPage() {
 							<h3 className="mt-3 mb-1.5 font-semibold text-base">
 								{item.title}
 							</h3>
-							<p className="hb-text-2 text-sm leading-relaxed">{item.body}</p>
+							<p className="hb-text-2 leading-relaxed">{item.body}</p>
 						</div>
 					))}
 				</div>
@@ -323,9 +321,7 @@ function LandingPage() {
 										?bg={mode.bg}
 									</code>
 								</h3>
-								<p className="hb-text-2 mt-1 text-sm leading-relaxed">
-									{mode.body}
-								</p>
+								<p className="hb-text-2 mt-1 leading-relaxed">{mode.body}</p>
 							</div>
 						</div>
 					))}
@@ -401,10 +397,7 @@ function LandingPage() {
 						"Emote and badge art is fetched straight from 7TV, BTTV, FFZ, and ivr.fi, and cached in your own browser.",
 						"No analytics, no telemetry, no cookies set by HowlBox.",
 					].map((item) => (
-						<li
-							className="hb-card flex gap-3 p-5 text-sm leading-relaxed"
-							key={item}
-						>
+						<li className="hb-card flex gap-3 p-5 leading-relaxed" key={item}>
 							<Check
 								aria-hidden
 								className="mt-0.5 size-4 shrink-0 text-[color:var(--site-brand-text)]"
