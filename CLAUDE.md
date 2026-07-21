@@ -126,6 +126,48 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   on white). Site type is Inter (`.hb-display` for headings); the
   overlay's `--hb-*` theme contract is untouched by any of this.
 
+## SEO and social
+
+- `apps/web/src/lib/seo/routes.ts` is the single source: `SEO_ROUTES`
+  (path, title, description, og image, index flag), `SITE_URL`,
+  `canonicalFor`, and the `WebApplication` JSON-LD. Add a route here
+  when you add one to `routes/`.
+- `apps/web/vite-plugin-seo.ts` runs on `closeBundle` and writes one
+  real `dist/<route>/index.html` per route with its own head, plus
+  `404.html`, `robots.txt`, `sitemap.xml`. This exists because GitHub
+  Pages otherwise answers every route but `/` from `404.html` with an
+  HTTP **404 status**, which Google will not index no matter what the
+  body renders. The head is swapped between the `SEO:BEGIN` /
+  `SEO:END` markers in `index.html`; do not reformat those comments.
+- Canonical form is WITH a trailing slash, matching the GitHub Pages
+  directory redirect. TanStack Router matches `/docs/` to `/docs`.
+- `/overlay` gets `noindex, nofollow` and no canonical, and stays out
+  of the sitemap. `robots.txt` cannot help: it is only read from the
+  host root, so on a project subpath it is inert.
+- No `aggregateRating` in the JSON-LD. Google requires a rating for the
+  Software App rich result, there is no honest rating data, and
+  inventing one is the self-serving-review pattern that earns a manual
+  action. No `FAQPage` markup either: Google deprecated that rich
+  result on 2026-05-07.
+- OG images: `bun run og` renders `public/og*.png` through headless
+  Chrome from `scripts/build-og.ts`. Manual on purpose, never in CI.
+  Chrome rather than an SVG rasterizer because Inter ships woff2 only
+  and every Node-side rasterizer wants TTF or OTF; the template embeds
+  the woff2 so output does not depend on installed system fonts.
+  Version the file name if art changes, since X has no cache purge.
+
+## Copy
+
+Landing and docs copy is written against a checklist derived from
+research on what reads as LLM-written. The durable rules: no trailing
+participial clauses that editorialize (`ensuring...`, `reflecting...`),
+no "not X, it's Y" antithesis, no three-item list where item three is a
+synonym of item one, no `seamless / effortless / leverage / robust /
+powerful / comprehensive`, vary paragraph length on purpose, and state
+at least one real limitation above the fold. Prefer a claim a reader
+could disprove in two minutes (a number, a version, a named system)
+over an adjective.
+
 ## URL params
 
 Schema lives in `lib/overlay/params.ts`. Full param reference is the
