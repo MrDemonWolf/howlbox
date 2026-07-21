@@ -253,7 +253,7 @@ export function OBSSteps({
 							{String(stepIndex + 1).padStart(2, "0")}
 						</span>
 						<h3 className="mt-4 mb-2 font-semibold text-lg">{step.title}</h3>
-						<p className="hb-text-2 text-sm leading-relaxed">{step.body}</p>
+						<p className="hb-text-2 leading-relaxed">{step.body}</p>
 					</li>
 				))}
 			</ol>
