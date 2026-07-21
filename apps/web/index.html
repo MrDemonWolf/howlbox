@@ -4,50 +4,64 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>HowlBox - Self-hosted Twitch chat overlay for OBS</title>
+    <!--
+      Everything between the SEO markers is rewritten per route at build
+      time by the seo plugin in vite.config.ts, from src/lib/seo/routes.ts.
+      Crawlers never run JS, so this has to be real HTML per URL.
+      Do not reformat the marker comments.
+    -->
+    <!-- SEO:BEGIN -->
+    <title>HowlBox: Twitch chat overlay for OBS, no account</title>
     <meta
       name="description"
-      content="HowlBox is a free, self-hosted Twitch chat overlay for OBS. Fifteen themes, every emote (7TV, BTTV, FFZ), no login and no keys. The whole overlay is one URL you host yourself."
+      content="A self-hosted Twitch chat overlay for OBS browser sources. Fifteen themes, 7TV, BTTV and FFZ emotes, and the whole configuration rides in the URL. No login, no API keys, no server."
     />
+    <link rel="canonical" href="https://mrdemonwolf.github.io/howlbox/" />
+    <meta property="og:url" content="https://mrdemonwolf.github.io/howlbox/" />
+    <meta property="og:title" content="HowlBox: Twitch chat overlay for OBS, no account" />
     <meta
-      name="keywords"
-      content="twitch chat overlay, obs chat overlay, twitch overlay, obs browser source, stream chat overlay, 7tv, bttv, ffz, self-hosted, howlbox"
+      property="og:description"
+      content="A self-hosted Twitch chat overlay for OBS browser sources. Fifteen themes, 7TV, BTTV and FFZ emotes, and the whole configuration rides in the URL. No login, no API keys, no server."
     />
+    <meta property="og:image" content="https://mrdemonwolf.github.io/howlbox/og.png" />
+    <meta name="twitter:title" content="HowlBox: Twitch chat overlay for OBS, no account" />
+    <meta
+      name="twitter:description"
+      content="A self-hosted Twitch chat overlay for OBS browser sources. Fifteen themes, 7TV, BTTV and FFZ emotes, and the whole configuration rides in the URL. No login, no API keys, no server."
+    />
+    <meta name="twitter:image" content="https://mrdemonwolf.github.io/howlbox/og.png" />
+    <!-- SEO:END -->
+
     <meta name="author" content="MrDemonWolf, Inc." />
+
+    <!--
+      The media pair drives browser UI. The bare tag after it is for
+      Discord, which reads theme-color for an embed's accent bar and
+      ignores media-scoped variants.
+    -->
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#050912" />
-
-    <!-- crawlers do not run JS, so the canonical + social tags live here, statically -->
-    <link rel="canonical" href="https://mrdemonwolf.github.io/howlbox/" />
+    <meta name="theme-color" content="#00aced" />
 
     <!-- favicons (vite rewrites root-relative hrefs with the deploy base path) -->
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Open Graph: absolute URLs required; hard-coded to the GitHub Pages home -->
+    <!-- Open Graph: absolute URLs are mandatory, crawlers do not resolve base -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="HowlBox" />
-    <meta property="og:title" content="HowlBox - Self-hosted Twitch chat overlay for OBS" />
-    <meta
-      property="og:description"
-      content="A themed Twitch chat overlay you host yourself. Fifteen themes, every emote, no login and no keys. The whole overlay is one URL."
-    />
-    <meta property="og:url" content="https://mrdemonwolf.github.io/howlbox/" />
-    <meta property="og:image" content="https://mrdemonwolf.github.io/howlbox/og.png" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="HowlBox - your chat, your colors, your howl." />
+    <!-- og:image and og:image:alt are per-route, so they live inside the
+         SEO markers above rather than here -->
 
-    <!-- Twitter / X large card -->
+
+    <!-- twitter:card has no Open Graph equivalent, so this namespace stays -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="HowlBox - Self-hosted Twitch chat overlay for OBS" />
-    <meta
-      name="twitter:description"
-      content="A themed Twitch chat overlay you host yourself. Fifteen themes, every emote, no login and no keys. The whole overlay is one URL."
-    />
-    <meta name="twitter:image" content="https://mrdemonwolf.github.io/howlbox/og.png" />
-    <meta name="twitter:image:alt" content="HowlBox - your chat, your colors, your howl." />
+    <meta name="twitter:image:alt" content="HowlBox, a Twitch chat overlay for OBS" />
   </head>
 
   <body>
