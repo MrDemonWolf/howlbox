@@ -33,8 +33,8 @@ jobs:
           # project pages serve at /<repo>/; custom domain would be /
           BASE_PATH: /howlbox/
 
-      - name: SPA fallback for /overlay
-        run: cp apps/web/dist/index.html apps/web/dist/404.html
+      # 404.html, robots.txt, sitemap.xml and the per-route index.html
+      # files are emitted by the seo plugin during the build.
 
       - uses: actions/upload-pages-artifact@v5
         with:

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ConfigBuilder } from "@/components/landing/config-builder";
 import {
 	BackLink,
-	Kicker,
+	Eyebrow,
 	OBSSteps,
 	SiteShell,
 } from "@/components/landing/site-chrome";
@@ -39,14 +39,14 @@ function ConfigPage() {
 				<div className="mb-8">
 					<BackLink />
 				</div>
-				<Kicker index="01">Configurator</Kicker>
-				<h1 className="hb-display mt-5 text-balance text-5xl lg:text-6xl">
-					Configure your overlay
+				<Eyebrow>Builder</Eyebrow>
+				<h1 className="hb-display mt-5 text-balance text-4xl lg:text-5xl">
+					Build your overlay URL
 				</h1>
 				<p className="hb-text-2 mt-4 max-w-2xl text-pretty text-lg leading-relaxed">
-					Change anything and watch the preview update live. Already running an
-					overlay? Paste its URL at the top of the form and pick up right where
-					you left off.
+					The preview on the left is the real overlay, rendered over an OBS
+					transparency checker. Already running one? Paste its URL at the top of
+					the form and every control loads with your settings.
 				</p>
 			</section>
 
@@ -54,7 +54,7 @@ function ConfigPage() {
 				<ConfigBuilder initialTheme={theme} />
 			</section>
 
-			<OBSSteps index="02" tone="surface" />
+			<OBSSteps index="01" tone="surface" />
 		</SiteShell>
 	);
 }

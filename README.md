@@ -1,12 +1,15 @@
 # HowlBox - Themed Twitch Chat Overlay for OBS
 
 HowlBox is a self-hosted, client-only Twitch chat overlay for OBS
-browser sources. It joins Twitch chat anonymously (no login, no OAuth,
-no API keys), renders native Twitch, 7TV, BTTV, and FrankerFaceZ
-emotes with badge art, and is configured entirely through URL query
-parameters so every OBS source URL is self-contained. Built for
-streamers who want a modern, beautiful chat overlay without a
-third-party service sitting between them and their chat.
+browser sources. It joins Twitch chat anonymously, renders native
+Twitch, 7TV, BTTV, and FrankerFaceZ emotes with badge art, and takes
+its entire configuration from URL query parameters, so an OBS source
+URL is the whole setup.
+
+Reading chat anonymously is what removes the account, and it is also
+the limit: HowlBox cannot send messages, moderate, or read anything
+Twitch gates behind a token (subs, follows, bits). If you need those,
+you need an overlay with a backend.
 
 Your chat. Your colors. Your howl.
 
@@ -77,12 +80,17 @@ Your chat. Your colors. Your howl.
 
 ## Usage
 
-Build an overlay URL with the configurator at `/config`, or hand-write
-one:
+Build an overlay URL with the builder at `/config`, or hand-write one:
 
-```
+```text
 /overlay?channel=mrdemonwolf&theme=wolf&bg=bubble&hidebots=true&fade=30
 ```
+
+The full reference lives at `/docs` on the deployed site
+([mrdemonwolf.github.io/howlbox/docs](https://mrdemonwolf.github.io/howlbox/docs)):
+every parameter with its own anchor, both custom badge art formats,
+the `hb-*` Custom CSS contract, and troubleshooting. The table below is
+the short version.
 
 | Parameter      | Values                                   | Description                                             |
 | -------------- | ---------------------------------------- | ------------------------------------------------------- |
