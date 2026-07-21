@@ -111,6 +111,54 @@ export function describeGiftUpgrade(name: string, gifter?: string): ChatEvent {
 	};
 }
 
+// A mass gift arrives as ONE submysterygift ("gifted 5 subs") followed by
+// one subgift per recipient. Rendering both means a 5-gift bomb costs six
+// rows and a 100-gift bomb wipes the whole column, so the individual
+// gifts that belong to an announced batch are swallowed.
+//
+// Keyed by gifter, counted down, and time-boxed: a big bomb trails its
+// individual notices over several seconds, while a standalone gift from
+// the same person later must still render.
+export function createGiftDeduper(windowMs = 60_000) {
+	const pending = new Map<string, { left: number; at: number }>();
+	return {
+		// a batch of `count` gifts was just announced by this gifter
+		announce(key: string, count: number, now: number) {
+			pending.set(key, { left: count, at: now });
+			// a channel that never gifts again must not hold keys forever
+			if (pending.size > 50) {
+				for (const [k, v] of pending) {
+					if (now - v.at > windowMs) {
+						pending.delete(k);
+					}
+				}
+			}
+		},
+		// true when this individual gift is part of an announced batch
+		claim(key: string, now: number): boolean {
+			const entry = pending.get(key);
+			if (!entry) {
+				return false;
+			}
+			if (now - entry.at > windowMs) {
+				pending.delete(key);
+				return false;
+			}
+			entry.left--;
+			if (entry.left <= 0) {
+				pending.delete(key);
+			}
+			return true;
+		},
+	};
+}
+
+// Anonymous gifters share one bucket; that is fine, since two anonymous
+// bombs overlapping is both rare and indistinguishable on the wire.
+export function gifterKey(userId?: string, displayName?: string): string {
+	return userId ?? displayName ?? "anonymous";
+}
+
 export function describeRaid(raider: string, viewers: number): ChatEvent {
 	return {
 		kind: "raid",

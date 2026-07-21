@@ -8,6 +8,7 @@ import {
 
 import { fallbackColor } from "./colors";
 import {
+	createGiftDeduper,
 	describeCheer,
 	describeCommunitySub,
 	describeFirstChat,
@@ -17,6 +18,7 @@ import {
 	describeResub,
 	describeSub,
 	describeSubGift,
+	gifterKey,
 } from "./events";
 import type {
 	ChatEvent,
@@ -132,6 +134,8 @@ export function connectChat(
 			handlers.onMessage(noticeToView(msg, event));
 		}
 	};
+	// swallows the per-recipient notices that follow a mass gift
+	const gifts = createGiftDeduper();
 	if (events.has("sub")) {
 		client.onSub((_channel, _user, info, msg) => {
 			pushNotice(msg, describeSub(info.displayName, info.plan));
@@ -143,6 +147,16 @@ export function connectChat(
 			);
 		});
 		client.onSubGift((_channel, _user, info, msg) => {
+			// part of an already-announced mass gift: the batch line covers
+			// it, so rendering this too would just repeat the same gift
+			if (
+				gifts.claim(
+					gifterKey(info.gifterUserId, info.gifterDisplayName),
+					msg.date.getTime(),
+				)
+			) {
+				return;
+			}
 			pushNotice(
 				msg,
 				describeSubGift(
@@ -154,6 +168,11 @@ export function connectChat(
 			);
 		});
 		client.onCommunitySub((_channel, _user, info, msg) => {
+			gifts.announce(
+				gifterKey(info.gifterUserId, info.gifterDisplayName),
+				info.count,
+				msg.date.getTime(),
+			);
 			pushNotice(
 				msg,
 				describeCommunitySub(info.plan, info.count, info.gifterDisplayName),
