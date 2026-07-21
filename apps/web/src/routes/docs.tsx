@@ -367,7 +367,12 @@ function DocsPage() {
 					{/* 68ch: prose past roughly 75 characters per line costs the
 					    reader the start of the next line, and this page is read
 					    top to bottom rather than scanned */}
-					<div className="flex max-w-[34rem] flex-col gap-16">
+					{/* min-w-0 is load-bearing: a grid item defaults to
+					    min-width:auto, so the unbreakable URL inside the quick-start
+					    code block sized this column to about 700px and pushed every
+					    paragraph off the right edge below 700px wide. With it the
+					    column tracks the viewport and the pre scrolls on its own. */}
+					<div className="flex min-w-0 max-w-[34rem] flex-col gap-16">
 						{/* quick start */}
 						<section className="scroll-mt-24" id="quick-start">
 							<h2 className="hb-display text-2xl">Quick start</h2>
