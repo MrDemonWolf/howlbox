@@ -63,6 +63,24 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 					values: "50 to 300, percent",
 					body: "Scales the theme's own font size. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. Default 100.",
 				},
+				{
+					name: "avatars",
+					values: "off, all, subs",
+					body: "Profile pictures before the name. Like pronouns this is a per-user third-party lookup, from api.ivr.fi, so it is off by default and the first message from a given chatter usually misses the picture. all fetches one for everybody; subs only fetches for subscribers and founders, which is the setting to use on a busy channel: it reads the subscriber tag already on the message, so drive-by chatters never trigger a lookup at all. The shape follows the theme, so a circle on wolf and a hard square on terminal or retro95. Default off.",
+				},
+			],
+		},
+		{
+			id: "events",
+			title: "Events",
+			blurb:
+				"Subs, gifts, raids and cheers, rendered as rows in the chat column.",
+			params: [
+				{
+					name: "events",
+					values: "comma-separated: sub, cheer, raid, first, announce, or all",
+					body: "Which events to show. Anonymous IRC carries all of these, so none of it needs an account: sub covers new subs, resubs, single and mass gifts, and Prime upgrades; cheer shows bits with the matching tier art; raid shows the raider and their viewer count; first marks a chatter's first message in the channel, and returning chatters; announce marks the /announce highlight from mods. Unknown values are dropped, and all is shorthand for every kind. A sub or raid row is a whole sentence with no separate name header, while a cheer, first message or announcement decorates the message it came with. Default empty, meaning no events.",
+				},
 			],
 		},
 		{
@@ -120,7 +138,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "hidecommands",
 					values: "true, false",
-					body: "Hide messages that start with an exclamation mark. Default false.",
+					body: "Hide messages that start with an exclamation mark. Sub and raid rows are system lines rather than user messages, so this never hides them; a first message or cheer that happens to be a command is still hidden, because it is a real message underneath. Default false.",
 				},
 				{
 					name: "hide",
@@ -235,6 +253,18 @@ const CSS_HOOKS = [
 	{ cls: "hb-name", body: "The chatter's display name." },
 	{ cls: "hb-text", body: "The message body." },
 	{ cls: "hb-badge", body: "One badge image before the name." },
+	{
+		cls: "hb-avatar",
+		body: "The profile picture, when the avatars parameter is on.",
+	},
+	{
+		cls: "hb-event-line",
+		body: "The system line on an event row. The row itself carries data-event with the kind, so hb-message[data-event='raid'] targets one kind.",
+	},
+	{
+		cls: "hb-cheermote",
+		body: "The bits tier image on a cheer row.",
+	},
 	{
 		cls: "hb-pronoun",
 		body: "The text pronoun badge, when the pronouns parameter is on.",
@@ -574,8 +604,10 @@ function DocsPage() {
 									The mod queue, AutoMod holds, or deleted message contents.
 								</li>
 								<li>
-									Subscriber, follower, or bits events. Those arrive over
-									EventSub, which needs an authenticated app.
+									Follower alerts. Follows only arrive over EventSub, which
+									needs an authenticated app. Subs, gifts, raids and cheers do
+									come down anonymous IRC, and the events parameter renders
+									them.
 								</li>
 								<li>
 									Chat history from before the source connected. There is no

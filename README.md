@@ -106,6 +106,8 @@ the short version.
 | `delay`        | seconds, `0` to `300` (default `0`)      | Hold non-mod messages so deletions land before display  |
 | `badges`       | `false` to disable (default on)          | Badge icons before names                                |
 | `pronouns`     | flag                                     | Pronoun badge before names (via pronouns.alejo.io)      |
+| `avatars`      | `off`, `all`, `subs` (default `off`)     | Profile pictures before names (via api.ivr.fi). `subs` only looks up subscribers and founders |
+| `events`       | comma-separated `sub`, `cheer`, `raid`, `first`, `announce`, or `all` | Show sub, gift, cheer, raid, first-message and announcement rows (default none) |
 | `timestamps`   | flag                                     | HH:MM before each message                               |
 | `animate`      | `false` to disable (default on)          | Slide/fade entrance animation                           |
 | `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
@@ -115,6 +117,13 @@ the short version.
 
 Invalid or missing values fall back to safe defaults; a typo in OBS
 never produces a blank overlay.
+
+Events ride the same anonymous connection the chat does, so `events`
+needs no account: subs, gifts, raids and cheers all arrive as ordinary
+IRC traffic. Follows are the exception, since they only exist on
+EventSub. A sub or raid renders as a whole sentence with no separate
+name header; a cheer, first message or announcement decorates the
+message it arrived with.
 
 Custom badge art precedence, weakest to strongest: fetched Twitch art,
 then `badgegist`, then inline `badgeart`. A bare `set` key (no
@@ -138,6 +147,8 @@ becomes active" off.
 | Emotes    | 7TV, BTTV, FrankerFaceZ public APIs |
 | Badges    | api.ivr.fi (Twitch badge art)       |
 | Pronouns  | pronouns.alejo.io (opt-in)          |
+| Avatars   | api.ivr.fi (batched, opt-in)        |
+| Cheermotes| static-cdn.jtvnw.net (global tiers) |
 | Styling   | Tailwind CSS 4 + CSS variables      |
 | UI        | shadcn/ui primitives (packages/ui)  |
 | Monorepo  | Turborepo + Bun workspaces          |

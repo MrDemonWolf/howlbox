@@ -68,6 +68,34 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   from a user can miss the badge; repeats hit. Gated by the `pronouns`
   param. Badges are a `RenderBadge` union (`types.ts`): image badges +
   the text pronoun badge share the row, built in `resolve.ts`.
+- `apps/web/src/lib/twitch/events.ts` + the USERNOTICE listeners in
+  `chat.ts` - sub/gift/raid/cheer/first-chat/announcement rows, gated by
+  the `events` param. Anonymous IRC carries all of it: subs and raids
+  are USERNOTICE (twurple `onSub`/`onResub`/`onSubGift`/
+  `onCommunitySub`/`onPrimePaidUpgrade`/`onGiftPaidUpgrade`/`onRaid`/
+  `onAnnouncement`), cheers ride `msg.isCheer`/`.bits` on a normal
+  message, first-timers ride `.isFirst`/`.isReturningChatter`. Only
+  follows need EventSub. An event is NOT a second stream: it is a
+  `ChatMessageView` with an `event` field, so it inherits the delay
+  buffer, dedupe, `max`, fade and emote resolution for free. Two row
+  shapes, split by `isStandaloneEvent`: sub/raid drop the author header
+  (the text is a whole sentence naming everyone), cheer/first/announce
+  keep it. Event rows set `isPrivileged` so a raid alert is never held
+  behind the mod delay. Cheermote art is a pure URL off
+  static-cdn.jtvnw.net for the global tiers (1/100/1000/5000/10000);
+  channel-custom cheer prefixes would need Helix, so they stay text.
+  `events.test.ts` (`bun test`) covers the wording and tier bucketing.
+- `apps/web/src/lib/twitch/avatars.ts` - profile pictures via api.ivr.fi
+  (same tokenless open-CORS host as the badges; Helix needs a token).
+  Per-USER like pronouns, so same lazy warm/resolve shape, but BATCHED:
+  logins collect for 300ms and flush up to 50 per request, since a busy
+  channel would otherwise fire one call per chatter. In-memory Map only,
+  no localStorage (an OBS reload of a 200-chatter channel costs 4
+  requests); persist via `cache.ts` only if that proves noisy. `logo`
+  URLs are downscaled 600x600 -> 70x70 by string swap. The `avatars`
+  param is `off`/`all`/`subs`; `subs` reads the subscriber tag already
+  on the message, so it costs no extra request to decide and keeps
+  drive-by chatters from triggering a lookup at all.
 - `apps/web/src/lib/overlay/params.ts` - zod schema for all URL
   params. CRITICAL: TanStack Router JSON-types search values
   (`?channel=123456` arrives as a number); scalars are stringified in
@@ -173,13 +201,17 @@ over an adjective.
 Schema lives in `lib/overlay/params.ts`. Full param reference is the
 Usage table in `README.md`; keep both in sync. Defaults:
 `bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=5`,
-`badgeart`/`badgegist` empty, `badges` and `animate` on, all other
-flags off (`pronouns` too - opt-in, since it is a per-user
-pronouns.alejo.io lookup). Ranges: `max` 1-200, `delay` 0-300s, `fade`
+`avatars=off`, `events` empty, `badgeart`/`badgegist` empty, `badges`
+and `animate` on, all other flags off (`pronouns` too - opt-in, since
+it is a per-user pronouns.alejo.io lookup; `avatars` for the same
+reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
 0-600s, `refresh` 0 or 5-1440min. `channel`/`hide`/`allow` validate against
 the Twitch login regex; bad logins are dropped, not errored. Custom
 badge art (`badgeart`, `badgegist`) is parsed/validated in
-`lib/twitch/badges.ts`.
+`lib/twitch/badges.ts`. `events` is a comma list of `sub,cheer,raid,
+first,announce` (plus an `all` shorthand) filtered by
+`normalizeEventList`; like `hide`/`allow` it needs the string-or-array
+preprocess, since the router re-serializes the validated value.
 
 ## OBS constraints (research-verified; do not violate)
 
@@ -196,7 +228,10 @@ badge art (`badgeart`, `badgegist`) is parsed/validated in
   `--hb-surface` to `--hb-surface-solid` (the override selector must
   tie theme-block specificity: `.hb-root, .hb-root[data-theme]`).
 - `hb-*` class names are a public contract for the OBS Custom CSS
-  field. Never rename them.
+  field. Never rename them. That now includes `hb-avatar`,
+  `hb-event-line` and `hb-cheermote`, plus the `data-event="<kind>"`
+  attribute on `hb-message` (so `hb-message[data-event="raid"]` can be
+  styled on its own).
 - OBS shows no error UI for browser sources; the overlay renders its
   own status pill (connecting / disconnected / could not join).
 - Target Chromium 127 (OBS 31+). devicePixelRatio is always 1.
@@ -218,6 +253,15 @@ blocks. Adding a theme: CSS block + the `THEMES` enum in
 compiler forces the new entry) + the README table. Light-surfaced
 themes also join `LIGHT_SURFACE_THEMES` in `message-list.tsx` (user
 color readability flips direction there).
+
+`--hb-avatar-size`/`--hb-avatar-radius`/`--hb-avatar-ring` (profile
+picture shape) and `--hb-event-accent` (event line color) live in one
+grouped section AFTER all the theme blocks in `overlay.css`, not inside
+them, so the avatar shapes can be compared at a glance; source order
+lets them win at equal specificity. Both default on `.hb-root`, so a new
+theme inherits a working circle and accent and only needs an entry when
+it wants a square or a different highlight (nothing fails to compile
+here, unlike the `Record<Theme, ...>` maps).
 
 ## Deploy
 
