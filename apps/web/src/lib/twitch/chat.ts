@@ -9,9 +9,8 @@ import {
 import { fallbackColor } from "./colors";
 import {
 	createGiftDeduper,
-	describeCheer,
+	decorateMessage,
 	describeCommunitySub,
-	describeFirstChat,
 	describeGiftUpgrade,
 	describePrimeUpgrade,
 	describeRaid,
@@ -64,16 +63,17 @@ export function connectChat(
 	});
 
 	// cheers and first-time chatters are tags on a normal message, not
-	// USERNOTICE, so they are decided here rather than in a listener
-	const decorate = (msg: ChatMessage): ChatEvent | undefined => {
-		if (events.has("cheer") && msg.isCheer && msg.bits > 0) {
-			return describeCheer(msg.bits);
-		}
-		if (events.has("first") && (msg.isFirst || msg.isReturningChatter)) {
-			return describeFirstChat(!msg.isFirst);
-		}
-		return undefined;
-	};
+	// USERNOTICE; the decision itself is pure and lives in events.ts
+	const decorate = (msg: ChatMessage): ChatEvent | undefined =>
+		decorateMessage(
+			{
+				isCheer: msg.isCheer,
+				bits: msg.bits,
+				isFirst: msg.isFirst,
+				isReturningChatter: msg.isReturningChatter,
+			},
+			events,
+		);
 
 	client.onMessage((_channel, user, text, msg) => {
 		if (!closed) {
