@@ -4,7 +4,11 @@ import {
 	overlayParamsSchema,
 	type Theme,
 } from "@/lib/overlay/params";
-import type { AvatarMode, ChatEventKind } from "@/lib/twitch/types";
+import {
+	type AvatarMode,
+	type ChatEventKind,
+	EVENT_KINDS,
+} from "@/lib/twitch/types";
 
 export interface OverlayConfig {
 	channel: string;
@@ -88,7 +92,15 @@ export function overlayQuery(config: OverlayConfig): string {
 		qs.set("refresh", String(config.refresh));
 	}
 	if (config.events.length > 0) {
-		qs.set("events", config.events.join(","));
+		// everything selected serializes to the shorthand: shorter to
+		// hand-edit in OBS, and an "all" link picks up any event kind
+		// added later instead of freezing today's list
+		qs.set(
+			"events",
+			config.events.length === EVENT_KINDS.length
+				? "all"
+				: config.events.join(","),
+		);
 	}
 	if (config.avatars !== OVERLAY_DEFAULTS.avatars) {
 		qs.set("avatars", config.avatars);
