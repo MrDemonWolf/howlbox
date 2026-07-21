@@ -92,20 +92,39 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   enum as a `Record<Theme, ...>` so a new theme fails to compile until
   it is labeled. The landing/config pickers read these; the enum value
   stays the URL contract.
-- `apps/web/src/routes/` - `/` landing (hero + stats fact band +
-  editorial feature index + `ThemeWall` + CTA), `/config` the URL
-  builder (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the
-  OBS page. Shared landing chrome is
-  `components/landing/site-chrome.tsx`: `PageBackground` (aurora +
-  grain + broadcast grid, all `.hb-*` in `index.css`, landing-only,
-  never the overlay), the `MONO` machine voice + `Eyebrow` kicker,
-  header/footer/OBS steps, and the exported `DISCLAIMER` (footer
-  affiliation line, mirrors the wolfathon pattern). `ThemeWall`
-  renders all 15 themes with the REAL `MessageList` over a static
-  sample; the canned live stream is `demo-messages.ts`. `main.tsx`
-  adds the `hb-overlay` html class synchronously before React so OBS
-  never sees an opaque flash; the transparency CSS lives in eager
-  `index.css`.
+- `apps/web/src/routes/docs.tsx` - `/docs`, the reference: quick start,
+  every URL param grouped the way the configurator groups them (each
+  with a `#param-<name>` anchor so writeups can deep-link), theme
+  values, the two custom badge art formats, the `hb-*` Custom CSS
+  contract, troubleshooting, and an explicit "what it will not do"
+  section (anonymous IRC cannot send, moderate, or see EventSub). The
+  param copy here is canonical; README's table is the short version.
+- `apps/web/src/routes/` - `/` landing, `/config` the URL builder
+  (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the OBS page.
+  Shared chrome is `components/landing/site-chrome.tsx`: `SiteShell`
+  (the one page wrapper: header, main, footer, `Toaster`; all three
+  site routes use it), `Band` (full-bleed section that alternates
+  `hb-bg-base` / `hb-bg-surface`), `SectionHead` + `Kicker` (the
+  numbered spine), the `MONO` machine voice + `Eyebrow`, `OBSSteps`,
+  and the exported `DISCLAIMER` (footer affiliation line, mirrors the
+  wolfathon pattern). The landing arc mirrors the wolfwave docs home:
+  hero + fact strip, 01 audiences, 02 `ThemeWall`, 03 display modes
+  (three live `OverlayPreview`s), 04 comparison table, 05 setup,
+  06 privacy, 07 FAQ, CTA. `ThemeWall` renders all 15 themes with the
+  REAL `MessageList` over a static sample; the canned live stream is
+  `demo-messages.ts`. `main.tsx` adds the `hb-overlay` html class
+  synchronously before React so OBS never sees an opaque flash; the
+  transparency CSS lives in eager `index.css`.
+- Site color: `--site-*` tokens in `index.css`, a light default plus a
+  `.dark` override and a `prefers-color-scheme` fallback, all scoped to
+  `html:not(.hb-overlay)`. Flat surfaces only (base / surface / elev +
+  hairline), no ambient background layers. `next-themes` (already a dep
+  via sonner) owns the html class and its persistence; `main.tsx`
+  paints the same class synchronously so the first frame is not the
+  wrong mode. Brand splits in two: `--site-brand` is the fill,
+  `--site-brand-text` is brand-colored text (cerulean fails AA as text
+  on white). Site type is Inter (`.hb-display` for headings); the
+  overlay's `--hb-*` theme contract is untouched by any of this.
 
 ## URL params
 
