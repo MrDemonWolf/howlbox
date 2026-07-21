@@ -178,6 +178,33 @@ export function describeAnnouncement(): ChatEvent {
 	return { kind: "announce", text: "Announcement" };
 }
 
+// A cheer is written in the message as "Cheer100" tokens, one per chunk
+// of bits, which a chat client is expected to swap for art. The event
+// line already states the total and shows the tier art, so a 2500 bit
+// cheer would otherwise read "cheered 2500 bits: Cheer1000 Cheer1000
+// Cheer100 Cheer100 ..." and bury whatever the person actually said.
+//
+// ponytail: shape match rather than a prefix list. Twitch's own global
+// prefixes are a couple of dozen and channels add their own, so matching
+// "word followed by digits" inside a message already tagged as a cheer
+// is both shorter and more complete. The ceiling: a cheer whose text
+// happens to contain a word like "GG100" loses that word too. Swap for
+// a fetched cheermote prefix list only if that ever bites.
+const CHEERMOTE_TOKEN = /^[A-Za-z]+[1-9]\d*$/;
+
+export function stripCheermoteTokens(text: string): string {
+	const kept = text
+		.split(/\s+/)
+		.filter((token) => token && !CHEERMOTE_TOKEN.test(token))
+		.join(" ");
+	if (!kept) {
+		return "";
+	}
+	// a text part sits between emotes, so the edge spacing has to survive
+	// or the remaining words jam against the neighbouring emote image
+	return `${/^\s/.test(text) ? " " : ""}${kept}${/\s$/.test(text) ? " " : ""}`;
+}
+
 // The tags a normal PRIVMSG can carry that turn it into an event row.
 export interface MessageFlags {
 	isCheer: boolean;

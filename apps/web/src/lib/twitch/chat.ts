@@ -18,6 +18,7 @@ import {
 	describeSub,
 	describeSubGift,
 	gifterKey,
+	stripCheermoteTokens,
 } from "./events";
 import type {
 	ChatEvent,
@@ -249,6 +250,13 @@ function toParts(text: string, offsets: Map<string, string[]>): MessagePart[] {
 	return parts;
 }
 
+// Stripping a cheer's tokens can empty a text part entirely (a message
+// that was nothing but "Cheer100"); an empty span would still force the
+// ": " separator, so drop them.
+function dropEmptyText(parts: MessagePart[]): MessagePart[] {
+	return parts.filter((part) => part.type !== "text" || part.text !== "");
+}
+
 function toView(
 	login: string,
 	text: string,
@@ -268,7 +276,15 @@ function toView(
 			version,
 		})),
 		renderBadges: [],
-		parts: toParts(text, msg.emoteOffsets),
+		// a cheer's "Cheer100" tokens are art markup, not something the
+		// person typed; the event line already carries the total
+		parts: dropEmptyText(
+			toParts(text, msg.emoteOffsets).map((part) =>
+				part.type === "text" && event?.kind === "cheer"
+					? { ...part, text: stripCheermoteTokens(part.text) }
+					: part,
+			),
+		),
 		isAction,
 		isPrivileged: msg.userInfo.isBroadcaster || msg.userInfo.isMod,
 		isSubscriber: msg.userInfo.isSubscriber || msg.userInfo.isFounder,

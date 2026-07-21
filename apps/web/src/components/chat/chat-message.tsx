@@ -107,6 +107,9 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 		? isStandaloneEvent(message.event.kind)
 		: false;
 	const showAvatar = showAvatars && Boolean(message.avatarUrl);
+	const hasBody = message.parts.some(
+		(part) => part.type !== "text" || part.text.trim() !== "",
+	);
 
 	// CSS-only entrance + auto-hide: animation clocks keep running
 	// while OBS hides the source, unlike JS timers
@@ -178,8 +181,10 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 					{standalone ? message.event.text : ` ${message.event.text}`}
 				</span>
 			)}
-			{/* a standalone event with no body has nothing to separate */}
-			{!message.isAction && (standalone ? message.parts.length > 0 : true) && (
+			{/* an event row with no body has nothing to separate: a raid
+			    never has one, and a cheer that was only "Cheer100" tokens
+			    has had them stripped */}
+			{!message.isAction && (message.event ? hasBody : true) && (
 				<span className="hb-sep">: </span>
 			)}
 			{message.isAction && " "}
