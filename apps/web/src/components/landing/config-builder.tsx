@@ -145,6 +145,19 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 		return () => clearTimeout(timer);
 	}, [summary]);
 
+	// Derived from the PREVIOUS state rather than the render closure, so
+	// two quick clicks cannot both compute from the same stale list and
+	// lose one of the toggles.
+	const toggleEvent = (kind: ChatEventKind, on: boolean) =>
+		setConfig((prev) => ({
+			...prev,
+			// kept in EVENT_KINDS order so the URL is stable no matter
+			// which order the boxes were ticked
+			events: on
+				? EVENT_KINDS.filter((k) => k === kind || prev.events.includes(k))
+				: prev.events.filter((k) => k !== kind),
+		}));
+
 	const cleanChannel = config.channel.trim().toLowerCase().replace(/^@/, "");
 
 	const url = useMemo(
@@ -558,6 +571,33 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 						connection the chat does, so these need no account. Each one shows
 						as a row in the chat column.
 					</p>
+					{/* most people want either the lot or none of it, so make
+					    that one click instead of five */}
+					<div className="flex flex-wrap gap-2">
+						<button
+							aria-pressed={config.events.length === EVENT_KINDS.length}
+							className={cn(
+								"hb-btn hb-btn-sm hb-btn-secondary",
+								config.events.length === EVENT_KINDS.length &&
+									"hb-btn-selected",
+							)}
+							onClick={() => set("events", [...EVENT_KINDS])}
+							type="button"
+						>
+							All events
+						</button>
+						<button
+							aria-pressed={config.events.length === 0}
+							className={cn(
+								"hb-btn hb-btn-sm hb-btn-secondary",
+								config.events.length === 0 && "hb-btn-selected",
+							)}
+							onClick={() => set("events", [])}
+							type="button"
+						>
+							None
+						</button>
+					</div>
 					{EVENT_TOGGLES.map((toggle) => (
 						<Toggle
 							checked={config.events.includes(toggle.kind)}
@@ -565,19 +605,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							id={`cfg-event-${toggle.kind}`}
 							key={toggle.kind}
 							label={toggle.label}
-							onChange={(on) =>
-								set(
-									"events",
-									// keep EVENT_KINDS order so the URL is stable no
-									// matter which order the boxes were ticked
-									on
-										? EVENT_KINDS.filter(
-												(kind) =>
-													kind === toggle.kind || config.events.includes(kind),
-											)
-										: config.events.filter((kind) => kind !== toggle.kind),
-								)
-							}
+							onChange={(on) => toggleEvent(toggle.kind, on)}
 						/>
 					))}
 				</Fieldset>

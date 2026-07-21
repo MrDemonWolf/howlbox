@@ -21,7 +21,7 @@ import {
 	isStandaloneEvent,
 	planLabel,
 } from "@/lib/twitch/events";
-import type { ChatEventKind } from "@/lib/twitch/types";
+import { type ChatEventKind, EVENT_KINDS } from "@/lib/twitch/types";
 
 describe("event lines", () => {
 	test("tier names", () => {
@@ -221,6 +221,37 @@ describe("params", () => {
 		);
 		expect(parsed.events).toEqual(["sub", "raid"]);
 		expect(parsed.avatars).toBe("subs");
+	});
+
+	test("every kind selected serializes to the all shorthand", () => {
+		const query = overlayQuery({
+			channel: "mrdemonwolf",
+			theme: "wolf",
+			bg: "off",
+			size: 100,
+			max: 50,
+			delay: 0,
+			fade: 0,
+			hidebots: false,
+			hidecommands: false,
+			timestamps: false,
+			badges: true,
+			animate: true,
+			pronouns: false,
+			hide: [],
+			allow: [],
+			badgeart: "",
+			badgegist: "",
+			refresh: 5,
+			events: [...EVENT_KINDS],
+			avatars: "off",
+		});
+		expect(query).toBe("channel=mrdemonwolf&events=all");
+		// and it survives the trip back
+		expect(
+			overlayParamsSchema.parse(Object.fromEntries(new URLSearchParams(query)))
+				.events,
+		).toEqual([...EVENT_KINDS]);
 	});
 
 	test("defaults stay out of the query string", () => {
