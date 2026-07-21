@@ -1,35 +1,36 @@
+import { Toaster } from "@howlbox/ui/components/sonner";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, PawPrint } from "lucide-react";
+import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
-import "@fontsource-variable/bricolage-grotesque/index.css";
+import { PawMark } from "@/components/landing/paw-mark";
 
 const GITHUB_URL = "https://github.com/mrdemonwolf/howlbox";
 
-export const DISPLAY_FONT =
-	"[font-family:'Bricolage_Grotesque_Variable',system-ui,sans-serif]";
-
-// the "machine voice": every technical/machine element (kickers, param
-// names, URLs, indices, status) speaks in uppercase mono. It is the
-// through-line of a product whose whole config is one URL.
+// the "machine voice": kickers, param names and URLs speak in uppercase
+// mono. It is the through-line of a product whose whole config is one
+// URL, so it stays on labels only. Running text and nav links read
+// poorly in wide-tracked caps and use the normal face.
 export const MONO =
 	"font-mono uppercase tracking-[0.22em] [font-family:ui-monospace,'SF_Mono',SFMono-Regular,Menlo,Consolas,monospace]";
 
-// section kicker: a cerulean tick + mono label. Used by the legal pages,
+// section kicker: a brand tick + mono label. Used by the legal pages,
 // which have no numbered spine of their own.
 export function Eyebrow({ children }: { children: React.ReactNode }) {
 	return (
 		<span
-			className={`inline-flex items-center gap-3 text-[#7fd7ff] text-[0.7rem] ${MONO}`}
+			className={`hb-text-brand inline-flex items-center gap-3 text-[0.7rem] ${MONO}`}
 		>
-			<span className="h-px w-7 bg-[#00ACED]" />
+			<span className="h-px w-7 bg-[color:var(--site-brand)]" />
 			{children}
 		</span>
 	);
 }
 
 // Numbered kicker chip. Every landing section carries one, so the page
-// reads as a single indexed spine: 01 WHY IT'S DIFFERENT, 02 THEMES, and
-// so on. Styling lives in index.css (.hb-kicker).
+// reads as a single indexed spine: 01 WHO IT'S FOR, 02 THEMES, and so
+// on. Styling lives in index.css (.hb-kicker).
 export function Kicker({
 	index,
 	children,
@@ -65,13 +66,11 @@ export function SectionHead({
 	return (
 		<div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
 			<Kicker index={index}>{kicker}</Kicker>
-			<h2
-				className={`mt-5 text-balance font-bold text-4xl tracking-[-0.02em] lg:text-5xl ${DISPLAY_FONT}`}
-			>
+			<h2 className="hb-display hb-text-1 mt-5 text-balance text-4xl lg:text-5xl">
 				{title}
 			</h2>
 			{sub ? (
-				<p className="mt-4 text-pretty text-[color:var(--site-txt-2)] text-lg leading-relaxed">
+				<p className="hb-text-2 mt-4 text-pretty text-lg leading-relaxed">
 					{sub}
 				</p>
 			) : null}
@@ -79,11 +78,35 @@ export function SectionHead({
 	);
 }
 
+// Standard full-bleed section band. `tone` picks which of the two
+// surfaces it sits on; the page alternates them so sections separate
+// without any ambient background effect.
+export function Band({
+	children,
+	id,
+	tone = "base",
+	className = "",
+}: {
+	children: React.ReactNode;
+	id?: string;
+	tone?: "base" | "surface";
+	className?: string;
+}) {
+	return (
+		<section
+			className={`${tone === "base" ? "hb-bg-base" : "hb-bg-surface"} hb-hairline border-t ${className}`}
+			id={id}
+		>
+			<div className="mx-auto max-w-6xl px-6 py-20 lg:py-24">{children}</div>
+		</section>
+	);
+}
+
 // Shared "back to home" affordance for the config and legal routes.
 export function BackLink() {
 	return (
 		<Link
-			className={`inline-flex items-center gap-1.5 text-[0.7rem] text-white/50 transition-colors hover:text-white ${MONO}`}
+			className={`hb-text-2 inline-flex items-center gap-1.5 text-[0.7rem] transition-colors hover:text-[color:var(--site-txt-1)] ${MONO}`}
 			to="/"
 		>
 			<ArrowLeft className="size-3.5" /> Home
@@ -91,62 +114,92 @@ export function BackLink() {
 	);
 }
 
-// deep-space canvas: aurora mesh + film grain + broadcast grid, all
-// fixed and pointer-transparent
-export function PageBackground() {
+function ThemeToggle() {
+	const { resolvedTheme, setTheme } = useTheme();
+	// useTheme is unresolved on the server-less first render too, so the
+	// icon would swap after mount; render the frame only once it is known
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => setMounted(true), []);
+
+	const dark = resolvedTheme === "dark";
+
 	return (
-		<div aria-hidden className="pointer-events-none fixed inset-0 z-0">
-			<div className="absolute inset-0 bg-[radial-gradient(125%_95%_at_50%_-10%,#0b1c44_0%,#081231_44%,#040713_100%)]" />
-			<div className="hb-aurora" />
-			<div className="hb-grid" />
-			<div className="hb-grain" />
-		</div>
+		<button
+			aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+			className="hb-btn hb-btn-icon hb-btn-ghost"
+			onClick={() => setTheme(dark ? "light" : "dark")}
+			type="button"
+		>
+			{mounted && dark ? (
+				<Sun className="size-4" />
+			) : (
+				<Moon className="size-4" />
+			)}
+		</button>
 	);
 }
 
 export function SiteHeader() {
 	return (
-		<header className="sticky top-0 z-30 border-white/5 border-b bg-[#040713]/70 backdrop-blur-md">
+		<header className="hb-hairline sticky top-0 z-30 border-b bg-[color:var(--site-base)]/85 backdrop-blur-md">
 			<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 				<Link
-					className={`flex items-center gap-2 font-bold text-lg ${DISPLAY_FONT}`}
+					className="hb-display hb-text-1 flex items-center gap-2 text-lg"
 					to="/"
 				>
-					<PawPrint className="size-5 text-[#00ACED]" />
+					<PawMark className="size-6 text-[color:var(--site-brand-text)]" />
 					HowlBox
 				</Link>
-				{/* the mono machine voice stays on the text links; the CTA is a
-				    real button from the shared ladder, so it must not inherit
-				    the nav's uppercase tracking */}
-				<nav className="flex flex-wrap items-center justify-end gap-5 max-sm:gap-3">
+				<nav className="flex flex-wrap items-center justify-end gap-4 max-sm:gap-2">
 					<Link
-						className={`text-white/60 text-xs transition-colors hover:text-white ${MONO}`}
+						className="hb-text-2 text-sm transition-colors hover:text-[color:var(--site-txt-1)] max-sm:hidden"
 						hash="themes"
 						to="/"
 					>
 						Themes
 					</Link>
 					<Link
-						className={`text-white/60 text-xs transition-colors hover:text-white ${MONO}`}
-						hash="setup"
-						to="/"
+						className="hb-text-2 text-sm transition-colors hover:text-[color:var(--site-txt-1)] max-sm:hidden"
+						to="/docs"
 					>
-						Setup
+						Docs
 					</Link>
 					<a
-						className={`text-white/60 text-xs transition-colors hover:text-white ${MONO}`}
+						className="hb-text-2 text-sm transition-colors hover:text-[color:var(--site-txt-1)] max-sm:hidden"
 						href={GITHUB_URL}
 						rel="noreferrer"
 						target="_blank"
 					>
 						GitHub
 					</a>
+					<ThemeToggle />
 					<Link className="hb-btn hb-btn-sm hb-btn-primary" to="/config">
 						Configure
 					</Link>
 				</nav>
 			</div>
 		</header>
+	);
+}
+
+// Every page on the site is header + content + footer on the token
+// canvas. One shell so the three routes cannot drift apart.
+export function SiteShell({ children }: { children: React.ReactNode }) {
+	return (
+		<div className="hb-bg-base hb-text-1 min-h-svh scroll-smooth antialiased">
+			{/* WCAG 2.4.1: five header controls sit before the content on
+			    every page, so keyboard users need a way past them */}
+			<a
+				className="hb-btn hb-btn-sm hb-btn-primary sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+				href="#main"
+			>
+				Skip to content
+			</a>
+			<SiteHeader />
+			<main id="main">{children}</main>
+			<SiteFooter />
+			<Toaster richColors />
+		</div>
 	);
 }
 
@@ -169,9 +222,15 @@ const SETUP_STEPS = [
 	},
 ];
 
-export function OBSSteps({ index = "04" }: { index?: string }) {
+export function OBSSteps({
+	index = "06",
+	tone = "base",
+}: {
+	index?: string;
+	tone?: "base" | "surface";
+}) {
 	return (
-		<section className="mx-auto max-w-6xl px-6 py-24" id="setup">
+		<Band id="setup" tone={tone}>
 			<SectionHead
 				align="center"
 				index={index}
@@ -182,24 +241,23 @@ export function OBSSteps({ index = "04" }: { index?: string }) {
 			<ol className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{SETUP_STEPS.map((step, stepIndex) => (
 					<li
-						className="hb-card p-6 transition-colors hover:border-[#00ACED]/40"
+						className="hb-card p-6 transition-colors hover:border-[color:var(--site-brand)]"
 						key={step.title}
 					>
 						<span className="hb-kicker-num text-xs">
 							{String(stepIndex + 1).padStart(2, "0")}
 						</span>
 						<h3 className="mt-4 mb-2 font-semibold text-lg">{step.title}</h3>
-						<p className="text-[color:var(--site-txt-2)] text-sm leading-relaxed">
-							{step.body}
-						</p>
+						<p className="hb-text-2 text-sm leading-relaxed">{step.body}</p>
 					</li>
 				))}
 			</ol>
-			<p className={`mt-6 text-center text-white/45 text-xs ${MONO}`}>
-				Power users: every node carries a stable hb-* class for the OBS Custom
-				CSS field.
+			<p className="hb-text-2 mt-6 text-center text-sm">
+				Power users: every node carries a stable{" "}
+				<code className="font-mono">hb-*</code> class for the OBS Custom CSS
+				field.
 			</p>
-		</section>
+		</Band>
 	);
 }
 
@@ -213,16 +271,16 @@ export function SiteFooter() {
 	// footer; the Twitch/7TV disclaimer sits above it since HowlBox
 	// surfaces those trademarks and wolfwave has no equivalent need.
 	return (
-		<footer className="border-white/10 border-t">
+		<footer className="hb-bg-surface hb-hairline border-t">
 			<div className="mx-auto w-full max-w-6xl px-6 py-10">
-				<p className="text-pretty text-white/45 text-xs leading-relaxed">
+				<p className="hb-text-2 text-pretty text-xs leading-relaxed">
 					{DISCLAIMER}
 				</p>
-				<div className="mt-6 flex flex-col items-center justify-between gap-4 border-white/10 border-t pt-6 text-sm text-white/55 sm:flex-row">
+				<div className="hb-hairline hb-text-2 mt-6 flex flex-col items-center justify-between gap-4 border-t pt-6 text-sm sm:flex-row">
 					<p>
 						© {new Date().getFullYear()} HowlBox by{" "}
 						<a
-							className="text-white/70 transition-colors hover:text-white"
+							className="transition-colors hover:text-[color:var(--site-txt-1)]"
 							href="https://www.mrdemonwolf.com"
 							rel="noreferrer"
 							target="_blank"
@@ -231,8 +289,14 @@ export function SiteFooter() {
 						</a>
 					</p>
 					<nav className="flex flex-wrap items-center justify-center gap-6">
+						<Link
+							className="transition-colors hover:text-[color:var(--site-txt-1)]"
+							to="/docs"
+						>
+							Docs
+						</Link>
 						<a
-							className="transition-colors hover:text-white"
+							className="transition-colors hover:text-[color:var(--site-txt-1)]"
 							href={GITHUB_URL}
 							rel="noreferrer"
 							target="_blank"
@@ -240,17 +304,23 @@ export function SiteFooter() {
 							GitHub
 						</a>
 						<a
-							className="transition-colors hover:text-white"
+							className="transition-colors hover:text-[color:var(--site-txt-1)]"
 							href="https://mrdwolf.net/discord"
 							rel="noreferrer"
 							target="_blank"
 						>
 							Discord
 						</a>
-						<Link className="transition-colors hover:text-white" to="/privacy">
+						<Link
+							className="transition-colors hover:text-[color:var(--site-txt-1)]"
+							to="/privacy"
+						>
 							Privacy
 						</Link>
-						<Link className="transition-colors hover:text-white" to="/terms">
+						<Link
+							className="transition-colors hover:text-[color:var(--site-txt-1)]"
+							to="/terms"
+						>
 							Terms
 						</Link>
 					</nav>
