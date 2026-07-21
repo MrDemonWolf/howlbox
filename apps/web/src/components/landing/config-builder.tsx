@@ -24,6 +24,11 @@ import {
 } from "@/lib/overlay/params";
 import { BG_LABEL, THEME_LABEL, THEME_SWATCH } from "@/lib/overlay/theme-meta";
 import { buildOverlayUrl, parseOverlayUrl } from "@/lib/overlay/url";
+import {
+	type AvatarMode,
+	type ChatEventKind,
+	EVENT_KINDS,
+} from "@/lib/twitch/types";
 
 interface Config {
 	channel: string;
@@ -44,6 +49,8 @@ interface Config {
 	badgeart: string;
 	badgegist: string;
 	refresh: number;
+	events: ChatEventKind[];
+	avatars: AvatarMode;
 }
 
 // Form state. The scalar/toggle defaults come from the shared
@@ -68,7 +75,38 @@ const DEFAULTS: Config = {
 	badgeart: OVERLAY_DEFAULTS.badgeart,
 	badgegist: OVERLAY_DEFAULTS.badgegist,
 	refresh: OVERLAY_DEFAULTS.refresh,
+	events: OVERLAY_DEFAULTS.events,
+	avatars: OVERLAY_DEFAULTS.avatars,
 };
+
+// The four event toggles, in the order they appear in the form. One
+// checkbox can cover several twurple events (a gift, a mass gift and a
+// Prime upgrade are all "subs" as far as a streamer is concerned).
+const EVENT_TOGGLES: { kind: ChatEventKind; label: string; hint: string }[] = [
+	{
+		kind: "sub",
+		label: "Subs, resubs and gifts",
+		hint: "Including mass gifts and Prime upgrades.",
+	},
+	{ kind: "cheer", label: "Cheers", hint: "With the bits tier art." },
+	{ kind: "raid", label: "Raids", hint: "Raider name and viewer count." },
+	{
+		kind: "first",
+		label: "First-time chatters",
+		hint: "Marks a first message, and returning chatters.",
+	},
+	{
+		kind: "announce",
+		label: "Announcements",
+		hint: "The /announce highlight from mods.",
+	},
+];
+
+const AVATAR_OPTIONS: { value: AvatarMode; label: string }[] = [
+	{ value: "off", label: "Off" },
+	{ value: "all", label: "Everyone" },
+	{ value: "subs", label: "Subscribers only" },
+];
 
 // The ui package ships dense 32px square fields; the site scale is a
 // 44px rounded control. One constant so every field matches the buttons
@@ -107,6 +145,19 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 		return () => clearTimeout(timer);
 	}, [summary]);
 
+	// Derived from the PREVIOUS state rather than the render closure, so
+	// two quick clicks cannot both compute from the same stale list and
+	// lose one of the toggles.
+	const toggleEvent = (kind: ChatEventKind, on: boolean) =>
+		setConfig((prev) => ({
+			...prev,
+			// kept in EVENT_KINDS order so the URL is stable no matter
+			// which order the boxes were ticked
+			events: on
+				? EVENT_KINDS.filter((k) => k === kind || prev.events.includes(k))
+				: prev.events.filter((k) => k !== kind),
+		}));
+
 	const cleanChannel = config.channel.trim().toLowerCase().replace(/^@/, "");
 
 	const url = useMemo(
@@ -130,6 +181,8 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				badgeart: config.badgeart.trim(),
 				badgegist: config.badgegist.trim(),
 				refresh: config.refresh,
+				events: config.events,
+				avatars: config.avatars,
 			}),
 		[cleanChannel, config],
 	);
@@ -183,6 +236,8 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 			badgeart: parsed.badgeart,
 			badgegist: parsed.badgegist,
 			refresh: parsed.refresh,
+			events: parsed.events,
+			avatars: parsed.avatars,
 		});
 		setImportDraft("");
 		toast.success("Loaded, every control now matches that link");
@@ -228,6 +283,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 					bg={config.bg}
 					className="h-64 sm:h-96"
 					fadeSeconds={config.fade}
+					showAvatars={config.avatars !== "off"}
 					showBadges={config.badges}
 					showPronouns={config.pronouns}
 					showTimestamps={config.timestamps}
@@ -424,6 +480,28 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 						/>
 					</Field>
 
+					<Field
+						hint="Profile pictures are looked up per user from api.ivr.fi. Subscribers only keeps that lookup to people invested in your channel instead of every passer-by."
+						label="Profile pictures"
+					>
+						<div className="flex flex-wrap gap-2">
+							{AVATAR_OPTIONS.map((option) => (
+								<button
+									aria-pressed={config.avatars === option.value}
+									className={cn(
+										"hb-btn hb-btn-sm hb-btn-secondary",
+										config.avatars === option.value && "hb-btn-selected",
+									)}
+									key={option.value}
+									onClick={() => set("avatars", option.value)}
+									type="button"
+								>
+									{option.label}
+								</button>
+							))}
+						</div>
+					</Field>
+
 					<Toggle
 						checked={config.badges}
 						id="cfg-badges"
@@ -485,6 +563,51 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							value={config.fade}
 						/>
 					</div>
+				</Fieldset>
+
+				<Fieldset title="Events">
+					<p className="text-[color:var(--site-txt-2)] text-sm leading-relaxed">
+						Subs, gifts, raids and cheers all arrive on the same anonymous
+						connection the chat does, so these need no account. Each one shows
+						as a row in the chat column.
+					</p>
+					{/* most people want either the lot or none of it, so make
+					    that one click instead of five */}
+					<div className="flex flex-wrap gap-2">
+						<button
+							aria-pressed={config.events.length === EVENT_KINDS.length}
+							className={cn(
+								"hb-btn hb-btn-sm hb-btn-secondary",
+								config.events.length === EVENT_KINDS.length &&
+									"hb-btn-selected",
+							)}
+							onClick={() => set("events", [...EVENT_KINDS])}
+							type="button"
+						>
+							All events
+						</button>
+						<button
+							aria-pressed={config.events.length === 0}
+							className={cn(
+								"hb-btn hb-btn-sm hb-btn-secondary",
+								config.events.length === 0 && "hb-btn-selected",
+							)}
+							onClick={() => set("events", [])}
+							type="button"
+						>
+							None
+						</button>
+					</div>
+					{EVENT_TOGGLES.map((toggle) => (
+						<Toggle
+							checked={config.events.includes(toggle.kind)}
+							hint={toggle.hint}
+							id={`cfg-event-${toggle.kind}`}
+							key={toggle.kind}
+							label={toggle.label}
+							onChange={(on) => toggleEvent(toggle.kind, on)}
+						/>
+					))}
 				</Fieldset>
 
 				<Fieldset title="Moderation">

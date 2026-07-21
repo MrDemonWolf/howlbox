@@ -3,6 +3,7 @@ import { memo } from "react";
 
 import type { OverlayParams } from "@/lib/overlay/params";
 import { readableUserColor } from "@/lib/twitch/colors";
+import { isStandaloneEvent } from "@/lib/twitch/events";
 import type { ChatMessageView, MessagePart } from "@/lib/twitch/types";
 
 interface ChatMessageRowProps {
@@ -12,6 +13,7 @@ interface ChatMessageRowProps {
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
+	showAvatars: boolean;
 	animate: boolean;
 	fadeSeconds: number;
 }
@@ -33,6 +35,20 @@ const EMOTE_CLASSES =
 // hairline pill in the theme's border/text colors
 const TEXT_BADGE_CLASSES =
 	"hb-pronoun -my-0.5 mr-1 inline-flex h-[1.15em] items-center rounded-[0.35em] border border-(--hb-border) px-[0.35em] align-middle text-[0.8em] leading-none";
+
+// profile picture: shape and ring come from the theme, so retro themes
+// get a square and the soft ones get a circle
+const AVATAR_CLASSES =
+	"hb-avatar -my-0.5 mr-1 inline-block aspect-square h-(--hb-avatar-size) rounded-(--hb-avatar-radius) object-cover align-middle [box-shadow:var(--hb-avatar-ring)]";
+
+// The system line on an event row (sub, raid, cheer, first message).
+// No trailing margin: the line is always followed either by the ": "
+// separator or by nothing, and a margin renders as "7 in a row : text".
+const EVENT_LINE_CLASSES =
+	"hb-event-line font-semibold text-[color:var(--hb-event-accent)]";
+
+const CHEERMOTE_CLASSES =
+	"hb-cheermote -my-1 mr-0.5 inline-block h-[1.6em] align-middle";
 
 type EmotePart = Extract<MessagePart, { type: "emote" }>;
 
@@ -68,6 +84,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 	showBadges,
 	showPronouns,
 	showTimestamps,
+	showAvatars,
 	animate,
 	fadeSeconds,
 }: ChatMessageRowProps) {
@@ -83,6 +100,16 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 			? "[text-shadow:var(--hb-shadow-off)]"
 			: "[text-shadow:var(--hb-glow)]";
 	const color = readableUserColor(message.color, surfaceTone);
+	// a sub or raid line names everyone involved in its own sentence, so
+	// it drops the author header; a cheer or first message decorates a
+	// real message and keeps it
+	const standalone = message.event
+		? isStandaloneEvent(message.event.kind)
+		: false;
+	const showAvatar = showAvatars && Boolean(message.avatarUrl);
+	const hasBody = message.parts.some(
+		(part) => part.type !== "text" || part.text.trim() !== "",
+	);
 
 	// CSS-only entrance + auto-hide: animation clocks keep running
 	// while OBS hides the source, unlike JS timers
@@ -104,12 +131,21 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 				bg === "bubble" && BUBBLE_CLASSES,
 				message.isAction && "italic",
 			)}
+			data-event={message.event?.kind}
 			style={animation ? { animation } : undefined}
 		>
 			{showTimestamps && (
 				<span className="hb-time mr-1 align-middle text-[0.78em] opacity-60">
 					{formatTime(message.timestamp)}
 				</span>
+			)}
+			{showAvatar && (
+				<img
+					alt=""
+					className={AVATAR_CLASSES}
+					loading="lazy"
+					src={message.avatarUrl}
+				/>
 			)}
 			{badges.map((badge, index) =>
 				badge.kind === "image" ? (
@@ -128,10 +164,29 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 					</span>
 				),
 			)}
-			<span className="hb-name font-semibold" style={{ color }}>
-				{message.displayName}
-			</span>
-			{!message.isAction && <span className="hb-sep">: </span>}
+			{!standalone && (
+				<span className="hb-name font-semibold" style={{ color }}>
+					{message.displayName}
+				</span>
+			)}
+			{message.event?.cheermoteUrl && (
+				<img
+					alt=""
+					className={CHEERMOTE_CLASSES}
+					src={message.event.cheermoteUrl}
+				/>
+			)}
+			{message.event && (
+				<span className={EVENT_LINE_CLASSES}>
+					{standalone ? message.event.text : ` ${message.event.text}`}
+				</span>
+			)}
+			{/* an event row with no body has nothing to separate: a raid
+			    never has one, and a cheer that was only "Cheer100" tokens
+			    has had them stripped */}
+			{!message.isAction && (message.event ? hasBody : true) && (
+				<span className="hb-sep">: </span>
+			)}
 			{message.isAction && " "}
 			<span
 				className="hb-text"

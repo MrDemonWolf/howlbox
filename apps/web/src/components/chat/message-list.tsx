@@ -33,6 +33,7 @@ interface MessageListProps {
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
+	showAvatars?: boolean;
 	animate: boolean;
 	fadeSeconds: number;
 }
@@ -48,6 +49,7 @@ export function MessageList({
 	showBadges,
 	showPronouns,
 	showTimestamps,
+	showAvatars = false,
 	animate,
 	fadeSeconds,
 }: MessageListProps) {
@@ -74,6 +76,7 @@ export function MessageList({
 					fadeSeconds={fadeSeconds}
 					key={message.id}
 					message={message}
+					showAvatars={showAvatars}
 					showBadges={showBadges}
 					showPronouns={showPronouns}
 					showTimestamps={showTimestamps}

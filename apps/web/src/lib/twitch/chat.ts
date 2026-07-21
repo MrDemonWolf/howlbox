@@ -3,10 +3,30 @@ import {
 	ChatClient,
 	type ChatMessage,
 	parseChatMessage,
+	type UserNotice,
 } from "@twurple/chat";
 
 import { fallbackColor } from "./colors";
-import type { ChatMessageView, ConnectionStatus, MessagePart } from "./types";
+import {
+	createGiftDeduper,
+	decorateMessage,
+	describeCommunitySub,
+	describeGiftUpgrade,
+	describePrimeUpgrade,
+	describeRaid,
+	describeResub,
+	describeSub,
+	describeSubGift,
+	gifterKey,
+	stripCheermoteTokens,
+} from "./events";
+import type {
+	ChatEvent,
+	ChatEventKind,
+	ChatMessageView,
+	ConnectionStatus,
+	MessagePart,
+} from "./types";
 
 export interface ChatHandlers {
 	onMessage: (message: ChatMessageView) => void;
@@ -16,12 +36,20 @@ export interface ChatHandlers {
 	onStatus: (status: ConnectionStatus) => void;
 }
 
+export interface ChatOptions {
+	// which event kinds to surface; empty means no event listeners are
+	// registered at all, so the default overlay path is untouched
+	events?: ReadonlySet<ChatEventKind>;
+}
+
 // Anonymous (justinfan) connection: read-only, no auth, but still
 // receives full IRCv3 tags (badges, color, emotes, message id).
 export function connectChat(
 	channel: string,
 	handlers: ChatHandlers,
+	options: ChatOptions = {},
 ): () => void {
+	const events = options.events ?? new Set<ChatEventKind>();
 	const joined = channel.replace(/^#/, "").toLowerCase();
 	// quit() can race the connect handshake and leave a zombie client
 	// that finishes connecting and auto-reconnects; the closed flag
@@ -35,14 +63,27 @@ export function connectChat(
 		rejoinChannelsOnReconnect: true,
 	});
 
+	// cheers and first-time chatters are tags on a normal message, not
+	// USERNOTICE; the decision itself is pure and lives in events.ts
+	const decorate = (msg: ChatMessage): ChatEvent | undefined =>
+		decorateMessage(
+			{
+				isCheer: msg.isCheer,
+				bits: msg.bits,
+				isFirst: msg.isFirst,
+				isReturningChatter: msg.isReturningChatter,
+			},
+			events,
+		);
+
 	client.onMessage((_channel, user, text, msg) => {
 		if (!closed) {
-			handlers.onMessage(toView(user, text, msg, false));
+			handlers.onMessage(toView(user, text, msg, false, decorate(msg)));
 		}
 	});
 	client.onAction((_channel, user, text, msg) => {
 		if (!closed) {
-			handlers.onMessage(toView(user, text, msg, true));
+			handlers.onMessage(toView(user, text, msg, true, decorate(msg)));
 		}
 	});
 	client.onMessageRemove((_channel, messageId) => {
@@ -87,6 +128,78 @@ export function connectChat(
 		}
 	});
 
+	// USERNOTICE events. Registered only for the requested kinds, so an
+	// overlay without ?events= behaves exactly as it did before.
+	const pushNotice = (msg: UserNotice, event: ChatEvent) => {
+		if (!closed) {
+			handlers.onMessage(noticeToView(msg, event));
+		}
+	};
+	// swallows the per-recipient notices that follow a mass gift
+	const gifts = createGiftDeduper();
+	if (events.has("sub")) {
+		client.onSub((_channel, _user, info, msg) => {
+			pushNotice(msg, describeSub(info.displayName, info.plan));
+		});
+		client.onResub((_channel, _user, info, msg) => {
+			pushNotice(
+				msg,
+				describeResub(info.displayName, info.plan, info.months, info.streak),
+			);
+		});
+		client.onSubGift((_channel, _user, info, msg) => {
+			// part of an already-announced mass gift: the batch line covers
+			// it, so rendering this too would just repeat the same gift
+			if (
+				gifts.claim(
+					gifterKey(info.gifterUserId, info.gifterDisplayName),
+					msg.date.getTime(),
+				)
+			) {
+				return;
+			}
+			pushNotice(
+				msg,
+				describeSubGift(
+					info.plan,
+					info.displayName,
+					info.gifterDisplayName,
+					info.giftDuration,
+				),
+			);
+		});
+		client.onCommunitySub((_channel, _user, info, msg) => {
+			gifts.announce(
+				gifterKey(info.gifterUserId, info.gifterDisplayName),
+				info.count,
+				msg.date.getTime(),
+			);
+			pushNotice(
+				msg,
+				describeCommunitySub(info.plan, info.count, info.gifterDisplayName),
+			);
+		});
+		client.onPrimePaidUpgrade((_channel, _user, info, msg) => {
+			pushNotice(msg, describePrimeUpgrade(info.displayName, info.plan));
+		});
+		client.onGiftPaidUpgrade((_channel, _user, info, msg) => {
+			pushNotice(
+				msg,
+				describeGiftUpgrade(info.displayName, info.gifterDisplayName),
+			);
+		});
+	}
+	if (events.has("raid")) {
+		client.onRaid((_channel, _user, info, msg) => {
+			pushNotice(msg, describeRaid(info.displayName, info.viewerCount));
+		});
+	}
+	if (events.has("announce")) {
+		client.onAnnouncement((_channel, _user, _info, msg) => {
+			pushNotice(msg, { kind: "announce", text: "Announcement" });
+		});
+	}
+
 	// OBS throttles timers while a source is hidden, which can stall
 	// twurple's timer-based retry; nudge reconnects off events too
 	const nudge = () => {
@@ -119,14 +232,11 @@ export function connectChat(
 	};
 }
 
-function toView(
-	login: string,
-	text: string,
-	msg: ChatMessage,
-	isAction: boolean,
-): ChatMessageView {
+// Twitch native emotes out of the emote offset tags. Shared by messages
+// and USERNOTICE bodies, which carry the same tag shape.
+function toParts(text: string, offsets: Map<string, string[]>): MessagePart[] {
 	const parts: MessagePart[] = [];
-	for (const part of parseChatMessage(text, msg.emoteOffsets)) {
+	for (const part of parseChatMessage(text, offsets)) {
 		if (part.type === "emote") {
 			parts.push({
 				type: "emote",
@@ -137,7 +247,23 @@ function toView(
 			parts.push({ type: "text", text: part.text });
 		}
 	}
+	return parts;
+}
 
+// Stripping a cheer's tokens can empty a text part entirely (a message
+// that was nothing but "Cheer100"); an empty span would still force the
+// ": " separator, so drop them.
+function dropEmptyText(parts: MessagePart[]): MessagePart[] {
+	return parts.filter((part) => part.type !== "text" || part.text !== "");
+}
+
+function toView(
+	login: string,
+	text: string,
+	msg: ChatMessage,
+	isAction: boolean,
+	event?: ChatEvent,
+): ChatMessageView {
 	return {
 		id: msg.id,
 		channelId: msg.channelId,
@@ -150,9 +276,45 @@ function toView(
 			version,
 		})),
 		renderBadges: [],
-		parts,
+		// a cheer's "Cheer100" tokens are art markup, not something the
+		// person typed; the event line already carries the total
+		parts: dropEmptyText(
+			toParts(text, msg.emoteOffsets).map((part) =>
+				part.type === "text" && event?.kind === "cheer"
+					? { ...part, text: stripCheermoteTokens(part.text) }
+					: part,
+			),
+		),
 		isAction,
 		isPrivileged: msg.userInfo.isBroadcaster || msg.userInfo.isMod,
+		isSubscriber: msg.userInfo.isSubscriber || msg.userInfo.isFounder,
 		timestamp: msg.date.getTime(),
+		event,
+	};
+}
+
+// A USERNOTICE (sub, gift, raid, announcement) as a message row. The
+// body is optional: a resub may carry a message, a raid never does.
+function noticeToView(msg: UserNotice, event: ChatEvent): ChatMessageView {
+	const login = msg.userInfo.userName;
+	return {
+		id: msg.id,
+		channelId: msg.channelId,
+		login,
+		displayName: msg.userInfo.displayName,
+		color: msg.userInfo.color || fallbackColor(login),
+		badges: [...msg.userInfo.badges].map(([set, version]) => ({
+			set,
+			version,
+		})),
+		renderBadges: [],
+		parts: msg.text ? toParts(msg.text, msg.emoteOffsets) : [],
+		isAction: false,
+		// events are system lines, not user speech: holding them behind the
+		// moderation delay would land a raid alert minutes after the raid
+		isPrivileged: true,
+		isSubscriber: msg.userInfo.isSubscriber || msg.userInfo.isFounder,
+		timestamp: msg.date.getTime(),
+		event,
 	};
 }
