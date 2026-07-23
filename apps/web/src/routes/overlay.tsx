@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { ChatOverlay } from "@/components/chat/chat-overlay";
+import { OverlayErrorFallback } from "@/components/error-fallbacks";
 import { useBadgeMap, useEmoteMap } from "@/hooks/use-emotes";
 import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import { overlayParamsSchema } from "@/lib/overlay/params";
@@ -12,6 +13,10 @@ import "@/components/chat/overlay.css";
 
 export const Route = createFileRoute("/overlay")({
 	validateSearch: (search) => overlayParamsSchema.parse(search),
+	// every param falls back on its own, so a parse throw is rare, but an
+	// overlay must never show OBS a blank/default-error page: catch it as a
+	// transparent status pill instead
+	errorComponent: OverlayErrorFallback,
 	component: OverlayPage,
 });
 
