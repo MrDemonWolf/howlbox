@@ -9,7 +9,7 @@ import {
 	ExternalLink,
 	RotateCcw,
 } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { OverlayPreview } from "@/components/landing/overlay-preview";
@@ -17,6 +17,7 @@ import { MONO } from "@/components/landing/site-chrome";
 import {
 	BG_MODES,
 	type BgMode,
+	isValidLogin,
 	normalizeLoginList,
 	OVERLAY_DEFAULTS,
 	THEMES,
@@ -122,8 +123,13 @@ const SIZE_PRESETS = [
 	{ label: "XL", value: 160 },
 ];
 
+// Clamp a typed number into [min, max]. A valid in-range 0 must survive
+// (Number(raw) || fallback would turn a legitimate 0 into the fallback,
+// so ?max=0 snapped to 50 instead of clamping to the min of 1); only a
+// non-numeric draft falls back.
 function clampNumber(raw: string, min: number, max: number, fallback: number) {
-	return Math.min(max, Math.max(min, Number(raw) || fallback));
+	const n = Number(raw);
+	return Math.min(max, Math.max(min, Number.isFinite(n) ? n : fallback));
 }
 
 export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
@@ -159,6 +165,12 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 		}));
 
 	const cleanChannel = config.channel.trim().toLowerCase().replace(/^@/, "");
+	// Buttons unlock only on a real Twitch login, not just any non-empty
+	// text; a garbage channel would otherwise build a URL that never joins.
+	const channelReady = isValidLogin(cleanChannel);
+	// Show the inline error only once the user has typed something wrong,
+	// never on the empty starting state.
+	const channelInvalid = cleanChannel.length > 0 && !channelReady;
 
 	const url = useMemo(
 		() =>
@@ -187,14 +199,39 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 		[cleanChannel, config],
 	);
 
-	// copy is disabled without a channel, so the button can't fire empty;
-	// the guard stays as a keyboard/programmatic backstop.
+	// copy is disabled until the channel is valid, so the button can't fire
+	// empty; the guard stays as a keyboard/programmatic backstop. The
+	// clipboard write can reject (denied permission, insecure context, OBS'
+	// embedded browser), so fall back to selecting the URL readout and tell
+	// the user to copy it by hand instead of dropping the click silently.
 	const copy = async () => {
-		if (!cleanChannel) {
+		if (!channelReady) {
 			return;
 		}
-		await navigator.clipboard.writeText(url);
-		toast.success("Overlay URL copied, paste it into OBS");
+		try {
+			await navigator.clipboard.writeText(url);
+			toast.success("Overlay URL copied, paste it into OBS");
+		} catch {
+			selectUrlReadout();
+			toast.error(
+				"Could not copy automatically, the URL is selected, press Ctrl+C",
+			);
+		}
+	};
+
+	// Select the generated URL text so a failed clipboard write still lets
+	// the user copy it manually.
+	const urlRef = useRef<HTMLElement>(null);
+	const selectUrlReadout = () => {
+		const node = urlRef.current;
+		if (!node) {
+			return;
+		}
+		const selection = window.getSelection();
+		const range = document.createRange();
+		range.selectNodeContents(node);
+		selection?.removeAllRanges();
+		selection?.addRange(range);
 	};
 
 	// destructive: one click wipes every field. Snapshot first and hand
@@ -310,6 +347,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 					<section
 						aria-label="Generated overlay URL"
 						className="break-all p-4 font-mono text-[color:var(--site-brand-text)] text-sm leading-relaxed"
+						ref={urlRef}
 					>
 						{url}
 					</section>
@@ -318,21 +356,21 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				<div className="flex flex-wrap gap-2">
 					<button
 						className="hb-btn hb-btn-primary"
-						disabled={!cleanChannel}
+						disabled={!channelReady}
 						onClick={copy}
 						type="button"
 					>
 						<Copy className="size-4" /> Copy URL
 					</button>
 					<a
-						aria-disabled={!cleanChannel}
+						aria-disabled={!channelReady}
 						className={cn(
 							"hb-btn hb-btn-secondary",
-							!cleanChannel && "pointer-events-none opacity-50",
+							!channelReady && "pointer-events-none opacity-50",
 						)}
 						href={url}
 						rel="noreferrer"
-						tabIndex={cleanChannel ? undefined : -1}
+						tabIndex={channelReady ? undefined : -1}
 						target="_blank"
 					>
 						<ExternalLink className="size-4" /> Open preview
@@ -341,9 +379,11 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 						<RotateCcw className="size-4" /> Reset
 					</button>
 				</div>
-				{!cleanChannel && (
+				{!channelReady && (
 					<p className="text-[color:var(--site-txt-2)] text-xs">
-						Enter your channel above to copy or open the overlay.
+						{channelInvalid
+							? "That is not a valid Twitch channel name. Use 1 to 25 letters, numbers or underscores."
+							: "Enter your channel above to copy or open the overlay."}
 					</p>
 				)}
 			</div>
@@ -385,12 +425,17 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 				</Fieldset>
 
 				<Fieldset title="Channel">
-					<Field
-						hint="Just the login name, no URL or @."
-						htmlFor="cfg-channel"
-						label="Twitch channel"
-					>
+					{/* Not wired through Field's hint (its describe helper would
+					    overwrite aria-describedby); the input points at both the
+					    hint and, when invalid, the error itself. */}
+					<div className="grid gap-2">
+						<Label htmlFor="cfg-channel">Twitch channel</Label>
 						<Input
+							aria-describedby={cn(
+								"cfg-channel-hint",
+								channelInvalid && "cfg-channel-error",
+							)}
+							aria-invalid={channelInvalid}
 							autoComplete="off"
 							className={FIELD}
 							id="cfg-channel"
@@ -398,7 +443,22 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 							placeholder="your_channel"
 							value={config.channel}
 						/>
-					</Field>
+						<p
+							className="text-[color:var(--site-txt-2)] text-xs leading-relaxed"
+							id="cfg-channel-hint"
+						>
+							Just the login name, no URL or @.
+						</p>
+						{channelInvalid && (
+							<p
+								className="text-[color:var(--site-danger,#e5484d)] text-xs"
+								id="cfg-channel-error"
+							>
+								Not a valid Twitch channel name. Use 1 to 25 letters, numbers or
+								underscores, no spaces.
+							</p>
+						)}
+					</div>
 				</Fieldset>
 
 				<Fieldset title="Look">
@@ -716,23 +776,26 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 
 						<div className="hb-hairline border-t pt-4">
 							<Field
-								hint="Pulls new 7TV, BTTV, FFZ, and badge art mid-stream so fresh emotes show up without reloading OBS. Off, or every 5 to 60 minutes; a gentle interval keeps the smaller emote APIs happy."
+								hint="Pulls new 7TV, BTTV, FFZ, and badge art mid-stream so fresh emotes show up without reloading OBS. Off, or every 5 minutes up to 24 hours; a gentle interval keeps the smaller emote APIs happy."
 								htmlFor="cfg-refresh"
 								label={`Refresh emotes (${config.refresh === 0 ? "off" : `every ${config.refresh} min`})`}
 							>
+								{/* Slider ceiling matches the schema's 1440-minute max, so
+								    an imported refresh never has to be misrepresented or
+								    silently truncated on touch. */}
 								<input
 									className="mt-1 h-11 w-full accent-[color:var(--site-brand)]"
 									id="cfg-refresh"
-									max={60}
+									max={1440}
 									min={0}
 									onChange={(e) => set("refresh", Number(e.target.value))}
 									step={5}
 									type="range"
-									value={Math.min(60, config.refresh)}
+									value={config.refresh}
 								/>
 								<div className="flex justify-between text-[0.7rem] text-[color:var(--site-txt-2)]">
 									<span>Off</span>
-									<span>60 min</span>
+									<span>24 h</span>
 								</div>
 							</Field>
 						</div>
