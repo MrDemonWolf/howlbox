@@ -50,14 +50,31 @@ export async function fetchBadgeMap(
 	return map;
 }
 
-// A badge key is "<set>" or "<set>/<version>"; art must be an http(s)
+// Caps on user-supplied badge art. A chat overlay renders a handful of
+// badge sets; anything past this is either a typo or an attempt to wedge
+// the parser, so it is dropped rather than trusted.
+const MAX_BADGE_ENTRIES = 200;
+// A badge-art gist is a short key=url list. Refuse to parse a megabyte
+// of attacker-controlled content before it can exhaust memory.
+const MAX_GIST_BYTES = 64 * 1024;
+
+// A badge key is "<set>" or "<set>/<version>"; art must be an https
 // image URL. Shared gate for the inline param and the gist file, so
 // both drop the same junk. Never throws, same spirit as params.ts.
 function isBadgeKey(key: string): boolean {
 	return /^[\w-]+(\/[\w-]+)?$/.test(key);
 }
-function isHttpUrl(url: string): boolean {
-	return /^https?:\/\//.test(url);
+// HTTPS only (an http image is mixed content on the HTTPS overlay and
+// leaks in the clear), and never a URL carrying embedded credentials
+// (user:pass@host), which are a credential-leak / SSRF-bait pattern.
+function isHttpsUrl(url: string): boolean {
+	let parsed: URL;
+	try {
+		parsed = new URL(url);
+	} catch {
+		return false;
+	}
+	return parsed.protocol === "https:" && !parsed.username && !parsed.password;
 }
 
 // Custom badge art from the ?badgeart param. Comma list of
@@ -67,13 +84,16 @@ function isHttpUrl(url: string): boolean {
 export function parseCustomBadgeArt(raw: string): [string, string][] {
 	const out: [string, string][] = [];
 	for (const pair of raw.split(",")) {
+		if (out.length >= MAX_BADGE_ENTRIES) {
+			break;
+		}
 		const eq = pair.indexOf("=");
 		if (eq <= 0) {
 			continue;
 		}
 		const key = pair.slice(0, eq).trim();
 		const url = pair.slice(eq + 1).trim();
-		if (isBadgeKey(key) && isHttpUrl(url)) {
+		if (isBadgeKey(key) && isHttpsUrl(url)) {
 			out.push([key, url]);
 		}
 	}
@@ -83,13 +103,20 @@ export function parseCustomBadgeArt(raw: string): [string, string][] {
 // A gist file is either JSON ({ "set/version": "url" }) or the same
 // set=url line format the inline param uses. Bad entries drop out.
 export function parseGistBadgeArt(content: string): [string, string][] {
+	// oversized content is dropped whole before any parse work
+	if (content.length > MAX_GIST_BYTES) {
+		return [];
+	}
 	const trimmed = content.trim();
 	if (trimmed.startsWith("{")) {
 		try {
 			const obj = JSON.parse(trimmed) as Record<string, unknown>;
 			const out: [string, string][] = [];
 			for (const [key, url] of Object.entries(obj)) {
-				if (typeof url === "string" && isBadgeKey(key) && isHttpUrl(url)) {
+				if (out.length >= MAX_BADGE_ENTRIES) {
+					break;
+				}
+				if (typeof url === "string" && isBadgeKey(key) && isHttpsUrl(url)) {
 					out.push([key, url]);
 				}
 			}
@@ -136,9 +163,12 @@ export async function fetchGistBadgeArt(
 	);
 	const pairs: [string, string][] = [];
 	for (const file of Object.values(res?.files ?? {})) {
+		if (pairs.length >= MAX_BADGE_ENTRIES) {
+			break;
+		}
 		if (file?.content) {
 			pairs.push(...parseGistBadgeArt(file.content));
 		}
 	}
-	return pairs;
+	return pairs.slice(0, MAX_BADGE_ENTRIES);
 }

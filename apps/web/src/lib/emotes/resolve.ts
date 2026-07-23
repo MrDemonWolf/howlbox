@@ -8,7 +8,36 @@ import type { EmoteMap } from "./emotes";
 
 export type BadgeMap = Map<string, string>;
 
-function splitTextPart(text: string, emotes: EmoteMap): MessagePart[] {
+export type EmotePart = Extract<MessagePart, { type: "emote" }>;
+
+export interface RenderGroup {
+	part: MessagePart;
+	// 7TV zero-width emotes stack over the preceding emote
+	overlays: EmotePart[];
+}
+
+// Group a rendered part list so each 7TV zero-width overlay emote stacks
+// onto the emote before it instead of taking its own slot. A leading
+// zero-width emote with no preceding emote falls through to a normal
+// standalone render. Pure so it can be unit-tested apart from the row.
+export function groupParts(parts: MessagePart[]): RenderGroup[] {
+	const groups: RenderGroup[] = [];
+	for (const part of parts) {
+		const last = groups.at(-1);
+		if (
+			part.type === "emote" &&
+			part.zeroWidth &&
+			last?.part.type === "emote"
+		) {
+			last.overlays.push(part);
+			continue;
+		}
+		groups.push({ part, overlays: [] });
+	}
+	return groups;
+}
+
+export function splitTextPart(text: string, emotes: EmoteMap): MessagePart[] {
 	const out: MessagePart[] = [];
 	let pendingText = "";
 	// split on whitespace, keeping the separators so spacing survives
