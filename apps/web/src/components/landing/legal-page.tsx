@@ -7,6 +7,17 @@ import {
 	SiteShell,
 } from "@/components/landing/site-chrome";
 
+// An external link inside the legal prose. Shared by both legal routes so
+// the target/rel pair stays identical (the surrounding LegalPage prose
+// styles the anchor).
+export function ext(href: string, label: string) {
+	return (
+		<a href={href} rel="noreferrer" target="_blank">
+			{label}
+		</a>
+	);
+}
+
 // Shared shell for the static legal pages (privacy, terms). Same chrome
 // as the landing/config routes; the body is a single readable prose
 // column. Section styling rides on descendant utilities so each route
