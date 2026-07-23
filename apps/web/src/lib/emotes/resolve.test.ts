@@ -1,0 +1,63 @@
+import { describe, expect, test } from "bun:test";
+
+import type { MessagePart } from "@/lib/twitch/types";
+
+import type { EmoteMap } from "./emotes";
+import { groupParts, splitTextPart } from "./resolve";
+
+const emotes: EmoteMap = new Map([
+	["Kappa", { url: "https://cdn/kappa.png", zeroWidth: false }],
+	["Hands", { url: "https://cdn/hands.png", zeroWidth: false }],
+	["RainTime", { url: "https://cdn/rain.png", zeroWidth: true }],
+]);
+
+describe("splitTextPart", () => {
+	test("emits emote and text parts around whitespace", () => {
+		expect(splitTextPart("hi Kappa there", emotes)).toEqual([
+			{ type: "text", text: "hi " },
+			{
+				type: "emote",
+				name: "Kappa",
+				url: "https://cdn/kappa.png",
+				zeroWidth: false,
+			},
+			{ type: "text", text: " there" },
+		]);
+	});
+
+	test("plain text with no emote stays one text part", () => {
+		expect(splitTextPart("just words", emotes)).toEqual([
+			{ type: "text", text: "just words" },
+		]);
+	});
+});
+
+describe("groupParts zero-width overlay grouping", () => {
+	const emote = (name: string, zeroWidth: boolean): MessagePart => ({
+		type: "emote",
+		name,
+		url: `https://cdn/${name}.png`,
+		zeroWidth,
+	});
+
+	test("a zero-width emote stacks onto the preceding emote", () => {
+		const groups = groupParts([emote("Hands", false), emote("RainTime", true)]);
+		expect(groups.length).toBe(1);
+		expect(groups[0]?.overlays.map((o) => o.name)).toEqual(["RainTime"]);
+	});
+
+	test("a leading zero-width emote falls through to a standalone render", () => {
+		const groups = groupParts([emote("RainTime", true)]);
+		expect(groups.length).toBe(1);
+		expect(groups[0]?.overlays).toEqual([]);
+	});
+
+	test("text between two emotes breaks the group", () => {
+		const groups = groupParts([
+			emote("Hands", false),
+			{ type: "text", text: " " },
+			emote("RainTime", true),
+		]);
+		expect(groups.length).toBe(3);
+	});
+});
