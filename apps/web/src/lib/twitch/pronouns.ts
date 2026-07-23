@@ -44,8 +44,15 @@ async function loadDefs(): Promise<void> {
 		DEFS_TTL_MS,
 		`${PRONOUNS_API}/pronouns`,
 	);
+	// cachedJson returns null only when the fetch failed with nothing
+	// cached. Throw rather than cache an empty map: an empty defs map would
+	// stick for the session and silently drop every pronoun badge. Throwing
+	// clears defsPromise (see warmPronoun) so a later message retries.
+	if (!list) {
+		throw new Error("pronoun definitions unavailable");
+	}
 	const map = new Map<string, string>();
-	for (const def of list ?? []) {
+	for (const def of list) {
 		if (def.name && def.display) {
 			map.set(def.name, def.display);
 		}
