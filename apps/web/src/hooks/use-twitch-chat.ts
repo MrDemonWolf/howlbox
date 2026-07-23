@@ -4,7 +4,13 @@ import type { EmoteMap } from "@/lib/emotes/emotes";
 import { type BadgeMap, resolveMessageExtras } from "@/lib/emotes/resolve";
 import { resolveAvatar, warmAvatar } from "@/lib/twitch/avatars";
 import { connectChat } from "@/lib/twitch/chat";
-import { isStandaloneEvent } from "@/lib/twitch/events";
+import {
+	appendCapped,
+	PendingBuffer,
+	passesFilters,
+	removeById,
+	removeByLogin,
+} from "@/lib/twitch/message-buffer";
 import { resolvePronoun, warmPronoun } from "@/lib/twitch/pronouns";
 import type {
 	AvatarMode,
@@ -69,38 +75,28 @@ export function useTwitchChat(
 		) as Set<ChatEventKind>;
 		// pending = delayed messages not yet shown; bounded because a
 		// long delay in a fast chat would otherwise queue thousands
-		const pending = new Map<
-			string,
-			{ message: ChatMessageView; timer: ReturnType<typeof setTimeout> }
-		>();
-		const maxPending = Math.max(200, maxMessages * 2);
+		const pending = new PendingBuffer<{
+			message: ChatMessageView;
+			timer: ReturnType<typeof setTimeout>;
+		}>(Math.max(200, maxMessages * 2));
 
 		const append = (message: ChatMessageView) => {
 			if (!active) {
 				return;
 			}
-			setMessages((prev) =>
-				prev.some((m) => m.id === message.id)
-					? prev
-					: [...prev, message].slice(-maxMessages),
-			);
+			setMessages((prev) => appendCapped(prev, message, maxMessages));
 		};
 
 		const promote = (id: string) => {
-			const entry = pending.get(id);
-			if (!entry) {
-				return;
+			const entry = pending.take(id);
+			if (entry) {
+				append(entry.message);
 			}
-			pending.delete(id);
-			append(entry.message);
 		};
 
 		const dropPending = (predicate: (m: ChatMessageView) => boolean) => {
-			for (const [id, entry] of pending) {
-				if (predicate(entry.message)) {
-					clearTimeout(entry.timer);
-					pending.delete(id);
-				}
+			for (const entry of pending.drop(predicate)) {
+				clearTimeout(entry.timer);
 			}
 		};
 
@@ -109,29 +105,13 @@ export function useTwitchChat(
 			channel,
 			{
 				onMessage: (raw) => {
-					if (!active || hidden.has(raw.login)) {
-						return;
-					}
-					if (allowed.size > 0 && !allowed.has(raw.login)) {
-						return;
-					}
-					// an event row is a system line, not a command; a raid or
-					// gift must not be filtered out by the "!" rule
-					// a raid or gift is a system line, never a command, so the
-					// "!" rule must not eat it. An attached event still wraps
-					// a real user message (a first-time chatter typing
-					// "!gamble"), so that one stays subject to the filter.
+					// hidden/allowed filtering and the "!command" rule (which
+					// spares standalone event rows like raids and gifts)
 					if (
-						hideCommands &&
-						!(raw.event && isStandaloneEvent(raw.event.kind))
+						!active ||
+						!passesFilters(raw, { hidden, allowed, hideCommands })
 					) {
-						const first = raw.parts[0];
-						if (
-							first?.type === "text" &&
-							first.text.trimStart().startsWith("!")
-						) {
-							return;
-						}
+						return;
 					}
 					// per-user pronoun: warm the cache on first sight, read
 					// whatever is cached now (first message may miss, repeats hit)
@@ -156,18 +136,16 @@ export function useTwitchChat(
 						// note: OBS throttles timers while the source is
 						// hidden; messages promote late, but nothing is
 						// visible then anyway
-						if (pending.size >= maxPending) {
-							const oldest = pending.keys().next().value;
-							if (oldest !== undefined) {
-								clearTimeout(pending.get(oldest)?.timer);
-								pending.delete(oldest);
-							}
-						}
 						const timer = setTimeout(
 							() => promote(message.id),
 							delaySeconds * 1000,
 						);
-						pending.set(message.id, { message, timer });
+						// the buffer evicts its oldest entry when full; clear that
+						// stale timer so a promoted-then-dropped id can't fire
+						const evicted = pending.add(message.id, { message, timer });
+						if (evicted) {
+							clearTimeout(evicted.timer);
+						}
 						return;
 					}
 					append(message);
@@ -177,14 +155,14 @@ export function useTwitchChat(
 						return;
 					}
 					dropPending((m) => m.id === messageId);
-					setMessages((prev) => prev.filter((m) => m.id !== messageId));
+					setMessages((prev) => removeById(prev, messageId));
 				},
 				onUserPurge: (login) => {
 					if (!active) {
 						return;
 					}
 					dropPending((m) => m.login === login);
-					setMessages((prev) => prev.filter((m) => m.login !== login));
+					setMessages((prev) => removeByLogin(prev, login));
 				},
 				onClear: () => {
 					if (!active) {
