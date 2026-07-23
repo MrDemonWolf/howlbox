@@ -69,7 +69,14 @@ export function warmPronoun(login: string): void {
 	void (async () => {
 		try {
 			if (!defsPromise) {
-				defsPromise = loadDefs();
+				// Clear the shared promise on failure so a transient network
+				// error does not poison every later lookup for the session; a
+				// success leaves both defs and the promise set, so loadDefs
+				// still runs at most once.
+				defsPromise = loadDefs().catch((err) => {
+					defsPromise = null;
+					throw err;
+				});
 			}
 			await defsPromise;
 			const users = await cachedJson<UserPronoun[]>(
