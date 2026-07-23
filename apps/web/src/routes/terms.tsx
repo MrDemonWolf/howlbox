@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { LegalPage } from "@/components/landing/legal-page";
+import { ext, LegalPage } from "@/components/landing/legal-page";
 
 const GITHUB_URL = "https://github.com/mrdemonwolf/howlbox";
 
@@ -17,14 +17,6 @@ export const Route = createFileRoute("/terms")({
 		],
 	}),
 });
-
-function ext(href: string, label: string) {
-	return (
-		<a href={href} rel="noreferrer" target="_blank">
-			{label}
-		</a>
-	);
-}
 
 function TermsPage() {
 	return (

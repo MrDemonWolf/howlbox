@@ -7,7 +7,6 @@
 			"packages/*"
 		],
 		"catalog": {
-			"dotenv": "^17.2.2",
 			"zod": "^4.1.13",
 			"typescript": "^6",
 			"@types/node": "^22.13.14",
@@ -29,8 +28,10 @@
 		"og": "bun run scripts/build-og.ts",
 		"test": "bun test",
 		"dev:web": "turbo run dev -F web",
-		"check": "biome check --write .",
-		"check:ci": "biome ci ."
+		"check": "biome check .",
+		"check:fix": "biome check --write .",
+		"check:ci": "biome ci .",
+		"ci": "bun run check:ci && bun run check-types && bun test && bun run build"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",
