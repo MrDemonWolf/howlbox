@@ -132,7 +132,7 @@ const FAQ = [
 	},
 	{
 		q: "Can I host it myself?",
-		a: "That is the point. It is a static client-only site with no backend. Serve the build from GitHub Pages, a home server, or any static host, and nothing about your chat leaves your machine except the anonymous Twitch connection.",
+		a: "That is the point. It is a static client-only site with no backend. Serve the build from GitHub Pages, a home server, or any static host. There is still no HowlBox server: your browser talks to Twitch for chat, and to the emote, badge, avatar, and pronoun providers for art, each only when that feature is on. The privacy policy lists them.",
 	},
 ];
 
@@ -338,7 +338,7 @@ function LandingPage() {
 					title="What you trade away"
 				/>
 				<div className="hb-card mt-14 overflow-x-auto">
-					<table className="w-full border-collapse sm:min-w-[36rem] text-left">
+					<table className="w-full border-collapse text-left sm:min-w-[36rem]">
 						<thead>
 							<tr className="hb-hairline border-b">
 								<th className="p-4 font-semibold text-sm" scope="col">

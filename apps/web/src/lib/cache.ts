@@ -15,6 +15,29 @@ interface CacheEntry<T> {
 	v: T;
 }
 
+// A parsed entry is trusted only after a shape check: any localStorage
+// key (or a truncated write) can hold JSON that is valid but not ours.
+function isCacheEntry<T>(value: unknown): value is CacheEntry<T> {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		typeof (value as { t?: unknown }).t === "number" &&
+		"v" in value
+	);
+}
+
+// localStorage can throw on the access itself, not just on write: a
+// sandboxed OBS browser source or a private-mode tab makes every method
+// raise SecurityError. Every touch goes through these so an unavailable
+// store degrades to "no persistence" instead of throwing out of a fetch.
+function safeRemove(key: string) {
+	try {
+		localStorage.removeItem(key);
+	} catch {
+		// storage unavailable: nothing to clean up
+	}
+}
+
 export async function getJson<T>(url: string): Promise<T> {
 	// abort a hung provider so the emote/badge promise never dangles
 	const res = await fetch(url, {
@@ -32,25 +55,33 @@ export async function getJson<T>(url: string): Promise<T> {
 // ponytail: age-sorted bulk evict, swap for a real LRU only if this
 // proves too blunt.
 function evictOldest() {
-	const entries: { key: string; t: number }[] = [];
-	for (let i = 0; i < localStorage.length; i++) {
-		const key = localStorage.key(i);
-		if (!key?.startsWith(CACHE_PREFIX)) {
-			continue;
+	// The whole scan is guarded: this runs from writeCache's failure path,
+	// so localStorage is already misbehaving; it must never throw a second
+	// time and take the caller down with it.
+	try {
+		const entries: { key: string; t: number }[] = [];
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (!key?.startsWith(CACHE_PREFIX)) {
+				continue;
+			}
+			let t = 0;
+			try {
+				t =
+					(JSON.parse(localStorage.getItem(key) ?? "{}") as { t?: number }).t ??
+					0;
+			} catch {
+				// unparseable entry sorts oldest and gets evicted first
+			}
+			entries.push({ key, t });
 		}
-		let t = 0;
-		try {
-			t =
-				(JSON.parse(localStorage.getItem(key) ?? "{}") as { t?: number }).t ??
-				0;
-		} catch {
-			// unparseable entry sorts oldest and gets evicted first
+		entries.sort((a, b) => a.t - b.t);
+		for (const { key } of entries.slice(0, Math.ceil(entries.length / 2))) {
+			localStorage.removeItem(key);
 		}
-		entries.push({ key, t });
-	}
-	entries.sort((a, b) => a.t - b.t);
-	for (const { key } of entries.slice(0, Math.ceil(entries.length / 2))) {
-		localStorage.removeItem(key);
+	} catch {
+		// storage unavailable mid-scan: give up, the fresh value is still
+		// returned to the caller
 	}
 }
 
@@ -88,15 +119,21 @@ export async function cachedJson<T>(
 	try {
 		const raw = localStorage.getItem(storageKey);
 		if (raw) {
-			const entry = JSON.parse(raw) as CacheEntry<T>;
-			if (!force && Date.now() - entry.t < ttlMs) {
-				return entry.v;
+			const parsed = JSON.parse(raw) as unknown;
+			if (isCacheEntry<T>(parsed)) {
+				if (!force && Date.now() - parsed.t < ttlMs) {
+					return parsed.v;
+				}
+				stale = parsed.v;
+			} else {
+				// valid JSON but not our shape: treat as a miss and clear it
+				safeRemove(storageKey);
 			}
-			stale = entry.v;
 		}
 	} catch {
-		// corrupt entry: remove it so it stops re-throwing on every load
-		localStorage.removeItem(storageKey);
+		// corrupt entry or unavailable storage: remove through the guarded
+		// helper so a throwing store still reaches the refetch below
+		safeRemove(storageKey);
 	}
 	try {
 		const value = await getJson<T>(url);

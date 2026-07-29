@@ -72,6 +72,15 @@ export const OVERLAY_DEFAULTS = {
 
 // One valid Twitch login: 1-25 chars of lowercase alnum/underscore.
 const LOGIN_RE = /^[a-z0-9_]{1,25}$/;
+
+// Shared single-login validator. The config builder gates the channel
+// field on this, the channel param regexes the same source, and
+// normalizeLoginList filters the list params with it, so none of the
+// three can disagree on what a real Twitch login looks like.
+export function isValidLogin(login: string): boolean {
+	return LOGIN_RE.test(login);
+}
+
 // string tokens that read as on / off in a URL param
 const TRUTHY_TOKENS = ["1", "true", "on", "yes"];
 const FALSY_TOKENS = ["0", "false", "off", "no"];
@@ -83,7 +92,7 @@ export function normalizeLoginList(raw: string): string[] {
 	return raw
 		.split(",")
 		.map((login) => login.trim().toLowerCase())
-		.filter((login) => LOGIN_RE.test(login));
+		.filter(isValidLogin);
 }
 
 // Split a comma list into valid event kinds, dropping unknown tokens.
