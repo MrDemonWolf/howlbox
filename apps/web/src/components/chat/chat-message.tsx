@@ -1,10 +1,11 @@
 import { cn } from "@howlbox/ui/lib/utils";
 import { memo } from "react";
 
+import { groupParts } from "@/lib/emotes/resolve";
 import type { OverlayParams } from "@/lib/overlay/params";
 import { readableUserColor } from "@/lib/twitch/colors";
 import { isStandaloneEvent } from "@/lib/twitch/events";
-import type { ChatMessageView, MessagePart } from "@/lib/twitch/types";
+import type { ChatMessageView } from "@/lib/twitch/types";
 
 interface ChatMessageRowProps {
 	message: ChatMessageView;
@@ -49,31 +50,6 @@ const EVENT_LINE_CLASSES =
 
 const CHEERMOTE_CLASSES =
 	"hb-cheermote -my-1 mr-0.5 inline-block h-[1.6em] align-middle";
-
-type EmotePart = Extract<MessagePart, { type: "emote" }>;
-
-interface RenderGroup {
-	part: MessagePart;
-	// 7TV zero-width emotes stack over the preceding emote
-	overlays: EmotePart[];
-}
-
-function groupParts(parts: MessagePart[]): RenderGroup[] {
-	const groups: RenderGroup[] = [];
-	for (const part of parts) {
-		const last = groups.at(-1);
-		if (
-			part.type === "emote" &&
-			part.zeroWidth &&
-			last?.part.type === "emote"
-		) {
-			last.overlays.push(part);
-			continue;
-		}
-		groups.push({ part, overlays: [] });
-	}
-	return groups;
-}
 
 // memoized: at ?max=200 every incoming message would otherwise
 // re-render all 200 rows
@@ -144,6 +120,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 					alt=""
 					className={AVATAR_CLASSES}
 					loading="lazy"
+					referrerPolicy="no-referrer"
 					src={message.avatarUrl}
 				/>
 			)}
@@ -153,6 +130,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 						alt=""
 						className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
 						key={`${message.id}-badge-${index}`}
+						referrerPolicy="no-referrer"
 						src={badge.url}
 					/>
 				) : (
@@ -173,6 +151,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 				<img
 					alt=""
 					className={CHEERMOTE_CLASSES}
+					referrerPolicy="no-referrer"
 					src={message.event.cheermoteUrl}
 				/>
 			)}
@@ -204,6 +183,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 								alt={group.part.name}
 								className={EMOTE_CLASSES}
 								key={key}
+								referrerPolicy="no-referrer"
 								src={group.part.url}
 								title={group.part.name}
 							/>
@@ -214,6 +194,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 							<img
 								alt={group.part.name}
 								className={EMOTE_CLASSES}
+								referrerPolicy="no-referrer"
 								src={group.part.url}
 								title={group.part.name}
 							/>
@@ -222,6 +203,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 									alt={overlay.name}
 									className="absolute inset-0 m-auto h-full w-auto"
 									key={`${key}-zw-${overlayIndex}`}
+									referrerPolicy="no-referrer"
 									src={overlay.url}
 									title={overlay.name}
 								/>

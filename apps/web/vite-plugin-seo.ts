@@ -81,9 +81,22 @@ export function seoPlugin(): Plugin {
 	return {
 		name: "howlbox-seo",
 		apply: "build",
-		async closeBundle() {
-			const dist = join(import.meta.dirname, "dist");
-			const template = await readFile(join(dist, "index.html"), "utf8");
+		// writeBundle, not closeBundle: it runs after every output is written
+		// AND receives the bundle, so the template comes from the in-memory
+		// index.html asset instead of a disk read. rolldown-vite does not
+		// guarantee dist/index.html is flushed by closeBundle time (it was
+		// empty on macOS), which broke the build; reading from the bundle is
+		// deterministic on every platform.
+		async writeBundle(options, bundle) {
+			const dist = options.dir ?? join(import.meta.dirname, "dist");
+			const entry = bundle["index.html"];
+			const template =
+				entry && entry.type === "asset"
+					? typeof entry.source === "string"
+						? entry.source
+						: Buffer.from(entry.source).toString("utf8")
+					: // fall back to disk if the html asset is not in the bundle
+						await readFile(join(dist, "index.html"), "utf8");
 
 			for (const route of SEO_ROUTES) {
 				const html = swapHead(template, route);

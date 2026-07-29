@@ -5,12 +5,17 @@ import {
 } from "@tanstack/react-router";
 import { ThemeProvider } from "next-themes";
 
+import { RootErrorFallback } from "@/components/error-fallbacks";
+
 import "../index.css";
 
 export type RouterAppContext = Record<string, never>;
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
 	component: RootComponent,
+	// last-resort boundary: any route that throws while rendering (or whose
+	// lazy chunk fails to load) lands here instead of a blank page
+	errorComponent: RootErrorFallback,
 	// static SEO + social tags live in index.html (crawlers do not run JS);
 	// this only keeps the in-browser tab title/description in sync
 	head: () => ({

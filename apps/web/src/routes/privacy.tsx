@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { LegalPage } from "@/components/landing/legal-page";
+import { ext, LegalPage } from "@/components/landing/legal-page";
 
 export const Route = createFileRoute("/privacy")({
 	component: PrivacyPage,
@@ -15,14 +15,6 @@ export const Route = createFileRoute("/privacy")({
 		],
 	}),
 });
-
-function ext(href: string, label: string) {
-	return (
-		<a href={href} rel="noreferrer" target="_blank">
-			{label}
-		</a>
-	);
-}
 
 function PrivacyPage() {
 	return (
@@ -72,30 +64,55 @@ function PrivacyPage() {
 					To render chat, your browser connects directly to third-party
 					services. These connections are made by your browser, not routed
 					through MrDemonWolf, and each service is governed by its own privacy
-					policy:
+					policy. The channel login you configure, and each chatter's login, are
+					sent to these services as part of the requests below; no other data
+					about you is added:
 				</p>
 				<ul>
 					<li>
 						{ext("https://www.twitch.tv/p/legal/privacy-notice/", "Twitch")} -
-						anonymous, read-only IRC to receive public chat messages.
+						anonymous, read-only IRC to receive the public chat for your
+						configured channel.
 					</li>
 					<li>
 						{ext("https://7tv.app/legal/privacy", "7TV")},{" "}
 						{ext("https://betterttv.com/", "BetterTTV")}, and{" "}
 						{ext("https://www.frankerfacez.com/", "FrankerFaceZ")} - emote
-						images and metadata.
+						images and metadata for your channel and globally. Your channel
+						login is sent to look up its emote set.
 					</li>
-					<li>{ext("https://ivr.fi/", "api.ivr.fi")} - Twitch badge art.</li>
+					<li>
+						{ext("https://ivr.fi/", "api.ivr.fi")} - Twitch badge art, and, when
+						profile pictures are enabled (<code>avatars</code>), the avatar for
+						each chatter looked up by their login.
+					</li>
 					<li>
 						{ext("https://pronouns.alejo.io/", "pronouns.alejo.io")} - pronoun
 						badges. Contacted only when the <code>pronouns</code> option is
-						enabled, and only to look up the pronoun a chatter has set there.
+						enabled, and only to look up the pronoun a chatter set there, keyed
+						by their login.
+					</li>
+					<li>
+						{ext("https://docs.github.com/rest/gists", "GitHub")} - only when
+						you point the <code>badgegist</code> option at a public gist of
+						custom badge art. Your browser fetches that gist through GitHub's
+						public API.
+					</li>
+					<li>
+						Any image host you name in the <code>badgeart</code> or{" "}
+						<code>badgegist</code> options. Custom badge art is an arbitrary
+						HTTPS image URL you supply, so your browser requests it directly
+						from whatever host you chose. Badge, emote, and avatar images are
+						loaded with a no-referrer policy, so the overlay URL is not sent to
+						those hosts.
 					</li>
 				</ul>
 				<p>
 					MrDemonWolf, Inc. does not control these services and is not
 					responsible for their practices. Review their policies to understand
-					how they handle requests from your browser.
+					how they handle requests from your browser. Options that are off send
+					nothing: pronoun, avatar, and custom badge requests happen only when
+					you enable them.
 				</p>
 			</section>
 

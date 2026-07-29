@@ -131,6 +131,11 @@ then `badgegist`, then inline `badgeart`. A bare `set` key (no
 the public GitHub API (no token), which allows 60 unauthenticated
 requests per hour per IP; the `5`-minute default `refresh` (and its
 5-minute floor) keeps a gist well under that, so no tuning is needed.
+The art URLs in `badgeart` and `badgegist` point at whatever image host
+you name, and your browser fetches them directly. Only HTTPS URLs are
+accepted (URLs carrying credentials are rejected), and badge, emote, and
+avatar images load with a `no-referrer` policy so the overlay URL is not
+sent to those hosts.
 
 In OBS 31 or newer, add a Browser source with the generated URL and
 set Width and Height on the source itself (try 480 x 800). Leave
