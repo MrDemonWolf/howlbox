@@ -9,6 +9,7 @@ import { normalizeEventList, overlayParamsSchema } from "@/lib/overlay/params";
 import { overlayQuery } from "@/lib/overlay/url";
 import { downscaleAvatar } from "@/lib/twitch/avatars";
 import {
+	cheermoteUrl,
 	cheerTier,
 	createGiftDeduper,
 	decorateMessage,
@@ -160,7 +161,16 @@ describe("message decoration", () => {
 		expect(ev?.kind).toBe("cheer");
 		expect(ev?.text).toBe("cheered 500 bits");
 		expect(ev?.cheermoteUrl).toBe(
-			"https://static-cdn.jtvnw.net/bits/dark/animated/100/2.gif",
+			"https://static-cdn.jtvnw.net/bits/dark/animated/100/1.gif",
+		);
+	});
+
+	test("cheermote media follows static and scale preferences", () => {
+		expect(cheermoteUrl(500, true, { staticMedia: true, assetScale: 3 })).toBe(
+			"https://static-cdn.jtvnw.net/bits/dark/static/100/3.png",
+		);
+		expect(cheermoteUrl(500, false, { assetScale: 2 })).toBe(
+			"https://static-cdn.jtvnw.net/bits/light/animated/100/2.gif",
 		);
 	});
 
@@ -319,12 +329,13 @@ describe("params", () => {
 			timestamps: false,
 			badges: true,
 			animate: true,
+			media: "animated" as const,
 			pronouns: false,
 			hide: [],
 			allow: [],
 			badgeart: "",
 			badgegist: "",
-			refresh: 5,
+			refresh: 0,
 			events: ["sub", "raid"] as ChatEventKind[],
 			avatars: "subs" as const,
 		};
@@ -349,12 +360,13 @@ describe("params", () => {
 			timestamps: false,
 			badges: true,
 			animate: true,
+			media: "animated" as const,
 			pronouns: false,
 			hide: [],
 			allow: [],
 			badgeart: "",
 			badgegist: "",
-			refresh: 5,
+			refresh: 0,
 			events: [...EVENT_KINDS],
 			avatars: "off",
 		});
@@ -380,12 +392,13 @@ describe("params", () => {
 			timestamps: false,
 			badges: true,
 			animate: true,
+			media: "animated" as const,
 			pronouns: false,
 			hide: [],
 			allow: [],
 			badgeart: "",
 			badgegist: "",
-			refresh: 5,
+			refresh: 0,
 			events: [],
 			avatars: "off",
 		});

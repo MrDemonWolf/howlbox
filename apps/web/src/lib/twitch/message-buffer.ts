@@ -45,13 +45,19 @@ export function appendCapped(
 	if (list.some((m) => m.id === message.id)) {
 		return list;
 	}
-	return [...list, message].slice(-max);
+	// One copy on the hot path: slice the retained tail, then append in place.
+	const next = list.slice(Math.max(0, list.length - max + 1));
+	next.push(message);
+	return next;
 }
 
 export function removeById(
 	list: ChatMessageView[],
 	id: string,
 ): ChatMessageView[] {
+	if (!list.some((m) => m.id === id)) {
+		return list;
+	}
 	return list.filter((m) => m.id !== id);
 }
 
@@ -59,6 +65,9 @@ export function removeByLogin(
 	list: ChatMessageView[],
 	login: string,
 ): ChatMessageView[] {
+	if (!list.some((m) => m.login === login)) {
+		return list;
+	}
 	return list.filter((m) => m.login !== login);
 }
 
@@ -75,9 +84,14 @@ export class PendingBuffer<E extends { message: ChatMessageView }> {
 		return this.map.size;
 	}
 
-	// Add an entry, evicting the oldest first when full. Returns the evicted
-	// entry (so its timer can be cleared) or null.
+	// Add an entry, evicting the oldest first when full. A duplicate id keeps
+	// the original entry and discards the new one, so its original moderation
+	// delay cannot be shortened by a reconnect replay. Returns whichever entry
+	// was discarded (so its timer can be cleared) or null.
 	add(id: string, entry: E): E | null {
+		if (this.map.has(id)) {
+			return entry;
+		}
 		let evicted: E | null = null;
 		if (this.map.size >= this.maxPending) {
 			const oldest = this.map.keys().next().value;
