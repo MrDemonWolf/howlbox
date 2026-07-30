@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { ChatMessageView } from "@/lib/twitch/types";
+import type { ChatEventKind, ChatMessageView } from "@/lib/twitch/types";
 
 function emote(name: string, id: string) {
 	return {
@@ -56,6 +56,7 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		parts: [text("okay this overlay is clean")],
 		isAction: false,
 		isPrivileged: true,
+		isSubscriber: true,
 	},
 	{
 		channelId: null,
@@ -67,6 +68,7 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		parts: [text("no login?? no keys?? "), emote("Kappa", "25")],
 		isAction: false,
 		isPrivileged: false,
+		isSubscriber: true,
 	},
 	{
 		channelId: null,
@@ -110,6 +112,7 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		parts: [text("6 months, still the comfiest stream")],
 		isAction: false,
 		isPrivileged: true,
+		isSubscriber: true,
 		event: {
 			kind: "sub",
 			text: "NightPaws resubscribed with Tier 1 for 6 months, 6 in a row",
@@ -136,6 +139,7 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		parts: [text("15 themes is wild "), emote("LUL", "425618")],
 		isAction: false,
 		isPrivileged: false,
+		isSubscriber: true,
 	},
 	{
 		channelId: null,
@@ -214,42 +218,66 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 // canned message stream shared by the landing demo and the config
 // preview. Not a real connection; timestamps use wall-clock so the
 // optional timestamp column reads sensibly.
-export function useDemoStream(limit = 8, intervalMs = 1700): ChatMessageView[] {
+interface DemoStreamOptions {
+	limit?: number;
+	intervalMs?: number;
+	events?: readonly ChatEventKind[];
+}
+
+interface DemoStream {
+	messages: ChatMessageView[];
+	removeMessage: (id: string) => void;
+}
+
+export function useDemoStream({
+	limit = 8,
+	intervalMs = 1700,
+	events,
+}: DemoStreamOptions = {}): DemoStream {
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
+	const scriptMessages = useMemo(
+		() =>
+			events
+				? DEMO_SCRIPT.filter(
+						(message) => !message.event || events.includes(message.event.kind),
+					)
+				: DEMO_SCRIPT,
+		[events],
+	);
+	const removeMessage = useCallback((id: string) => {
+		setMessages((current) => current.filter((message) => message.id !== id));
+	}, []);
 
 	useEffect(() => {
 		let count = 0;
-		// start empty so an effect re-run (StrictMode double-invoke, HMR)
-		// does not append demo-0.. onto the prior run's messages and
-		// collide the `demo-${count}` keys
+		// Start empty so an effect re-run (StrictMode, HMR, or a changed
+		// event filter) cannot leave rows the current preview excludes.
 		setMessages([]);
 		const add = () => {
-			const script = DEMO_SCRIPT[count % DEMO_SCRIPT.length];
+			const script = scriptMessages[count % scriptMessages.length];
 			const id = `demo-${count}`;
 			count++;
 			if (!script) {
 				return;
 			}
-			setMessages((prev) =>
+			setMessages((current) =>
 				[
-					...prev,
+					...current,
 					{
 						...script,
 						id,
 						timestamp: Date.now(),
-						// filled for every demo row; the renderer only shows it
-						// when the preview is asked for avatars
 						avatarUrl: avatarFor(script.login),
 					},
 				].slice(-limit),
 			);
 		};
-		for (let i = 0; i < Math.min(4, limit); i++) {
+		for (let index = 0; index < Math.min(4, limit); index++) {
 			add();
 		}
 		const timer = setInterval(add, intervalMs);
 		return () => clearInterval(timer);
-	}, [limit, intervalMs]);
+	}, [intervalMs, limit, scriptMessages]);
 
-	return messages;
+	return { messages, removeMessage };
 }
