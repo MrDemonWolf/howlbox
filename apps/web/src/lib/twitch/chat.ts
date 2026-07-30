@@ -7,6 +7,8 @@ import {
 	type UserNotice,
 } from "@twurple/chat";
 
+import { resolveMediaPreferences } from "@/lib/emotes/media";
+
 import { fallbackColor } from "./colors";
 import {
 	createGiftDeduper,
@@ -61,10 +63,10 @@ export function connectChat(
 ): () => void {
 	const events = options.events ?? new Set<ChatEventKind>();
 	const joined = channel.replace(/^#/, "").toLowerCase();
-	const mediaPreferences = {
+	const mediaPreferences = resolveMediaPreferences({
 		assetScale: options.emoteScale ?? 2,
-		staticMedia: options.staticMedia ?? false,
-	} as const;
+		staticMedia: options.staticMedia,
+	});
 	const emoteSettings: EmoteSettings = {
 		animationSettings: mediaPreferences.staticMedia ? "static" : "default",
 		size: EMOTE_SIZE[mediaPreferences.assetScale],

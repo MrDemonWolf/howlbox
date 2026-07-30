@@ -13,8 +13,9 @@ import type {
 
 import "@/components/chat/overlay.css";
 
-const OBS_WIDTH = 480;
-const OBS_HEIGHT = 800;
+export const OBS_WIDTH = 480;
+export const OBS_HEIGHT = 800;
+export const OBS_DIMENSIONS = `${OBS_WIDTH} × ${OBS_HEIGHT}`;
 
 interface OverlayPreviewProps {
 	theme: Theme;
@@ -168,8 +169,12 @@ export function OverlayPreview({
 		>
 			{logicalViewport ? (
 				<div
-					className="absolute top-1/2 left-1/2 h-[800px] w-[480px] origin-center"
-					style={{ transform: `translate(-50%, -50%) scale(${scale})` }}
+					className="absolute top-1/2 left-1/2 origin-center"
+					style={{
+						height: OBS_HEIGHT,
+						transform: `translate(-50%, -50%) scale(${scale})`,
+						width: OBS_WIDTH,
+					}}
 				>
 					{preview}
 				</div>

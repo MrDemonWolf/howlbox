@@ -229,8 +229,11 @@ interface GistResponse {
 }
 
 function isGistResponse(value: unknown): value is GistResponse {
-	if (!isRecord(value) || value.files === undefined) {
-		return isRecord(value) && value.files === undefined;
+	if (!isRecord(value)) {
+		return false;
+	}
+	if (value.files === undefined) {
+		return true;
 	}
 	if (!isRecord(value.files)) {
 		return false;
