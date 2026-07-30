@@ -29,45 +29,39 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 
 - `apps/web/src/lib/twitch/chat.ts` - anonymous ChatClient wrapper.
   v8 gotchas: `connect()` returns void; event channel args have no
-  `#` prefix; unset user color arrives as `""` not undefined. A
-  `closed` flag guards every handler (quit can race the handshake and
-  leave auto-reconnecting zombies; onConnect re-quits them).
-  Reconnects are nudged by events (visibilitychange, online, OBS
-  custom events), never timer loops: OBS throttles timers in hidden
-  sources.
+  `#` prefix; unset user color arrives as `""` not undefined. Each
+  reconnect nudge retires the whole client generation, and every
+  handler checks generation identity so a late handshake cannot leave
+  an orphan socket. Visibility, online, and OBS show/activate events
+  trigger nudges; OBS hide/deactivate events do not. Never add timer
+  retry loops because hidden sources throttle timers.
 - `apps/web/src/hooks/use-twitch-chat.ts` - message list state,
   filters (hidden/allowed logins, `!commands`), moderation delay
   buffer (bounded; deletes/timeouts/bans evict pending messages),
   dedupe by id, `active` stale-closure guard.
-- `apps/web/src/lib/emotes/` - 7TV/BTTV/FFZ fetch + cache and
-  text-part tokenization. Fetch/cache is the generic `cachedJson<T>`
-  in `lib/cache.ts` (localStorage, stale-if-error, named TTL consts,
-  `AbortSignal.timeout`, quota-driven eviction). Globals fetch in
-  parallel with the FFZ room; the FFZ room lookup doubles as
-  login-to-id resolver (ivr.fi fallback, itself cached). Channel
-  emotes override globals. 7TV `flags & 1` = zero-width overlay
-  emote. Resolution happens at APPEND time through stable refs so
-  rows stay memoized and late-loading maps never reconnect chat;
-  `useEmoteMap`/`useBadgeMap` share a generic `useAsyncRef`
-  (`hooks/use-emotes.ts`).
+- `apps/web/src/lib/emotes/` - 7TV/BTTV/FFZ fetch and cache,
+  media variant selection, zero-width grouping, and text tokenization.
+  `lib/cache.ts` provides validated JSON fetches, caller cancellation,
+  a 10-second timeout, scoped outage cooldowns, localStorage TTLs,
+  stale-if-error, and quota-driven eviction. Global providers load in
+  parallel with the FFZ room; the room supplies a Twitch id when
+  available, with a cached ivr.fi fallback. Channel emotes override
+  globals. Resolution happens at append time through stable refs so
+  rows stay memoized and loaded maps never reconnect chat. Refreshes
+  preserve the last nonempty in-memory map on total provider failure.
 - `apps/web/src/lib/twitch/badges.ts` - badge art via api.ivr.fi
-  (Helix-shaped, open CORS, includes channel sub art). Old
-  badges.twitch.tv is DNS-dead; Helix needs a token. Never add either.
-  Custom overrides: `badgeart` (inline `set=url`/`set/version=url`
-  pairs) and `badgegist` (a public GitHub gist of the same pairs or a
-  JSON map, fetched tokenless through the cache). Precedence Twitch <
-  gist < inline; a bare `set` key covers every version (resolve.ts
-  falls back to it). `refresh` (minutes, 0=off, 5-min floor) re-fetches
-  emote+badge maps with the cache TTLs bypassed via the `force` arg on
-  `cachedJson`.
-- `apps/web/src/lib/twitch/pronouns.ts` - pronoun badges via
-  pronouns.alejo.io (CORS `*`, no auth; the service 7TV/FFZ read).
-  Per-USER not per-channel, so nothing to prefetch: `warmPronoun`
-  fire-and-forgets a cached lookup on first sight of a login,
-  `resolvePronoun` reads the sync cache at append time. First message
-  from a user can miss the badge; repeats hit. Gated by the `pronouns`
-  param. Badges are a `RenderBadge` union (`types.ts`): image badges +
-  the text pronoun badge share the row, built in `resolve.ts`.
+  (Helix-shaped, open CORS, includes channel subscriber art). Custom
+  overrides are `badgeart` inline pairs and a public `badgegist` JSON
+  map or pair list. Precedence is Twitch < gist < inline. Periodic
+  `refresh` bypasses only channel and gist TTLs; global badges retain
+  their six-hour TTL. Each provider failure is isolated.
+- `apps/web/src/lib/twitch/pronouns.ts` - lazy per-user pronoun
+  lookups through pronouns.alejo.io. The first message can miss and
+  later messages hit the synchronous append-time cache. Work is capped
+  at four concurrent and 500 pending lookups, with a 2,000-entry LRU
+  and provider cooldown. A successful empty response is negative
+  cached; transport and validation failures are not. Gated by the
+  opt-in `pronouns` param.
 - `apps/web/src/lib/twitch/events.ts` + the USERNOTICE listeners in
   `chat.ts` - sub/gift/raid/cheer/first-chat/announcement rows, gated by
   the `events` param. Anonymous IRC carries all of it: subs and raids
@@ -91,36 +85,30 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   batch line (keyed by gifter, counted down, time-boxed so a standalone
   later gift still renders). `events.test.ts` (`bun test`) covers the
   wording, tier bucketing and the real captured gift-bomb sequence.
-- `apps/web/src/lib/twitch/avatars.ts` - profile pictures via api.ivr.fi
-  (same tokenless open-CORS host as the badges; Helix needs a token).
-  Per-USER like pronouns, so same lazy warm/resolve shape, but BATCHED:
-  logins collect for 300ms and flush up to 50 per request, since a busy
-  channel would otherwise fire one call per chatter. In-memory Map only,
-  no localStorage (an OBS reload of a 200-chatter channel costs 4
-  requests); persist via `cache.ts` only if that proves noisy. `logo`
-  URLs are downscaled 600x600 -> 70x70 by string swap. The `avatars`
-  param is `off`/`all`/`subs`; `subs` reads the subscriber tag already
-  on the message, so it costs no extra request to decide and keeps
-  drive-by chatters from triggering a lookup at all.
-- `apps/web/src/lib/overlay/params.ts` - zod schema for all URL
-  params. CRITICAL: TanStack Router JSON-types search values
-  (`?channel=123456` arrives as a number); scalars are stringified in
-  preprocess before validation. Every field ends in `.catch(default)`.
-  Exports the `Theme`/`BgMode` types (import them, don't re-derive),
-  `OVERLAY_DEFAULTS` (the shared default set), and `normalizeLoginList`
-  (regex login filter shared with the config builder).
+- `apps/web/src/lib/twitch/avatars.ts` - lazy profile pictures via
+  api.ivr.fi. Logins collect for 300ms and flush in batches of 50, with
+  at most two requests active, 1,000 pending logins, a 2,000-entry LRU,
+  payload validation, and an outage cooldown. `logo` URLs are reduced
+  from 600x600 to 70x70. `avatars=subs` uses the subscriber tag already
+  on the message, so deciding whether to fetch costs nothing.
+- `apps/web/src/lib/overlay/config.ts` - dependency-free URL types,
+  enums, defaults, normalizers, and OBS asset-scale selection shared by
+  both entry paths. `params.ts` layers the canonical Zod schema over
+  it for site-router use. `parse-search.ts` mirrors the TanStack default
+  decoder and schema fallbacks without importing TanStack or Zod, so
+  direct OBS startup stays small. Its parity test MUST compare against
+  `defaultParseSearch`, including duplicate and JSON-shaped values.
 - `apps/web/src/lib/overlay/url.ts` - `buildOverlayUrl` /
   `overlayQuery`: serialize a config into the overlay query string,
   omitting defaults. Inverse of `params.ts`, so it round-trips.
   `ConfigBuilder` uses it instead of a hand-rolled query ladder.
-- `apps/web/src/components/chat/` - renderer (Tailwind classes) +
-  `overlay.css` (per-theme variable blocks + overlay keyframes/mask).
-  `ChatMessageRow` is memoized; keep its props primitive/stable.
-  `message-list.tsx` (`MessageList`) is the shared `hb-messages`
-  column plus `surfaceToneFor(theme, bg)`; `hb-root.tsx` (`HbRoot` +
-  `HB_ROOT_CLASS`) is the shared themed wrapper. `ChatOverlay`, the
-  landing `OverlayPreview`, and `ThemeWall` all render `MessageList`
-  inside `HbRoot`, owning only their own positioning.
+- `apps/web/src/components/chat/` - renderer (Tailwind classes) and
+  `overlay.css` (per-theme variables plus transform/opacity keyframes).
+  `ChatMessageRow` is memoized. `message-list.tsx` maps each theme to a
+  conservative solid surface reference for dynamic-name contrast;
+  transparent mode uses an opposite-luminance outline. `hb-root.tsx`
+  owns the shared wrapper, a 12px readability floor, and theme-gated
+  loading of the Latin-only arcade font.
 - `apps/web/src/lib/overlay/theme-meta.ts` - `THEME_SWATCH` (picker
   gradient), `THEME_LABEL` (human name), `BG_LABEL`, each keyed by the
   enum as a `Record<Theme, ...>` so a new theme fails to compile until
@@ -133,22 +121,16 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   contract, troubleshooting, and an explicit "what it will not do"
   section (anonymous IRC cannot send, moderate, or see EventSub). The
   param copy here is canonical; README's table is the short version.
-- `apps/web/src/routes/` - `/` landing, `/config` the URL builder
-  (`ConfigBuilder` + live `OverlayPreview`), `/overlay` the OBS page.
-  Shared chrome is `components/landing/site-chrome.tsx`: `SiteShell`
-  (the one page wrapper: header, main, footer, `Toaster`; all three
-  site routes use it), `Band` (full-bleed section that alternates
-  `hb-bg-base` / `hb-bg-surface`), `SectionHead` + `Kicker` (the
-  numbered spine), the `MONO` machine voice + `Eyebrow`, `OBSSteps`,
-  and the exported `DISCLAIMER` (footer affiliation line, mirrors the
-  wolfathon pattern). The landing arc mirrors the wolfwave docs home:
-  hero + fact strip, 01 audiences, 02 `ThemeWall`, 03 display modes
-  (three live `OverlayPreview`s), 04 comparison table, 05 setup,
-  06 privacy, 07 FAQ, CTA. `ThemeWall` renders all 15 themes with the
-  REAL `MessageList` over a static sample; the canned live stream is
-  `demo-messages.ts`. `main.tsx` adds the `hb-overlay` html class
-  synchronously before React so OBS never sees an opaque flash; the
-  transparency CSS lives in eager `index.css`.
+- `apps/web/src/routes/` - `/` landing, `/config` URL builder, and
+  the router wrapper for `/overlay`. `bootstrap.ts` detects the overlay
+  pathname before site code loads, stamps transparency synchronously,
+  and imports `overlay-main.tsx`; every other route imports `main.tsx`.
+  `overlay-app.tsx` holds the shared overlay runtime. The direct CSS
+  entry uses `source(none)` plus explicit overlay sources so site
+  utilities, Inter, TanStack Router, and Zod do not enter the OBS graph.
+  Shared site chrome is `components/landing/site-chrome.tsx`. The
+  landing and builder previews use the real `MessageList` and `HbRoot`
+  with canned data from `demo-messages.ts`.
 - Site color: `--site-*` tokens in `index.css`, a light default plus a
   `.dark` override and a `prefers-color-scheme` fallback, all scoped to
   `html:not(.hb-overlay)`. Flat surfaces only (base / surface / elev +
@@ -206,8 +188,8 @@ over an adjective.
 
 Schema lives in `lib/overlay/params.ts`. Full param reference is the
 Usage table in `README.md`; keep both in sync. Defaults:
-`bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=5`,
-`avatars=off`, `events` empty, `badgeart`/`badgegist` empty, `badges`
+`bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=0`,
+`avatars=off`, `media=animated`, `events` empty, `badgeart`/`badgegist` empty, `badges`
 and `animate` on, all other flags off (`pronouns` too - opt-in, since
 it is a per-user pronouns.alejo.io lookup; `avatars` for the same
 reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
@@ -224,7 +206,7 @@ preprocess, since the router re-serializes the validated value.
 - `backdrop-filter` can NEVER blur the game feed: OBS composites
   video outside the page and CSS samples page pixels only. Overlay
   glass is faked with gradient fills + hairline borders + inset
-  specular highlights + feTurbulence noise. Zero blur filters on the
+  specular highlights + cheap CSS grain. Zero blur filters on the
   overlay (CPU-raster OBS setups); fine on the landing page.
 - Animate transform/opacity only. Entrance/auto-hide are pure CSS
   animations (their clocks keep running while OBS hides the source;
@@ -254,11 +236,11 @@ background shorthand, can stack noise/gradients), `--hb-surface-solid`
 directions), optional `--hb-mask`. `wolf` is the base `.hb-root`
 default (no `[data-theme]` block); the other fourteen are override
 blocks. Adding a theme: CSS block + the `THEMES` enum in
-`lib/overlay/params.ts` + `THEME_SWATCH` and `THEME_LABEL` in
+`lib/overlay/config.ts` + `THEME_SWATCH` and `THEME_LABEL` in
 `lib/overlay/theme-meta.ts` (both `Record<Theme, ...>`, so the
-compiler forces the new entry) + the README table. Light-surfaced
-themes also join `LIGHT_SURFACE_THEMES` in `message-list.tsx` (user
-color readability flips direction there).
+compiler forces the new entry) + the README table. Every theme also needs a conservative solid reference in
+`THEME_SURFACE_REFERENCE` in `message-list.tsx`, so dynamic user colors
+reach AA contrast on panel and bubble surfaces.
 
 `--hb-avatar-size`/`--hb-avatar-radius`/`--hb-avatar-ring` (profile
 picture shape) and `--hb-event-accent` (event line color) live in one

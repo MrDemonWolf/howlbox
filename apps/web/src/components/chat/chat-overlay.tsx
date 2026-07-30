@@ -16,6 +16,7 @@ interface ChatOverlayProps {
 	animate: boolean;
 	fadeSeconds: number;
 	size: number;
+	onMessageExpired?: (id: string) => void;
 }
 
 const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
@@ -36,11 +37,15 @@ export function ChatOverlay({
 	animate,
 	fadeSeconds,
 	size,
+	onMessageExpired,
 }: ChatOverlayProps) {
 	return (
 		<HbRoot bg={bg} className="fixed inset-0" size={size} theme={theme}>
 			{status !== "connected" && (
-				<div className="hb-status absolute top-2 left-2 rounded-md bg-black/70 px-2 py-1 font-sans text-white text-xs">
+				<div
+					className="hb-status absolute top-2 left-2 rounded-md bg-black/80 px-2 py-1 text-white text-xs [font-family:system-ui,sans-serif]"
+					role={status === "join_failed" ? "alert" : "status"}
+				>
 					{STATUS_LABEL[status]}
 				</div>
 			)}
@@ -49,6 +54,7 @@ export function ChatOverlay({
 				bg={bg}
 				fadeSeconds={fadeSeconds}
 				messages={messages}
+				onMessageExpired={onMessageExpired}
 				showAvatars={showAvatars}
 				showBadges={showBadges}
 				showPronouns={showPronouns}

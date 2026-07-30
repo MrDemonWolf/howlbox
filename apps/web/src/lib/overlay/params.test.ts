@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	assetScaleFor,
 	isValidLogin,
 	normalizeLoginList,
 	OVERLAY_DEFAULTS,
@@ -42,6 +43,17 @@ describe("normalizeLoginList", () => {
 	});
 });
 
+describe("assetScaleFor", () => {
+	test("uses only the resolution needed by the configured size", () => {
+		expect(assetScaleFor(50)).toBe(1);
+		expect(assetScaleFor(100)).toBe(1);
+		expect(assetScaleFor(101)).toBe(2);
+		expect(assetScaleFor(200)).toBe(2);
+		expect(assetScaleFor(201)).toBe(3);
+		expect(assetScaleFor(300)).toBe(3);
+	});
+});
+
 describe("overlayParamsSchema invalid-value fallbacks", () => {
 	test("a bad theme falls back to the default", () => {
 		expect(overlayParamsSchema.parse({ theme: "not-a-theme" }).theme).toBe(
@@ -72,6 +84,13 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		expect(overlayParamsSchema.parse({ refresh: 720 }).refresh).toBe(720);
 	});
 
+	test("media accepts static and safely falls back to animated", () => {
+		expect(overlayParamsSchema.parse({ media: "static" }).media).toBe("static");
+		expect(overlayParamsSchema.parse({ media: "invalid" }).media).toBe(
+			OVERLAY_DEFAULTS.media,
+		);
+	});
+
 	test("an invalid channel is dropped rather than erroring", () => {
 		expect(overlayParamsSchema.parse({ channel: "bad name" }).channel).toBe(
 			undefined,
@@ -87,6 +106,8 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		const parsed = overlayParamsSchema.parse({});
 		expect(parsed.theme).toBe(OVERLAY_DEFAULTS.theme);
 		expect(parsed.badges).toBe(true);
+		expect(parsed.refresh).toBe(0);
+		expect(parsed.media).toBe("animated");
 		expect(parsed.events).toEqual([]);
 	});
 });

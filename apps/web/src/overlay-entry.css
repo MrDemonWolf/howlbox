@@ -1,0 +1,16 @@
+@import "tailwindcss" source(none);
+@source "./overlay-app.tsx";
+@source "./overlay-main.tsx";
+@source "./components/chat/**/*.{ts,tsx}";
+@source "./components/error-fallbacks.tsx";
+
+html.hb-overlay,
+html.hb-overlay body {
+	background: transparent;
+	margin: 0;
+	overflow: hidden;
+}
+
+html.hb-overlay body {
+	font-family: system-ui, sans-serif;
+}

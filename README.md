@@ -97,7 +97,7 @@ the short version.
 | `channel`      | Twitch login name                        | Channel to join (required)                              |
 | `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `xp`, `xbox`, `arcade`, `galaxy`, `mocha` | Color theme preset |
 | `bg`           | `off`, `panel`, `bubble`                 | Display mode (default `off`). `panel` draws its backdrop only while there are messages |
-| `size`         | percent, `50` to `300` (default `100`)   | Scales the theme's own text size                        |
+| `size`         | percent, `50` to `300` (default `100`)   | Scales theme text, with a 12px rendered floor           |
 | `max`          | `1` to `200` (default `50`)              | Max messages kept on screen                             |
 | `hidebots`     | flag                                     | Hide known chat bots (Nightbot, etc.)                   |
 | `hide`         | comma-separated logins                   | Always hide these users                                 |
@@ -110,10 +110,11 @@ the short version.
 | `events`       | comma-separated `sub`, `cheer`, `raid`, `first`, `announce`, or `all` | Show sub, gift, cheer, raid, first-message and announcement rows (default none) |
 | `timestamps`   | flag                                     | HH:MM before each message                               |
 | `animate`      | `false` to disable (default on)          | Slide/fade entrance animation                           |
+| `media`        | `animated`, `static` (default `animated`) | Static art avoids continuous decode and repaint         |
 | `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
 | `badgeart`     | comma-separated `set=url` or `set/version=url` pairs | Custom badge art overriding the Twitch defaults |
 | `badgegist`    | public gist id or URL                    | Custom badge art hosted in a gist (same pairs, one per line, or a JSON map) |
-| `refresh`      | minutes, `0` or `5` to `1440` (default `5`) | Re-fetch emote and badge maps every N minutes (`0` = off) |
+| `refresh`      | minutes, `0` or `5` to `1440` (default `0`) | Re-fetch channel art every N minutes; globals retain their TTL |
 
 Invalid or missing values fall back to safe defaults; a typo in OBS
 never produces a blank overlay.
@@ -129,8 +130,8 @@ Custom badge art precedence, weakest to strongest: fetched Twitch art,
 then `badgegist`, then inline `badgeart`. A bare `set` key (no
 `/version`) covers every version of that set. The gist is fetched from
 the public GitHub API (no token), which allows 60 unauthenticated
-requests per hour per IP; the `5`-minute default `refresh` (and its
-5-minute floor) keeps a gist well under that, so no tuning is needed.
+requests per hour per IP. Refresh is off by default; when enabled, its
+5-minute floor keeps a gist well under that limit.
 The art URLs in `badgeart` and `badgegist` point at whatever image host
 you name, and your browser fetches them directly. Only HTTPS URLs are
 accepted (URLs carrying credentials are rejected), and badge, emote, and

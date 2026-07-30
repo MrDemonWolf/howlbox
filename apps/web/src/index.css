@@ -10,6 +10,7 @@ html.hb-overlay body {
 	   package's globals.css body background so OBS sees a clear page */
 	background: transparent !important;
 	margin: 0;
+	font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 	overflow: hidden;
 }
 
@@ -366,4 +367,21 @@ html:not(.hb-overlay).dark .hb-btn-primary:hover {
 	background-position:
 		0 0,
 		11px 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html:not(.hb-overlay) {
+		scroll-behavior: auto;
+	}
+
+	html:not(.hb-overlay) *,
+	html:not(.hb-overlay) *::before,
+	html:not(.hb-overlay) *::after {
+		transition-delay: 0s;
+		transition-duration: 0s;
+	}
+
+	.hb-btn:active {
+		transform: none;
+	}
 }

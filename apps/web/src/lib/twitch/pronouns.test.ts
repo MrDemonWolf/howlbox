@@ -1,21 +1,27 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { resolvePronoun, warmPronoun } from "./pronouns";
-
-// The module holds its definition map and per-login cache at module
-// scope, so these tests use a distinct login each and run the
-// failure-then-retry case in order: the failure must land before any
-// success sets the shared defs map.
+import { resetCacheCooldownsForTests } from "../cache";
+import {
+	resetPronounCooldownForTests,
+	resetPronounStateForTests,
+	resolvePronoun,
+	warmPronoun,
+} from "./pronouns";
 
 const realFetch = globalThis.fetch;
-let defsShouldFail: boolean;
-
 const DEFS = [{ name: "hehim", display: "He/Him" }];
+const flush = () => new Promise((resolve) => setTimeout(resolve, 25));
 
-const flush = () => new Promise((r) => setTimeout(r, 25));
+let defsShouldFail: boolean;
+let failedUsers: Set<string>;
+let userRequests: Map<string, number>;
 
 beforeEach(() => {
-	// no localStorage in the test runtime; force cachedJson to always fetch
+	resetPronounStateForTests();
+	resetCacheCooldownsForTests();
+	defsShouldFail = false;
+	failedUsers = new Set();
+	userRequests = new Map();
 	(globalThis as { localStorage?: unknown }).localStorage = undefined;
 	globalThis.fetch = (async (input: string) => {
 		const url = String(input);
@@ -25,18 +31,23 @@ beforeEach(() => {
 			}
 			return { ok: true, json: async () => DEFS } as Response;
 		}
-		// per-user endpoint: /users/<login>
 		const login = url.split("/users/")[1] ?? "";
+		userRequests.set(login, (userRequests.get(login) ?? 0) + 1);
+		if (failedUsers.has(login)) {
+			throw new Error("user endpoint down");
+		}
 		const map: Record<string, unknown[]> = {
 			userb: [{ pronoun_id: "hehim" }],
 			userd: [{ pronoun_id: "hehim" }],
-			userc: [], // user with no pronoun set
+			userc: [],
 		};
 		return { ok: true, json: async () => map[login] ?? [] } as Response;
 	}) as typeof fetch;
 });
 
 afterEach(() => {
+	resetPronounStateForTests();
+	resetCacheCooldownsForTests();
 	globalThis.fetch = realFetch;
 });
 
@@ -48,24 +59,57 @@ describe("pronoun loading", () => {
 		expect(resolvePronoun("usera")).toBeNull();
 	});
 
-	test("a later message retries and resolves after the earlier failure", async () => {
-		// same session, defs now reachable: the poisoned-promise fix must let
-		// this succeed rather than reusing the earlier rejection forever
+	test("a definitions failure can retry after its cooldown", async () => {
+		defsShouldFail = true;
+		warmPronoun("userb");
+		await flush();
+		expect(resolvePronoun("userb")).toBeNull();
+
 		defsShouldFail = false;
+		resetPronounCooldownForTests();
+		resetCacheCooldownsForTests();
 		warmPronoun("userb");
 		await flush();
 		expect(resolvePronoun("userb")).toBe("He/Him");
 	});
 
-	test("a user with no pronoun set resolves to null and is not retried", async () => {
+	test("a failed user response is not negative cached", async () => {
+		failedUsers.add("userd");
+		warmPronoun("userd");
+		await flush();
+		expect(resolvePronoun("userd")).toBeNull();
+
+		failedUsers.delete("userd");
+		resetPronounCooldownForTests();
+		resetCacheCooldownsForTests();
+		warmPronoun("userd");
+		await flush();
+		expect(resolvePronoun("userd")).toBe("He/Him");
+		expect(userRequests.get("userd")).toBe(2);
+	});
+
+	test("a successful empty response is negative cached", async () => {
 		warmPronoun("userc");
 		await flush();
 		expect(resolvePronoun("userc")).toBeNull();
+		warmPronoun("userc");
+		await flush();
+		expect(userRequests.get("userc")).toBe(1);
 	});
 
 	test("a user with a pronoun set resolves to its label", async () => {
 		warmPronoun("userd");
 		await flush();
 		expect(resolvePronoun("userd")).toBe("He/Him");
+	});
+
+	test("a provider outage cools down lookups for other users", async () => {
+		failedUsers.add("usera");
+		warmPronoun("usera");
+		await flush();
+		warmPronoun("another_user");
+		await flush();
+		expect(userRequests.get("usera")).toBe(1);
+		expect(userRequests.has("another_user")).toBe(false);
 	});
 });
