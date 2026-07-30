@@ -1,106 +1,189 @@
 // Profile pictures via api.ivr.fi, the same tokenless open-CORS service
-// the badge art comes from. Helix would need a token, so this is the
-// only way to get an avatar inside the client-only rule.
-//
-// Per-USER like pronouns.ts, so there is no map to prefetch and the same
-// lazy shape applies: warmAvatar kicks a lookup on first sight of a
-// login, resolveAvatar reads the sync cache at append time. The first
-// message from a user misses the picture; repeats hit.
-//
-// Unlike pronouns this batches. ivr.fi takes a comma list of logins in
-// one request, so a busy channel costs a handful of calls instead of one
-// per chatter. Logins collect for a beat, then flush together.
+// used for Twitch badge art. Lookups are lazy, batched and bounded so a
+// long-running busy source cannot grow memory or network work forever.
 
 import { getJson } from "@/lib/cache";
 
 const USER_API = "https://api.ivr.fi/v2/twitch/user";
-// collect logins arriving in the same burst before firing
 const BATCH_WINDOW_MS = 300;
-// ivr.fi handles long lists fine; this keeps the URL sane
 const BATCH_MAX = 50;
+const MAX_CACHE_ENTRIES = 2_000;
+const MAX_PENDING_LOGINS = 1_000;
+const MAX_CONCURRENT_REQUESTS = 2;
+const FAILURE_COOLDOWN_MS = 30_000;
 
-// login -> avatar url, or "" for a user with no picture / a failed
-// lookup we do not want to retry on every message
+// login -> avatar URL, or "" for a valid lookup with no picture.
 const cache = new Map<string, string>();
-// logins already requested (pending or resolved), so a fast chat does
-// not queue the same login a hundred times
-const seen = new Set<string>();
+const pending = new Set<string>();
 let queue: string[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
+let activeRequests = 0;
+let failureCooldownUntil = 0;
 
 interface IvrUser {
 	login?: string;
 	logo?: string;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isLogin(value: unknown): value is string {
+	return typeof value === "string" && /^[a-zA-Z0-9_]{1,25}$/.test(value);
+}
+
+function isIvrUsers(value: unknown): value is IvrUser[] {
+	return (
+		Array.isArray(value) &&
+		value.length <= BATCH_MAX &&
+		value.every(
+			(user) =>
+				isRecord(user) &&
+				(user.login === undefined || isLogin(user.login)) &&
+				(user.logo === undefined ||
+					(typeof user.logo === "string" && user.logo.length <= 2_048)),
+		)
+	);
+}
+
+function normalizeLogin(login: string): string | null {
+	const normalized = login.toLowerCase();
+	return isLogin(normalized) ? normalized : null;
+}
+
+function normalizeAvatarUrl(raw: string): string | null {
+	try {
+		const url = new URL(raw);
+		return url.protocol === "https:" && !url.username && !url.password
+			? downscaleAvatar(url.href)
+			: null;
+	} catch {
+		return null;
+	}
+}
+
+function setCached(login: string, value: string): void {
+	cache.delete(login);
+	cache.set(login, value);
+	while (cache.size > MAX_CACHE_ENTRIES) {
+		const oldest = cache.keys().next().value;
+		if (oldest === undefined) {
+			break;
+		}
+		cache.delete(oldest);
+	}
+}
+
 // The jtvnw profile URLs end in a size suffix ("-600x600.jpeg"). Avatars
-// render at roughly 1.6em, so pull the smallest offered size: 70x70 is
-// ~1.7 KB against ~16 KB for the 600 the API returns. A URL that does
-// not match the pattern is used as-is rather than mangled.
+// render at roughly 1.6em, so request the smallest offered 70x70 asset.
 export function downscaleAvatar(url: string): string {
 	return url.replace(/-\d+x\d+\.(?=[a-z]+$)/i, "-70x70.");
 }
 
 async function flush(logins: string[]): Promise<void> {
+	activeRequests++;
 	try {
 		const users = await getJson<IvrUser[]>(
 			`${USER_API}?login=${logins.map(encodeURIComponent).join(",")}`,
+			{ validate: isIvrUsers },
 		);
-		for (const user of users ?? []) {
-			if (user.login) {
-				cache.set(user.login, user.logo ? downscaleAvatar(user.logo) : "");
+		const requested = new Set(logins);
+		for (const user of users) {
+			const login = user.login?.toLowerCase();
+			if (!login || !requested.has(login)) {
+				continue;
 			}
+			setCached(login, user.logo ? (normalizeAvatarUrl(user.logo) ?? "") : "");
 		}
-	} catch {
-		// overlay works fine without pictures; drop these logins from seen
-		// so a later message from them can retry
+		// An absent login is banned, nonexistent or otherwise has no art.
 		for (const login of logins) {
 			if (!cache.has(login)) {
-				seen.delete(login);
+				setCached(login, "");
 			}
 		}
-		return;
-	}
-	// a banned or nonexistent login is simply absent from the response;
-	// mark it resolved-empty so we stop asking for it
-	for (const login of logins) {
-		if (!cache.has(login)) {
-			cache.set(login, "");
+		failureCooldownUntil = 0;
+	} catch {
+		failureCooldownUntil = Date.now() + FAILURE_COOLDOWN_MS;
+	} finally {
+		for (const login of logins) {
+			pending.delete(login);
 		}
+		activeRequests--;
+		drainQueue();
 	}
 }
 
-function schedule() {
-	if (timer) {
+function drainQueue(): void {
+	if (Date.now() < failureCooldownUntil) {
+		for (const login of queue) {
+			pending.delete(login);
+		}
+		queue = [];
+		return;
+	}
+	while (queue.length > 0 && activeRequests < MAX_CONCURRENT_REQUESTS) {
+		const batch = queue.splice(0, BATCH_MAX);
+		void flush(batch);
+	}
+}
+
+function schedule(): void {
+	if (timer || queue.length === 0) {
 		return;
 	}
 	timer = setTimeout(() => {
 		timer = null;
-		const batch = queue.slice(0, BATCH_MAX);
-		queue = queue.slice(BATCH_MAX);
-		if (batch.length > 0) {
-			void flush(batch);
-		}
-		// more than one batch worth arrived at once: keep draining
-		if (queue.length > 0) {
-			schedule();
-		}
+		drainQueue();
 	}, BATCH_WINDOW_MS);
 }
 
-// Resolved avatar for a login, or null when unknown, still loading, or
-// the user has no picture.
+// Resolved avatar for a login, or null when unknown, loading, or absent.
 export function resolveAvatar(login: string): string | null {
-	return cache.get(login) || null;
+	const normalized = normalizeLogin(login);
+	if (!normalized) {
+		return null;
+	}
+	const value = cache.get(normalized);
+	if (value === undefined) {
+		return null;
+	}
+	// Touch on read to make the bounded map a true LRU.
+	setCached(normalized, value);
+	return value || null;
 }
 
-// Fire-and-forget: ensure this login's avatar is (being) fetched. Safe to
-// call on every message; deduped by the seen set.
+// Fire-and-forget. Calls are deduped while pending and rejected while a
+// provider failure cooldown is active, keeping message-rate work bounded.
 export function warmAvatar(login: string): void {
-	if (seen.has(login)) {
+	const normalized = normalizeLogin(login);
+	if (
+		!normalized ||
+		cache.has(normalized) ||
+		pending.has(normalized) ||
+		Date.now() < failureCooldownUntil ||
+		pending.size >= MAX_PENDING_LOGINS
+	) {
 		return;
 	}
-	seen.add(login);
-	queue.push(login);
+	pending.add(normalized);
+	queue.push(normalized);
 	schedule();
+}
+
+// Deterministic test reset for module-level timers and LRU state.
+export function resetAvatarStateForTests(): void {
+	if (timer) {
+		clearTimeout(timer);
+	}
+	timer = null;
+	queue = [];
+	cache.clear();
+	pending.clear();
+	activeRequests = 0;
+	failureCooldownUntil = 0;
+}
+
+export function avatarCacheSizeForTests(): number {
+	return cache.size;
 }

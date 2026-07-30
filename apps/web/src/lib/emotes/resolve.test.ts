@@ -52,10 +52,17 @@ describe("groupParts zero-width overlay grouping", () => {
 		expect(groups[0]?.overlays).toEqual([]);
 	});
 
-	test("text between two emotes breaks the group", () => {
+	test("token whitespace is consumed before a zero-width overlay", () => {
+		const groups = groupParts(splitTextPart("Hands RainTime", emotes));
+		expect(groups).toHaveLength(1);
+		expect(groups[0]?.part).toMatchObject({ type: "emote", name: "Hands" });
+		expect(groups[0]?.overlays.map((part) => part.name)).toEqual(["RainTime"]);
+	});
+
+	test("non-whitespace text between two emotes breaks the group", () => {
 		const groups = groupParts([
 			emote("Hands", false),
-			{ type: "text", text: " " },
+			{ type: "text", text: " words " },
 			emote("RainTime", true),
 		]);
 		expect(groups.length).toBe(3);
