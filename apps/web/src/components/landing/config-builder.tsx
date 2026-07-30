@@ -28,7 +28,7 @@ export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
 	// What the preview is currently showing, announced only once the user
 	// stops adjusting. Screen readers get told the overlay changed without
 	// being read a new line for every step of a slider drag.
-	const summary = `${BG_LABEL[config.bg]} / ${THEME_LABEL[config.theme]} / ${config.size}% / 480×800`;
+	const summary = `${BG_LABEL[config.bg]} / ${THEME_LABEL[config.theme]} / ${config.size}%`;
 	const [settled, setSettled] = useState(summary);
 	useEffect(() => {
 		const timer = setTimeout(() => setSettled(summary), 500);

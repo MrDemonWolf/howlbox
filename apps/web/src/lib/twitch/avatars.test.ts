@@ -15,6 +15,16 @@ function logo(login: string) {
 	return `https://static-cdn.jtvnw.net/jtv_user_pictures/${login}-profile_image-abc-600x600.png`;
 }
 
+async function waitFor(predicate: () => boolean, timeoutMs = 1500) {
+	const deadline = performance.now() + timeoutMs;
+	while (!predicate()) {
+		if (performance.now() >= deadline) {
+			throw new Error("Timed out waiting for test condition");
+		}
+		await Bun.sleep(10);
+	}
+}
+
 beforeEach(() => {
 	resetAvatarStateForTests();
 });
@@ -103,16 +113,17 @@ test("concurrency stays capped while later batches wait", async () => {
 	for (let i = 0; i < 120; i++) {
 		warmAvatar(`busy${i}`);
 	}
-	await Bun.sleep(400);
+	await waitFor(() => releases.length === 2);
 	expect(releases.length).toBe(2);
 	expect(peak).toBe(2);
 
 	for (const release of releases.splice(0)) {
 		release();
 	}
-	await Bun.sleep(25);
+	await waitFor(() => releases.length === 1);
 	expect(releases.length).toBe(1);
 	releases[0]?.();
+	await waitFor(() => active === 0);
 });
 
 test("a provider outage opens a cooldown for other logins", async () => {
@@ -123,9 +134,9 @@ test("a provider outage opens a cooldown for other logins", async () => {
 	}) as unknown as typeof fetch;
 
 	warmAvatar("failed_one");
-	await Bun.sleep(500);
+	await waitFor(() => requests === 1);
 	warmAvatar("failed_two");
-	await Bun.sleep(400);
+	await Bun.sleep(600);
 	expect(requests).toBe(1);
 	expect(resolveAvatar("failed_one")).toBeNull();
 });

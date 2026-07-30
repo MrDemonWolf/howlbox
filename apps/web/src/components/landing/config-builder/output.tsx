@@ -7,7 +7,10 @@ import { Copy, ExternalLink, RotateCcw } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
 
-import { OverlayPreview } from "@/components/landing/overlay-preview";
+import {
+	OBS_DIMENSIONS,
+	OverlayPreview,
+} from "@/components/landing/overlay-preview";
 import { MONO } from "@/components/landing/site-chrome";
 
 import type { Config } from "./form-model";
@@ -68,7 +71,7 @@ export function ConfigOutput({
 				<span
 					className={`text-[0.65rem] text-[color:var(--site-brand-text)] ${MONO}`}
 				>
-					Live preview · 480 × 800
+					Live preview · {OBS_DIMENSIONS}
 				</span>
 				{/* This line already mirrors the state a sighted user reads off
 				    the preview, so it doubles as the status region rather than
