@@ -53,7 +53,7 @@ const SAMPLE: ChatMessageView[] = [
 function ThemeTile({ theme }: { theme: Theme }) {
 	return (
 		<Link
-			className="hb-card group flex flex-col overflow-hidden transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)]"
+			className="hb-card group flex flex-col overflow-hidden transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 			search={{ theme }}
 			to="/config"
 		>
