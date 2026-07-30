@@ -61,7 +61,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "size",
 					values: "50 to 300, percent",
-					body: "Scales the theme's own font size. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. Default 100.",
+					body: "Scales the theme's own font size, with a 12px rendered floor for broadcast readability. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. Default 100.",
 				},
 				{
 					name: "avatars",
@@ -118,6 +118,11 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 					values: "true, false",
 					body: "Entrance animation on new messages. Transform and opacity only, so it stays cheap on CPU-rendered OBS setups. Default true.",
 				},
+				{
+					name: "media",
+					values: "animated, static",
+					body: "Controls animated emotes and cheer art separately from row entrances. Static reduces network transfer, decoded pixels, and continuous frame paints. A reduced-motion preference also selects static art. Default animated.",
+				},
 			],
 		},
 		{
@@ -170,7 +175,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "refresh",
 					values: "0, or 5 to 1440, minutes",
-					body: "Refetch the emote and badge maps this often, so emotes added mid-stream show up without reloading the source. 0 turns it off. The floor is 5 minutes on purpose: the emote APIs are free and unauthenticated, and a tighter loop is rude to them. Default 5.",
+					body: "Refetch channel-scoped emote and badge maps this often, so art added mid-stream shows up without reloading the source. Global maps keep their normal cache TTL. 0 turns refresh off and is the default. The 5-minute floor protects the free, unauthenticated upstream APIs.",
 				},
 			],
 		},
@@ -297,7 +302,7 @@ const TROUBLE = [
 	},
 	{
 		q: "7TV or BTTV emotes are missing",
-		a: "Those services only return emotes for channels that have set them up. If the channel has no 7TV account, there are no 7TV emotes to fetch. Channel emotes override globals, and results are cached in localStorage, so a change on their side shows up on the next refresh interval.",
+		a: "Those services only return emotes for channels that have set them up. If the channel has no 7TV account, there are no 7TV emotes to fetch. Channel emotes override globals, and results are cached in localStorage. Reload the source to pick up changes, or enable a refresh interval for channel art.",
 	},
 	{
 		q: "Custom badge art is not showing",
@@ -532,9 +537,9 @@ function DocsPage() {
 							</p>
 							<p className="hb-text-2 mt-3 leading-relaxed">
 								The gist is read through the public GitHub API with no token,
-								which allows 60 unauthenticated requests per hour per IP. The
-								default 5-minute refresh interval and its 5-minute floor keep a
-								gist far under that, so there is nothing to tune.
+								which allows 60 unauthenticated requests per hour per IP.
+								Refresh is off by default. If enabled, its 5-minute floor keeps
+								a gist far under that limit.
 							</p>
 						</section>
 
