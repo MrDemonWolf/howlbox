@@ -64,6 +64,11 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 					body: "Scales the theme's own font size. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. Default 100.",
 				},
 				{
+					name: "emotescale",
+					values: "1 to 4, half steps",
+					body: "Grows emotes on messages that are nothing but emotes. One word alongside the emote and that message renders at normal size, so a wall of PogChamp stands out and a sentence does not. Any value between the half steps snaps to the nearest one. Cheermote art follows the same multiplier; badges, pronoun pills, avatars and text do not. Past an effective 2x, once this and size are multiplied together, the overlay switches to the largest art each emote service publishes rather than upscaling the 2x file, so a 3x emote costs more bandwidth than a 1x one. Default 1.",
+				},
+				{
 					name: "avatars",
 					values: "off, all, subs",
 					body: "Profile pictures before the name. Like pronouns this is a per-user third-party lookup, from api.ivr.fi, so it is off by default and the first message from a given chatter usually misses the picture. all fetches one for everybody; subs only fetches for subscribers and founders, which is the setting to use on a busy channel: it reads the subscriber tag already on the message, so drive-by chatters never trigger a lookup at all. The shape follows the theme, so a circle on wolf and a hard square on terminal or retro95. Default off.",
@@ -249,7 +254,10 @@ const CSS_HOOKS = [
 		body: "The overlay wrapper. Carries data-theme and the theme variables.",
 	},
 	{ cls: "hb-messages", body: "The scrolling message column." },
-	{ cls: "hb-message", body: "One message row." },
+	{
+		cls: "hb-message",
+		body: "One message row. A row whose body is nothing but emotes also carries data-emote-only, so hb-message[data-emote-only] targets exactly the rows emotescale grows.",
+	},
 	{ cls: "hb-name", body: "The chatter's display name." },
 	{ cls: "hb-text", body: "The message body." },
 	{ cls: "hb-badge", body: "One badge image before the name." },
@@ -271,7 +279,10 @@ const CSS_HOOKS = [
 	},
 	{ cls: "hb-time", body: "The timestamp, when timestamps is on." },
 	{ cls: "hb-sep", body: "The colon between the name and the message." },
-	{ cls: "hb-emote", body: "One emote image inside the message body." },
+	{
+		cls: "hb-emote",
+		body: "One emote image inside the message body. Height is 1.6em times --hb-emote-scale, which is 1 unless the row is emote-only; setting --hb-emote-scale on hb-root grows every emote, emote-only or not.",
+	},
 	{
 		cls: "hb-status",
 		body: "The connecting / disconnected / could not join pill.",

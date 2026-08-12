@@ -49,7 +49,16 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   emote. Resolution happens at APPEND time through stable refs so
   rows stay memoized and late-loading maps never reconnect chat;
   `useEmoteMap`/`useBadgeMap` share a generic `useAsyncRef`
-  (`hooks/use-emotes.ts`).
+  (`hooks/use-emotes.ts`). CDN variants are NOT hardcoded any more:
+  `asset-tier.ts` maps an effective scale (`size` percent times
+  `emotescale`) onto per-provider variant strings, standard (the old
+  2x everywhere) above 2x switching to high (7TV `4x`, BTTV `3x` which
+  is its max, FFZ key `4` since the v1 API has no `3`, Twitch `3.0`
+  which is twurple's max, cheer `4`). The tier applies AFTER the cache
+  reads and no request URL carries a size, so flipping it rebuilds the
+  map from localStorage with zero network. Pass the tier STRING, never
+  the raw scale, into hook deps: values inside one bucket compare
+  equal, so nudging `emotescale` does not reconnect chat.
 - `apps/web/src/lib/twitch/badges.ts` - badge art via api.ivr.fi
   (Helix-shaped, open CORS, includes channel sub art). Old
   badges.twitch.tv is DNS-dead; Helix needs a token. Never add either.
@@ -207,11 +216,13 @@ over an adjective.
 Schema lives in `lib/overlay/params.ts`. Full param reference is the
 Usage table in `README.md`; keep both in sync. Defaults:
 `bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=5`,
-`avatars=off`, `events` empty, `badgeart`/`badgegist` empty, `badges`
-and `animate` on, all other flags off (`pronouns` too - opt-in, since
-it is a per-user pronouns.alejo.io lookup; `avatars` for the same
-reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
-0-600s, `refresh` 0 or 5-1440min. `channel`/`hide`/`allow` validate against
+`avatars=off`, `emotescale=1`, `events` empty, `badgeart`/`badgegist`
+empty, `badges` and `animate` on, all other flags off (`pronouns` too -
+opt-in, since it is a per-user pronouns.alejo.io lookup; `avatars` for
+the same reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
+0-600s, `refresh` 0 or 5-1440min, `emotescale` 1-4 in half steps (the
+one non-integer param; it snaps rather than rejecting).
+`channel`/`hide`/`allow` validate against
 the Twitch login regex; bad logins are dropped, not errored. Custom
 badge art (`badgeart`, `badgegist`) is parsed/validated in
 `lib/twitch/badges.ts`. `events` is a comma list of `sub,cheer,raid,
@@ -268,6 +279,17 @@ lets them win at equal specificity. Both default on `.hb-root`, so a new
 theme inherits a working circle and accent and only needs an entry when
 it wants a square or a different highlight (nothing fails to compile
 here, unlike the `Record<Theme, ...>` maps).
+
+`--hb-emote-boost` and `--hb-emote-scale` (`?emotescale`) also default on
+`.hb-root`, in the same block as the avatar vars. Two vars on purpose:
+`HbRoot` writes the configured multiplier to `--hb-emote-boost`, and
+`chat-message.tsx` hands it to `--hb-emote-scale` inline ONLY on rows
+where `isEmoteOnly(parts)` holds, which is what `.hb-emote` and
+`.hb-cheermote` size against. That keeps the gate out of the props, so
+`ChatMessageRow` stays memoized and `MessageList`/`ChatOverlay` need no
+pass-through, and it gives OBS Custom CSS two hooks: `--hb-emote-scale`
+on `.hb-root` grows every emote, `hb-message[data-emote-only]` targets
+the jumbo rows on their own.
 
 ## Deploy
 
