@@ -69,6 +69,7 @@
 	--hb-emote-scale: 1;
 	--hb-emote-boost: 1;
 	--hb-emote-jumbo: 1;
+	--hb-emote-align: middle;
 }
 
 /* Bubble mode can repeat a surface up to 200 times. Use each theme's
@@ -320,6 +321,13 @@
 .hb-message[data-emote-only] .hb-cheermote {
 	margin-top: 0;
 	margin-bottom: 0;
+	/* middle at 1x (the value hb-root writes when emotescale is off), bottom
+	   once the art is bigger than the line. Measured on a 77px emote: middle
+	   left the name 31px above the emote's lower edge, bottom brought them
+	   within 2px. baseline lands in the same place but adds ~5px of
+	   descender leading under every jumbo row, which is height an overlay
+	   cannot spare. */
+	vertical-align: var(--hb-emote-align, middle);
 }
 
 /* celestial deep violet with star speckle */

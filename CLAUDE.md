@@ -277,6 +277,15 @@ tokens are stripped from the body, so a bits-only message reaches the row
 with NO parts while still rendering tier art; without the flag it would
 be the one all-art body that does not grow.
 
+`--hb-emote-align` is the fourth: `middle` normally, `bottom` once
+`emotescale` is above 1, written by `HbRoot` and obeyed only by
+`hb-message[data-emote-only]`. Centring an image on the text line is
+right at chat size and wrong once the art is several times the line
+height, because the name ends up floating against the middle of a tall
+block. Measured on a 77px emote: `middle` left the name 31px above the
+emote's lower edge, `bottom` closed that to 2px. `baseline` looks the
+same but adds ~5px of descender leading under every jumbo row.
+
 The jumbo DECAYS with the art count: `emoteOnlyCount` feeds
 `calc(1 + (var(--hb-emote-boost,1) - 1) / N)`, so the extra size is shared
 out and a row's added width stays near `(scale - 1)` emote widths however
