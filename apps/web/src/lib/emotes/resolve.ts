@@ -60,15 +60,25 @@ export function isEmoteOnly(
 	parts: MessagePart[],
 	hasCheermote = false,
 ): boolean {
-	let seen = hasCheermote;
+	return emoteOnlyCount(parts, hasCheermote) > 0;
+}
+
+// How many pieces of art an emote-only row holds, or 0 when the row is not
+// emote-only. The count is what decides how far ?emotescale actually grows
+// them: see the decay in chat-message.tsx.
+export function emoteOnlyCount(
+	parts: MessagePart[],
+	hasCheermote = false,
+): number {
+	let count = hasCheermote ? 1 : 0;
 	for (const part of parts) {
 		if (part.type === "emote") {
-			seen = true;
+			count++;
 		} else if (part.text.trim() !== "") {
-			return false;
+			return 0;
 		}
 	}
-	return seen;
+	return count;
 }
 
 export function splitTextPart(text: string, emotes: EmoteMap): MessagePart[] {
