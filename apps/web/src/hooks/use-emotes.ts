@@ -1,5 +1,6 @@
 import { type RefObject, useCallback, useEffect, useRef } from "react";
 
+import type { AssetTier } from "@/lib/emotes/asset-tier";
 import { type EmoteMap, fetchEmoteMap } from "@/lib/emotes/emotes";
 import type { BadgeMap } from "@/lib/emotes/resolve";
 import {
@@ -53,8 +54,19 @@ function useAsyncRef<T>(
 	return ref;
 }
 
-export function useEmoteMap(channel: string | undefined, refreshMinutes = 0) {
-	return useAsyncRef<EmoteMap>(channel, fetchEmoteMap, refreshMinutes);
+// tier is the CDN variant bucket (see lib/emotes/asset-tier). It is a
+// string, so the fetcher identity is stable while the bucket is, and
+// nudging ?emotescale inside one bucket does not refetch.
+export function useEmoteMap(
+	channel: string | undefined,
+	refreshMinutes = 0,
+	tier: AssetTier = "standard",
+) {
+	const fetcher = useCallback(
+		(login: string, force: boolean) => fetchEmoteMap(login, force, tier),
+		[tier],
+	);
+	return useAsyncRef<EmoteMap>(channel, fetcher, refreshMinutes);
 }
 
 // customArt is the raw ?badgeart string, gistRef the ?badgegist id/URL;
