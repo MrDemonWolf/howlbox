@@ -29,10 +29,11 @@ function formatTime(timestamp: number): string {
 const BUBBLE_CLASSES =
 	"w-fit max-w-full rounded-(--hb-radius) border border-(--hb-border) px-2.5 py-1.5 [background:var(--hb-bubble-surface,var(--hb-surface))] [box-shadow:var(--hb-bubble-shadow,var(--hb-shadow))]";
 
-// --hb-emote-scale is 1 everywhere except on emote-only rows, where the
-// row hands it the configured ?emotescale multiplier (see below).
+// --hb-emote-scale is the OBS Custom CSS hook and --hb-emote-jumbo is the
+// per-row ?emotescale gate, 1 unless the row is emote-only. Multiplying
+// them keeps a Custom CSS scale working on jumbo rows too.
 const EMOTE_CLASSES =
-	"hb-emote -my-1 inline-block h-[calc(1.6em*var(--hb-emote-scale,1))] w-auto align-middle";
+	"hb-emote -my-1 inline-block h-[calc(1.6em*var(--hb-emote-scale,1)*var(--hb-emote-jumbo,1))] w-auto align-middle";
 
 // text badge (pronouns) sized to sit with the image badges: same height,
 // hairline pill in the theme's border/text colors
@@ -51,7 +52,7 @@ const EVENT_LINE_CLASSES =
 	"hb-event-line font-semibold text-[color:var(--hb-event-accent)]";
 
 const CHEERMOTE_CLASSES =
-	"hb-cheermote -my-1 mr-0.5 inline-block h-[calc(1.6em*var(--hb-emote-scale,1))] align-middle";
+	"hb-cheermote -my-1 mr-0.5 inline-block h-[calc(1.6em*var(--hb-emote-scale,1)*var(--hb-emote-jumbo,1))] align-middle";
 
 // memoized: at ?max=200 every incoming message would otherwise
 // re-render all 200 rows
@@ -114,18 +115,21 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 		.filter(Boolean)
 		.join(" ");
 
-	// The ?emotescale jumbo, gated to rows whose body is nothing but
-	// emotes. HbRoot puts the configured multiplier on --hb-emote-boost;
-	// handing it to --hb-emote-scale here is what the emote and cheermote
-	// heights read. Rows with words in them never see it, so their emotes
-	// stay at 1.6em.
-	const emoteOnly = isEmoteOnly(message.parts);
+	// The ?emotescale jumbo, gated to rows whose body is nothing but art.
+	// HbRoot puts the configured multiplier on --hb-emote-boost; this
+	// hands it to --hb-emote-jumbo, which the emote and cheermote heights
+	// multiply by the --hb-emote-scale Custom CSS hook. Rows with words in
+	// them never see it, so their emotes stay at 1.6em.
+	const emoteOnly = isEmoteOnly(
+		message.parts,
+		Boolean(message.event?.cheermoteUrl),
+	);
 	const style: CSSProperties | undefined =
 		animation || emoteOnly
 			? ({
 					animation,
 					...(emoteOnly
-						? { "--hb-emote-scale": "var(--hb-emote-boost,1)" }
+						? { "--hb-emote-jumbo": "var(--hb-emote-boost,1)" }
 						: {}),
 				} as CSSProperties)
 			: undefined;

@@ -58,13 +58,17 @@
 	--hb-avatar-ring: 0 0 0 1px var(--hb-border);
 	--hb-event-accent: #6cc4ff;
 
-	/* emote art (?emotescale). --hb-emote-boost is the configured
-	   multiplier, written inline by the overlay; --hb-emote-scale is what
-	   an emote actually renders at, and the row only hands it the boost
-	   when the message is nothing but emotes. Setting --hb-emote-scale in
-	   OBS Custom CSS grows every emote, emote-only message or not. */
-	--hb-emote-boost: 1;
+	/* emote art (?emotescale). Three vars, because the OBS Custom CSS
+	   hook and the per-row gate must not fight over one name:
+	   --hb-emote-scale is the hook, free for a Custom CSS rule to set and
+	   never written inline; --hb-emote-boost is the configured multiplier,
+	   written inline on hb-root by the overlay; --hb-emote-jumbo is the
+	   boost in force on THIS row, 1 unless the row is emote-only. An
+	   emote's height multiplies the hook by the row value, so a Custom CSS
+	   --hb-emote-scale scales ordinary and jumbo rows alike. */
 	--hb-emote-scale: 1;
+	--hb-emote-boost: 1;
+	--hb-emote-jumbo: 1;
 }
 
 /* Bubble mode can repeat a surface up to 200 times. Use each theme's
