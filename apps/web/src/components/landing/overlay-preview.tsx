@@ -17,6 +17,7 @@ interface OverlayPreviewProps {
 	animate: boolean;
 	fadeSeconds: number;
 	size?: number;
+	emoteScale?: number;
 	className?: string;
 	// "checker" shows the transparency checkerboard (honest OBS view);
 	// "gameplay" fakes a game feed to sell legibility over video
@@ -35,6 +36,7 @@ export function OverlayPreview({
 	animate,
 	fadeSeconds,
 	size = 100,
+	emoteScale = 1,
 	className = "h-105",
 	backdrop = "gameplay",
 }: OverlayPreviewProps) {
@@ -56,7 +58,13 @@ export function OverlayPreview({
 						: "bg-[linear-gradient(135deg,#1b2735_0%,#2d4a3e_38%,#6b4f2e_72%,#3d2b4f_100%)]",
 				)}
 			/>
-			<HbRoot bg={bg} className="absolute inset-0" size={size} theme={theme}>
+			<HbRoot
+				bg={bg}
+				className="absolute inset-0"
+				emoteScale={emoteScale}
+				size={size}
+				theme={theme}
+			>
 				<MessageList
 					animate={animate}
 					bg={bg}

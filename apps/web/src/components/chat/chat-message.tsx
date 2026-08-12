@@ -1,7 +1,7 @@
 import { cn } from "@howlbox/ui/lib/utils";
-import { memo } from "react";
+import { type CSSProperties, memo } from "react";
 
-import { groupParts } from "@/lib/emotes/resolve";
+import { groupParts, isEmoteOnly } from "@/lib/emotes/resolve";
 import type { OverlayParams } from "@/lib/overlay/params";
 import { readableUserColor } from "@/lib/twitch/colors";
 import { isStandaloneEvent } from "@/lib/twitch/events";
@@ -29,8 +29,10 @@ function formatTime(timestamp: number): string {
 const BUBBLE_CLASSES =
 	"w-fit max-w-full rounded-(--hb-radius) border border-(--hb-border) px-2.5 py-1.5 [background:var(--hb-surface)] [box-shadow:var(--hb-shadow)]";
 
+// --hb-emote-scale is 1 everywhere except on emote-only rows, where the
+// row hands it the configured ?emotescale multiplier (see below).
 const EMOTE_CLASSES =
-	"hb-emote -my-1 inline-block h-[1.6em] min-w-[1.6em] align-middle";
+	"hb-emote -my-1 inline-block h-[calc(1.6em*var(--hb-emote-scale,1))] min-w-[calc(1.6em*var(--hb-emote-scale,1))] align-middle";
 
 // text badge (pronouns) sized to sit with the image badges: same height,
 // hairline pill in the theme's border/text colors
@@ -49,7 +51,7 @@ const EVENT_LINE_CLASSES =
 	"hb-event-line font-semibold text-[color:var(--hb-event-accent)]";
 
 const CHEERMOTE_CLASSES =
-	"hb-cheermote -my-1 mr-0.5 inline-block h-[1.6em] align-middle";
+	"hb-cheermote -my-1 mr-0.5 inline-block h-[calc(1.6em*var(--hb-emote-scale,1))] align-middle";
 
 // memoized: at ?max=200 every incoming message would otherwise
 // re-render all 200 rows
@@ -99,6 +101,22 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 			.filter(Boolean)
 			.join(", ") || undefined;
 
+	// The ?emotescale jumbo, gated to rows whose body is nothing but
+	// emotes. HbRoot puts the configured multiplier on --hb-emote-boost;
+	// handing it to --hb-emote-scale here is what the emote and cheermote
+	// heights read. Rows with words in them never see it, so their emotes
+	// stay at 1.6em.
+	const emoteOnly = isEmoteOnly(message.parts);
+	const style: CSSProperties | undefined =
+		animation || emoteOnly
+			? ({
+					animation,
+					...(emoteOnly
+						? { "--hb-emote-scale": "var(--hb-emote-boost,1)" }
+						: {}),
+				} as CSSProperties)
+			: undefined;
+
 	return (
 		<div
 			className={cn(
@@ -107,8 +125,9 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 				bg === "bubble" && BUBBLE_CLASSES,
 				message.isAction && "italic",
 			)}
+			data-emote-only={emoteOnly ? "" : undefined}
 			data-event={message.event?.kind}
-			style={animation ? { animation } : undefined}
+			style={style}
 		>
 			{showTimestamps && (
 				<span className="hb-time mr-1 align-middle text-[0.78em] opacity-60">

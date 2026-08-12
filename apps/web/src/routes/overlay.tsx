@@ -5,6 +5,7 @@ import { ChatOverlay } from "@/components/chat/chat-overlay";
 import { OverlayErrorFallback } from "@/components/error-fallbacks";
 import { useBadgeMap, useEmoteMap } from "@/hooks/use-emotes";
 import { useTwitchChat } from "@/hooks/use-twitch-chat";
+import { assetTier } from "@/lib/emotes/asset-tier";
 import { overlayParamsSchema } from "@/lib/overlay/params";
 import { KNOWN_BOTS } from "@/lib/twitch/bots";
 
@@ -25,7 +26,10 @@ function OverlayPage() {
 	const hiddenLogins = params.hidebots
 		? [...KNOWN_BOTS, ...params.hide]
 		: params.hide;
-	const emotesRef = useEmoteMap(params.channel, params.refresh);
+	// one bucket decision, shared by the third-party emote fetch and the
+	// native emote/cheermote URLs the chat client bakes in
+	const assets = assetTier(params.size, params.emotescale);
+	const emotesRef = useEmoteMap(params.channel, params.refresh, assets);
 	const badgesRef = useBadgeMap(
 		params.channel,
 		params.badgeart,
@@ -41,6 +45,7 @@ function OverlayPage() {
 		pronouns: params.pronouns,
 		events: params.events,
 		avatars: params.avatars,
+		assets,
 		emotesRef,
 		badgesRef,
 	});
@@ -65,6 +70,7 @@ function OverlayPage() {
 		<ChatOverlay
 			animate={params.animate}
 			bg={params.bg}
+			emoteScale={params.emotescale}
 			fadeSeconds={params.fade}
 			messages={messages}
 			showAvatars={params.avatars !== "off"}

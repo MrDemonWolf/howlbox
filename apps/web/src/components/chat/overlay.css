@@ -47,6 +47,14 @@
 	--hb-avatar-radius: 999px;
 	--hb-avatar-ring: 0 0 0 1px var(--hb-border);
 	--hb-event-accent: #6cc4ff;
+
+	/* emote art (?emotescale). --hb-emote-boost is the configured
+	   multiplier, written inline by the overlay; --hb-emote-scale is what
+	   an emote actually renders at, and the row only hands it the boost
+	   when the message is nothing but emotes. Setting --hb-emote-scale in
+	   OBS Custom CSS grows every emote, emote-only message or not. */
+	--hb-emote-boost: 1;
+	--hb-emote-scale: 1;
 }
 
 /* macOS 26 (Tahoe) Liquid Glass: near-clear smoke with specular rim

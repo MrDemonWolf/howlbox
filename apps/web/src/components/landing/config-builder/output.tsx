@@ -86,6 +86,7 @@ export function ConfigOutput({
 				backdrop="checker"
 				bg={config.bg}
 				className="h-64 sm:h-96"
+				emoteScale={config.emotescale}
 				fadeSeconds={config.fade}
 				showAvatars={config.avatars !== "off"}
 				showBadges={config.badges}
