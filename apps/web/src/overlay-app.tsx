@@ -14,7 +14,7 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 		? [...KNOWN_BOTS, ...params.hide]
 		: params.hide;
 	const reducedMotion = useReducedMotion();
-	const assetScale = assetScaleFor(params.size);
+	const assetScale = assetScaleFor(params.size, params.emotescale);
 	const staticMedia = params.media === "static" || reducedMotion;
 	const mediaPreferences = { assetScale, staticMedia };
 	const emotesRef = useEmoteMap(
@@ -67,6 +67,7 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 		<ChatOverlay
 			animate={params.animate}
 			bg={params.bg}
+			emoteScale={params.emotescale}
 			fadeSeconds={params.fade}
 			messages={messages}
 			onMessageExpired={removeMessage}

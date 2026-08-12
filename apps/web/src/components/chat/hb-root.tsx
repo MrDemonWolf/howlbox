@@ -17,6 +17,7 @@ export function HbRoot({
 	bg,
 	theme,
 	size = 100,
+	emoteScale = 1,
 	className,
 	children,
 }: {
@@ -24,6 +25,8 @@ export function HbRoot({
 	theme: Theme;
 	// percentage of the theme's base size; 100 = untouched
 	size?: number;
+	// ?emotescale, applied by the row only to emote-only messages
+	emoteScale?: number;
 	className?: string;
 	children: ReactNode;
 }) {
@@ -44,7 +47,12 @@ export function HbRoot({
 			className={rootClassName}
 			data-bg={bg}
 			data-theme={theme}
-			style={{ "--hb-font-scale": size / 100 } as CSSProperties}
+			style={
+				{
+					"--hb-font-scale": size / 100,
+					"--hb-emote-boost": emoteScale,
+				} as CSSProperties
+			}
 		>
 			{children}
 		</div>

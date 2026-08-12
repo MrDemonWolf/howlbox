@@ -34,6 +34,7 @@ export interface OverlayParams {
 	bg: BgMode;
 	theme: Theme;
 	size: number;
+	emotescale: number;
 	max: number;
 	hidebots: boolean;
 	hide: string[];
@@ -54,10 +55,15 @@ export interface OverlayParams {
 }
 
 // Provider 1x art is sized for the default renderer at OBS DPR 1. Increase
-// resolution only after the configured text scale outgrows that source art.
-export function assetScaleFor(size: number): AssetScale {
-	if (size <= 100) return 1;
-	if (size <= 200) return 2;
+// resolution only after the configured scale outgrows that source art.
+// Emote art is drawn at 1.6em times emotescale, so both factors count: a
+// 3x emote on a default-size overlay needs the same source a 300% overlay
+// does. Emote-only rows are the only ones emotescale grows, but they are
+// also the rows nobody can miss, so the source is picked for them.
+export function assetScaleFor(size: number, emotescale = 1): AssetScale {
+	const effective = size * emotescale;
+	if (effective <= 100) return 1;
+	if (effective <= 200) return 2;
 	return 3;
 }
 
@@ -66,6 +72,7 @@ export const OVERLAY_DEFAULTS = {
 	bg: "off",
 	theme: "wolf",
 	size: 100,
+	emotescale: 1,
 	max: 50,
 	delay: 0,
 	fade: 0,
@@ -85,6 +92,7 @@ export const OVERLAY_DEFAULTS = {
 	bg: BgMode;
 	theme: Theme;
 	size: number;
+	emotescale: number;
 	max: number;
 	delay: number;
 	fade: number;

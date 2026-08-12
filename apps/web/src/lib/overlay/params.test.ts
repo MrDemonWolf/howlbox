@@ -52,6 +52,17 @@ describe("assetScaleFor", () => {
 		expect(assetScaleFor(201)).toBe(3);
 		expect(assetScaleFor(300)).toBe(3);
 	});
+
+	test("emotescale counts toward the resolution too", () => {
+		// a default-size overlay stays on 1x art until emotes grow
+		expect(assetScaleFor(100, 1)).toBe(1);
+		expect(assetScaleFor(100, 1.5)).toBe(2);
+		expect(assetScaleFor(100, 2)).toBe(2);
+		expect(assetScaleFor(100, 2.5)).toBe(3);
+		// and the two factors multiply rather than either one winning
+		expect(assetScaleFor(150, 2)).toBe(3);
+		expect(assetScaleFor(200, 1)).toBe(2);
+	});
 });
 
 describe("overlayParamsSchema invalid-value fallbacks", () => {
@@ -76,6 +87,20 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		expect(overlayParamsSchema.parse({ max: true }).max).toBe(
 			OVERLAY_DEFAULTS.max,
 		);
+	});
+
+	test("emotescale keeps half steps and snaps anything between", () => {
+		expect(overlayParamsSchema.parse({ emotescale: 2.5 }).emotescale).toBe(2.5);
+		expect(overlayParamsSchema.parse({ emotescale: 2.3 }).emotescale).toBe(2.5);
+		expect(overlayParamsSchema.parse({ emotescale: 1.2 }).emotescale).toBe(1);
+	});
+
+	test("an out-of-range or non-numeric emotescale falls back to 1", () => {
+		for (const raw of [0, 9, -2, true, "big"]) {
+			expect(overlayParamsSchema.parse({ emotescale: raw }).emotescale).toBe(
+				OVERLAY_DEFAULTS.emotescale,
+			);
+		}
 	});
 
 	test("refresh below the 5-minute floor is bumped to 5", () => {
