@@ -1,5 +1,6 @@
 import { type RefObject, useEffect, useState } from "react";
 
+import type { AssetTier } from "@/lib/emotes/asset-tier";
 import type { EmoteMap } from "@/lib/emotes/emotes";
 import { type BadgeMap, resolveMessageExtras } from "@/lib/emotes/resolve";
 import { resolveAvatar, warmAvatar } from "@/lib/twitch/avatars";
@@ -34,6 +35,11 @@ export interface UseTwitchChatOptions {
 	events?: readonly ChatEventKind[];
 	// whose profile picture to fetch (off / everyone / subscribers only)
 	avatars?: AvatarMode;
+	// CDN variant bucket for native emote and cheermote art. A string, so
+	// nudging ?emotescale within one bucket compares equal and does not
+	// reconnect; crossing a bucket reconnects on purpose, since the rows
+	// already on screen carry URLs baked at the old variant.
+	assets?: AssetTier;
 	// read at append time; ref identity is stable so late-loading
 	// maps never tear down the connection
 	emotesRef?: RefObject<EmoteMap | null>;
@@ -54,6 +60,7 @@ export function useTwitchChat(
 	const pronouns = options.pronouns ?? false;
 	const eventsKey = (options.events ?? []).join(",");
 	const avatars = options.avatars ?? "off";
+	const assets = options.assets ?? "standard";
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
 	const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
@@ -177,7 +184,7 @@ export function useTwitchChat(
 					}
 				},
 			},
-			{ events },
+			{ events, assets },
 		);
 		return () => {
 			active = false;
@@ -194,6 +201,7 @@ export function useTwitchChat(
 		pronouns,
 		eventsKey,
 		avatars,
+		assets,
 	]);
 
 	return { messages, status };

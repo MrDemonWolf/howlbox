@@ -39,9 +39,9 @@ export function cheerTier(bits: number): number {
 
 // Global cheermote art, no token needed. Channel-custom cheer prefixes
 // would need Helix, so those fall back to the plain bits count.
-export function cheermoteUrl(bits: number, dark = true): string {
+export function cheermoteUrl(bits: number, dark = true, scale = "2"): string {
 	const theme = dark ? "dark" : "light";
-	return `https://static-cdn.jtvnw.net/bits/${theme}/animated/${cheerTier(bits)}/2.gif`;
+	return `https://static-cdn.jtvnw.net/bits/${theme}/animated/${cheerTier(bits)}/${scale}.gif`;
 }
 
 function plural(count: number, word: string): string {
@@ -166,11 +166,11 @@ export function describeRaid(raider: string, viewers: number): ChatEvent {
 	};
 }
 
-export function describeCheer(bits: number): ChatEvent {
+export function describeCheer(bits: number, scale = "2"): ChatEvent {
 	return {
 		kind: "cheer",
 		text: `cheered ${plural(bits, "bit")}`,
-		cheermoteUrl: cheermoteUrl(bits),
+		cheermoteUrl: cheermoteUrl(bits, true, scale),
 	};
 }
 
@@ -220,11 +220,12 @@ export interface MessageFlags {
 export function decorateMessage(
 	flags: MessageFlags,
 	kinds: ReadonlySet<ChatEventKind>,
+	cheerScale = "2",
 ): ChatEvent | undefined {
 	// a cheer outranks a first message: it is the rarer signal, and the
 	// bits amount is what the streamer actually wants to see
 	if (kinds.has("cheer") && flags.isCheer && flags.bits > 0) {
-		return describeCheer(flags.bits);
+		return describeCheer(flags.bits, cheerScale);
 	}
 	if (kinds.has("first") && (flags.isFirst || flags.isReturningChatter)) {
 		return describeFirstChat(!flags.isFirst);

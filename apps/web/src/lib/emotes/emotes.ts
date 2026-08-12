@@ -4,6 +4,8 @@
 
 import { cachedJson, ONE_HOUR_MS, SIX_HOURS_MS } from "@/lib/cache";
 
+import { type AssetTier, type TierVariants, tierVariants } from "./asset-tier";
+
 export interface ThirdPartyEmote {
 	url: string;
 	zeroWidth: boolean;
@@ -20,7 +22,11 @@ interface SevenTvEmote {
 	};
 }
 
-function addSevenTv(map: EmoteMap, emotes: SevenTvEmote[] | undefined) {
+function addSevenTv(
+	map: EmoteMap,
+	emotes: SevenTvEmote[] | undefined,
+	variant: string,
+) {
 	for (const emote of emotes ?? []) {
 		const host = emote.data?.host?.url;
 		if (!emote.name || !host) {
@@ -28,7 +34,7 @@ function addSevenTv(map: EmoteMap, emotes: SevenTvEmote[] | undefined) {
 		}
 		map.set(emote.name, {
 			// host.url is protocol-relative ("//cdn.7tv.app/emote/{id}")
-			url: `https:${host}/2x.webp`,
+			url: `https:${host}/${variant}`,
 			// ActiveEmote.flags & 1 = zero-width overlay emote
 			zeroWidth: ((emote.flags ?? 0) & 1) === 1,
 		});
@@ -40,13 +46,17 @@ interface BttvEmote {
 	code?: string;
 }
 
-function addBttv(map: EmoteMap, emotes: BttvEmote[] | undefined) {
+function addBttv(
+	map: EmoteMap,
+	emotes: BttvEmote[] | undefined,
+	variant: string,
+) {
 	for (const emote of emotes ?? []) {
 		if (!emote.id || !emote.code) {
 			continue;
 		}
 		map.set(emote.code, {
-			url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`,
+			url: `https://cdn.betterttv.net/emote/${emote.id}/${variant}`,
 			zeroWidth: false,
 		});
 	}
@@ -58,15 +68,21 @@ interface FfzEmote {
 	animated?: Record<string, string> | null;
 }
 
-function addFfz(map: EmoteMap, emoticons: FfzEmote[] | undefined) {
+function addFfz(
+	map: EmoteMap,
+	emoticons: FfzEmote[] | undefined,
+	key: TierVariants["ffz"],
+) {
 	for (const emote of emoticons ?? []) {
 		if (!emote.name) {
 			continue;
 		}
 		// FFZ urls{} are always static PNG, even for animated emotes;
-		// the animated{} key is ABSENT on static ones (test truthiness)
-		const animated = emote.animated?.["2"] ?? emote.animated?.["1"];
-		const still = emote.urls?.["2"] ?? emote.urls?.["1"];
+		// the animated{} key is ABSENT on static ones (test truthiness).
+		// The ladder collapses to the old "2" then "1" when key is "2".
+		const animated =
+			emote.animated?.[key] ?? emote.animated?.["2"] ?? emote.animated?.["1"];
+		const still = emote.urls?.[key] ?? emote.urls?.["2"] ?? emote.urls?.["1"];
 		const url = animated ?? still;
 		if (url) {
 			map.set(emote.name, { url, zeroWidth: false });
@@ -109,12 +125,17 @@ async function resolveTwitchId(login: string): Promise<string | null> {
 }
 
 // force bypasses the cache TTLs (used by the ?refresh param) so a
-// mid-stream emote add shows up without an overlay reload.
+// mid-stream emote add shows up without an overlay reload. tier picks
+// the CDN variant every URL below is built at; it applies after the
+// cache reads and no request carries a size, so changing it rebuilds
+// the map from localStorage with no extra network.
 export async function fetchEmoteMap(
 	login: string,
 	force = false,
+	tier: AssetTier = "standard",
 ): Promise<EmoteMap> {
 	const map: EmoteMap = new Map();
+	const variant = tierVariants(tier);
 
 	// First wave: the FFZ room (channel emotes + the twitch id 7TV/BTTV
 	// need) alongside the three globals, which do not depend on the id.
@@ -169,22 +190,26 @@ export async function fetchEmoteMap(
 	]);
 
 	// order matters: globals first, channel emotes override on collision
-	addSevenTv(map, sevenGlobal?.emotes);
-	addBttv(map, bttvGlobal ?? undefined);
+	addSevenTv(map, sevenGlobal?.emotes, variant.sevenTv);
+	addBttv(map, bttvGlobal ?? undefined, variant.bttv);
 
 	// iterate default_sets ONLY; the response carries extra sets
 	for (const setId of ffzGlobal?.default_sets ?? []) {
-		addFfz(map, ffzGlobal?.sets?.[String(setId)]?.emoticons);
+		addFfz(map, ffzGlobal?.sets?.[String(setId)]?.emoticons, variant.ffz);
 	}
 
-	addSevenTv(map, sevenChannel?.emote_set?.emotes);
+	addSevenTv(map, sevenChannel?.emote_set?.emotes, variant.sevenTv);
 
 	// merge BOTH arrays or most channel emotes get dropped
-	addBttv(map, bttvChannel?.channelEmotes);
-	addBttv(map, bttvChannel?.sharedEmotes);
+	addBttv(map, bttvChannel?.channelEmotes, variant.bttv);
+	addBttv(map, bttvChannel?.sharedEmotes, variant.bttv);
 
 	if (ffzRoom?.room?.set !== undefined) {
-		addFfz(map, ffzRoom.sets?.[String(ffzRoom.room.set)]?.emoticons);
+		addFfz(
+			map,
+			ffzRoom.sets?.[String(ffzRoom.room.set)]?.emoticons,
+			variant.ffz,
+		);
 	}
 
 	return map;

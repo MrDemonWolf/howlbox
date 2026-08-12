@@ -2,9 +2,12 @@ import {
 	buildEmoteImageUrl,
 	ChatClient,
 	type ChatMessage,
+	type EmoteSize,
 	parseChatMessage,
 	type UserNotice,
 } from "@twurple/chat";
+
+import { type AssetTier, tierVariants } from "@/lib/emotes/asset-tier";
 
 import { fallbackColor } from "./colors";
 import {
@@ -40,6 +43,9 @@ export interface ChatOptions {
 	// which event kinds to surface; empty means no event listeners are
 	// registered at all, so the default overlay path is untouched
 	events?: ReadonlySet<ChatEventKind>;
+	// CDN variant bucket for native emote and cheermote art; third-party
+	// emotes get theirs baked in by fetchEmoteMap
+	assets?: AssetTier;
 }
 
 // Anonymous (justinfan) connection: read-only, no auth, but still
@@ -50,6 +56,7 @@ export function connectChat(
 	options: ChatOptions = {},
 ): () => void {
 	const events = options.events ?? new Set<ChatEventKind>();
+	const variant = tierVariants(options.assets ?? "standard");
 	const joined = channel.replace(/^#/, "").toLowerCase();
 	// quit() can race the connect handshake and leave a zombie client
 	// that finishes connecting and auto-reconnects; the closed flag
@@ -74,16 +81,21 @@ export function connectChat(
 				isReturningChatter: msg.isReturningChatter,
 			},
 			events,
+			variant.cheer,
 		);
 
 	client.onMessage((_channel, user, text, msg) => {
 		if (!closed) {
-			handlers.onMessage(toView(user, text, msg, false, decorate(msg)));
+			handlers.onMessage(
+				toView(user, text, msg, false, variant.twitch, decorate(msg)),
+			);
 		}
 	});
 	client.onAction((_channel, user, text, msg) => {
 		if (!closed) {
-			handlers.onMessage(toView(user, text, msg, true, decorate(msg)));
+			handlers.onMessage(
+				toView(user, text, msg, true, variant.twitch, decorate(msg)),
+			);
 		}
 	});
 	client.onMessageRemove((_channel, messageId) => {
@@ -132,7 +144,7 @@ export function connectChat(
 	// overlay without ?events= behaves exactly as it did before.
 	const pushNotice = (msg: UserNotice, event: ChatEvent) => {
 		if (!closed) {
-			handlers.onMessage(noticeToView(msg, event));
+			handlers.onMessage(noticeToView(msg, event, variant.twitch));
 		}
 	};
 	// swallows the per-recipient notices that follow a mass gift
@@ -234,14 +246,18 @@ export function connectChat(
 
 // Twitch native emotes out of the emote offset tags. Shared by messages
 // and USERNOTICE bodies, which carry the same tag shape.
-function toParts(text: string, offsets: Map<string, string[]>): MessagePart[] {
+function toParts(
+	text: string,
+	offsets: Map<string, string[]>,
+	size: EmoteSize,
+): MessagePart[] {
 	const parts: MessagePart[] = [];
 	for (const part of parseChatMessage(text, offsets)) {
 		if (part.type === "emote") {
 			parts.push({
 				type: "emote",
 				name: part.name,
-				url: buildEmoteImageUrl(part.id, { size: "2.0" }),
+				url: buildEmoteImageUrl(part.id, { size }),
 			});
 		} else if (part.type === "text") {
 			parts.push({ type: "text", text: part.text });
@@ -262,6 +278,7 @@ function toView(
 	text: string,
 	msg: ChatMessage,
 	isAction: boolean,
+	size: EmoteSize,
 	event?: ChatEvent,
 ): ChatMessageView {
 	return {
@@ -279,7 +296,7 @@ function toView(
 		// a cheer's "Cheer100" tokens are art markup, not something the
 		// person typed; the event line already carries the total
 		parts: dropEmptyText(
-			toParts(text, msg.emoteOffsets).map((part) =>
+			toParts(text, msg.emoteOffsets, size).map((part) =>
 				part.type === "text" && event?.kind === "cheer"
 					? { ...part, text: stripCheermoteTokens(part.text) }
 					: part,
@@ -295,7 +312,11 @@ function toView(
 
 // A USERNOTICE (sub, gift, raid, announcement) as a message row. The
 // body is optional: a resub may carry a message, a raid never does.
-function noticeToView(msg: UserNotice, event: ChatEvent): ChatMessageView {
+function noticeToView(
+	msg: UserNotice,
+	event: ChatEvent,
+	size: EmoteSize,
+): ChatMessageView {
 	const login = msg.userInfo.userName;
 	return {
 		id: msg.id,
@@ -308,7 +329,7 @@ function noticeToView(msg: UserNotice, event: ChatEvent): ChatMessageView {
 			version,
 		})),
 		renderBadges: [],
-		parts: msg.text ? toParts(msg.text, msg.emoteOffsets) : [],
+		parts: msg.text ? toParts(msg.text, msg.emoteOffsets, size) : [],
 		isAction: false,
 		// events are system lines, not user speech: holding them behind the
 		// moderation delay would land a raid alert minutes after the raid
