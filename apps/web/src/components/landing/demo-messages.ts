@@ -170,6 +170,19 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		isAction: false,
 		isPrivileged: false,
 	},
+	// nothing but emotes, so ?emotescale applies to this row and not to
+	// the ones around it
+	{
+		channelId: null,
+		login: "aurorawolf",
+		displayName: "AuroraWolf",
+		color: "#FF4500",
+		badges: [],
+		renderBadges: [],
+		parts: [emote("LUL", "425618"), text(" "), emote("Kappa", "25")],
+		isAction: false,
+		isPrivileged: false,
+	},
 	// attached event row: keeps its author header and message body
 	{
 		channelId: null,

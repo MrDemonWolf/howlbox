@@ -16,6 +16,7 @@ import { Field, Fieldset, NumberField, Toggle } from "./fields";
 import {
 	AVATAR_OPTIONS,
 	type Config,
+	EMOTE_SCALE_PRESETS,
 	EVENT_TOGGLES,
 	FIELD,
 	type SetConfig,
@@ -190,6 +191,41 @@ export function ConfigSections({
 						step={5}
 						type="range"
 						value={config.size}
+					/>
+				</Field>
+
+				{/* emote multiplier: same preset-plus-slider shape as text size
+				    right above, so the two size knobs read as a pair */}
+				<Field
+					hint="Only messages that are nothing but emotes grow. One word alongside the emote and the message stays at normal size. Cheermote art follows the same multiplier."
+					htmlFor="cfg-emotescale"
+					label={`Emote size (${config.emotescale}x)`}
+				>
+					<div className="flex flex-wrap gap-2">
+						{EMOTE_SCALE_PRESETS.map((preset) => (
+							<button
+								aria-pressed={config.emotescale === preset.value}
+								className={cn(
+									"hb-btn hb-btn-sm hb-btn-secondary min-w-11",
+									config.emotescale === preset.value && "hb-btn-selected",
+								)}
+								key={preset.label}
+								onClick={() => set("emotescale", preset.value)}
+								type="button"
+							>
+								{preset.label}
+							</button>
+						))}
+					</div>
+					<input
+						className="mt-1 h-11 w-full accent-[color:var(--site-brand)]"
+						id="cfg-emotescale"
+						max={4}
+						min={1}
+						onChange={(e) => set("emotescale", Number(e.target.value))}
+						step={0.5}
+						type="range"
+						value={config.emotescale}
 					/>
 				</Field>
 
