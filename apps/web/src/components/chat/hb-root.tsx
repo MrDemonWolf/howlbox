@@ -51,6 +51,13 @@ export function HbRoot({
 				{
 					"--hb-font-scale": size / 100,
 					"--hb-emote-boost": emoteScale,
+					// Emotes centre on the text line at chat size, which is right
+					// until the art is several times the line height: middle then
+					// leaves the name floating against the centre of a tall block
+					// with no shared edge. Past 1x, jumbo rows drop to the bottom
+					// so the name and the emote sit on one floor. Only the value
+					// changes here; which rows obey it is CSS (see overlay.css).
+					"--hb-emote-align": emoteScale > 1 ? "bottom" : "middle",
 				} as CSSProperties
 			}
 		>

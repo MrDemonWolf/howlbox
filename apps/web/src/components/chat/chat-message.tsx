@@ -1,6 +1,6 @@
 import { type CSSProperties, memo } from "react";
 
-import { groupParts, isEmoteOnly } from "@/lib/emotes/resolve";
+import { emoteOnlyCount, groupParts } from "@/lib/emotes/resolve";
 import type { OverlayParams } from "@/lib/overlay/params";
 import { readableUserColor, userColorOutline } from "@/lib/twitch/colors";
 import { isStandaloneEvent } from "@/lib/twitch/events";
@@ -120,16 +120,27 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 	// hands it to --hb-emote-jumbo, which the emote and cheermote heights
 	// multiply by the --hb-emote-scale Custom CSS hook. Rows with words in
 	// them never see it, so their emotes stay at 1.6em.
-	const emoteOnly = isEmoteOnly(
+	//
+	// The multiplier decays with the number of emotes, dividing the EXTRA
+	// size among them: one emote gets the full scale, and a row of N gets
+	// 1 + (scale - 1) / N. That holds a row's added width to approximately
+	// (scale - 1) emote widths no matter how many were spammed, so the
+	// single-emote reaction still lands while an eleven-emote wall stops
+	// eating a third of the overlay. Kept as a calc() rather than a
+	// resolved number so the boost stays overridable in OBS Custom CSS.
+	const artCount = emoteOnlyCount(
 		message.parts,
 		Boolean(message.event?.cheermoteUrl),
 	);
+	const emoteOnly = artCount > 0;
 	const style: CSSProperties | undefined =
 		animation || emoteOnly
 			? ({
 					animation,
 					...(emoteOnly
-						? { "--hb-emote-jumbo": "var(--hb-emote-boost,1)" }
+						? {
+								"--hb-emote-jumbo": `calc(1 + (var(--hb-emote-boost,1) - 1) / ${artCount})`,
+							}
 						: {}),
 				} as CSSProperties)
 			: undefined;
