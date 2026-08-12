@@ -1,11 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { cachedJson, ONE_HOUR_MS } from "./cache";
+import {
+	cacheCooldownSizeForTests,
+	cachedJson,
+	getJson,
+	ONE_HOUR_MS,
+	resetCacheCooldownsForTests,
+} from "./cache";
 
 const PREFIX = "hb-cache-v1:";
 
-// A controllable in-memory localStorage stub. Bun's test runtime has no
-// localStorage, so cache.ts sees whatever we hang off globalThis here.
 interface Stub {
 	store: Map<string, string>;
 	throwOnGet: boolean;
@@ -16,6 +20,7 @@ let stub: Stub;
 const realFetch = globalThis.fetch;
 let fetchCount: number;
 let fetchImpl: () => Promise<unknown>;
+let lastFetchSignal: AbortSignal | null;
 
 function installLocalStorage(s: Stub) {
 	const ls = {
@@ -47,10 +52,13 @@ function installLocalStorage(s: Stub) {
 beforeEach(() => {
 	stub = { store: new Map(), throwOnGet: false, throwOnSet: false };
 	installLocalStorage(stub);
+	resetCacheCooldownsForTests();
 	fetchCount = 0;
 	fetchImpl = async () => ({ n: 1 });
-	globalThis.fetch = (async () => {
+	lastFetchSignal = null;
+	globalThis.fetch = (async (_input, init) => {
 		fetchCount++;
+		lastFetchSignal = init?.signal ?? null;
 		const value = await fetchImpl();
 		return { ok: true, json: async () => value } as Response;
 	}) as typeof fetch;
@@ -61,7 +69,6 @@ afterEach(() => {
 	(globalThis as { localStorage?: unknown }).localStorage = undefined;
 });
 
-// Force the stored entry's timestamp into the past so it reads as stale.
 function ageEntry(key: string) {
 	const raw = stub.store.get(PREFIX + key);
 	if (!raw) {
@@ -71,6 +78,11 @@ function ageEntry(key: string) {
 	parsed.t = Date.now() - 10 * ONE_HOUR_MS;
 	stub.store.set(PREFIX + key, JSON.stringify(parsed));
 }
+
+const isN = (value: unknown): value is { n: number } =>
+	typeof value === "object" &&
+	value !== null &&
+	typeof (value as { n?: unknown }).n === "number";
 
 describe("cachedJson", () => {
 	test("serves a fresh cached value without refetching", async () => {
@@ -123,5 +135,56 @@ describe("cachedJson", () => {
 			throw new Error("network down");
 		};
 		expect(await cachedJson("k", ONE_HOUR_MS, "u")).toBeNull();
+	});
+
+	test("rejects and does not cache a payload that fails validation", async () => {
+		fetchImpl = async () => ({ nope: true });
+		expect(
+			await cachedJson("validated", ONE_HOUR_MS, "u", { validate: isN }),
+		).toBeNull();
+		expect(stub.store.has(`${PREFIX}validated`)).toBe(false);
+
+		fetchImpl = async () => ({ n: 2 });
+		expect(
+			await cachedJson("validated", ONE_HOUR_MS, "u", { validate: isN }),
+		).toEqual({ n: 2 });
+		expect(fetchCount).toBe(2);
+	});
+
+	test("provider cooldown suppresses repeated failures across cache keys", async () => {
+		fetchImpl = async () => {
+			throw new Error("provider down");
+		};
+		expect(
+			await cachedJson("one", ONE_HOUR_MS, "u1", {
+				cooldownKey: "provider",
+			}),
+		).toBeNull();
+		expect(
+			await cachedJson("two", ONE_HOUR_MS, "u2", {
+				cooldownKey: "provider",
+			}),
+		).toBeNull();
+		expect(fetchCount).toBe(1);
+	});
+
+	test("provider cooldown state stays bounded across unique failures", async () => {
+		fetchImpl = async () => {
+			throw new Error("provider down");
+		};
+		for (let index = 0; index < 300; index++) {
+			await cachedJson(`key-${index}`, ONE_HOUR_MS, "u", {
+				cooldownKey: `provider-${index}`,
+				cooldownMs: ONE_HOUR_MS,
+			});
+		}
+		expect(cacheCooldownSizeForTests()).toBe(256);
+	});
+
+	test("combines a caller AbortSignal with the request timeout", async () => {
+		const controller = new AbortController();
+		controller.abort();
+		await getJson("u", { signal: controller.signal, validate: isN });
+		expect(lastFetchSignal?.aborted).toBe(true);
 	});
 });

@@ -7,7 +7,10 @@ import { Copy, ExternalLink, RotateCcw } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
 
-import { OverlayPreview } from "@/components/landing/overlay-preview";
+import {
+	OBS_DIMENSIONS,
+	OverlayPreview,
+} from "@/components/landing/overlay-preview";
 import { MONO } from "@/components/landing/site-chrome";
 
 import type { Config } from "./form-model";
@@ -63,12 +66,12 @@ export function ConfigOutput({
 	};
 
 	return (
-		<div className="flex flex-col gap-4 lg:sticky lg:top-24">
+		<div className="order-2 flex flex-col gap-4 lg:sticky lg:top-24 lg:order-1">
 			<div className="flex items-center justify-between">
 				<span
 					className={`text-[0.65rem] text-[color:var(--site-brand-text)] ${MONO}`}
 				>
-					Live preview
+					Live preview · {OBS_DIMENSIONS}
 				</span>
 				{/* This line already mirrors the state a sighted user reads off
 				    the preview, so it doubles as the status region rather than
@@ -85,13 +88,17 @@ export function ConfigOutput({
 				animate={config.animate}
 				backdrop="checker"
 				bg={config.bg}
-				className="h-64 sm:h-96"
-				emoteScale={config.emotescale}
+				avatarMode={config.avatars}
+				className="h-[34rem]"
+				events={config.events}
+				logicalViewport
 				fadeSeconds={config.fade}
-				showAvatars={config.avatars !== "off"}
+				maxMessages={config.max}
+				mediaMode={config.media}
 				showBadges={config.badges}
 				showPronouns={config.pronouns}
 				showTimestamps={config.timestamps}
+				emoteScale={config.emotescale}
 				size={config.size}
 				theme={config.theme}
 			/>

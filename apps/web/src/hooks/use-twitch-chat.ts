@@ -1,6 +1,5 @@
-import { type RefObject, useEffect, useState } from "react";
+import { type RefObject, useCallback, useEffect, useState } from "react";
 
-import type { AssetTier } from "@/lib/emotes/asset-tier";
 import type { EmoteMap } from "@/lib/emotes/emotes";
 import { type BadgeMap, resolveMessageExtras } from "@/lib/emotes/resolve";
 import { resolveAvatar, warmAvatar } from "@/lib/twitch/avatars";
@@ -35,11 +34,9 @@ export interface UseTwitchChatOptions {
 	events?: readonly ChatEventKind[];
 	// whose profile picture to fetch (off / everyone / subscribers only)
 	avatars?: AvatarMode;
-	// CDN variant bucket for native emote and cheermote art. A string, so
-	// nudging ?emotescale within one bucket compares equal and does not
-	// reconnect; crossing a bucket reconnects on purpose, since the rows
-	// already on screen carry URLs baked at the old variant.
-	assets?: AssetTier;
+	// native Twitch emote CDN asset controls
+	emoteScale?: 1 | 2 | 3;
+	staticMedia?: boolean;
 	// read at append time; ref identity is stable so late-loading
 	// maps never tear down the connection
 	emotesRef?: RefObject<EmoteMap | null>;
@@ -60,10 +57,14 @@ export function useTwitchChat(
 	const pronouns = options.pronouns ?? false;
 	const eventsKey = (options.events ?? []).join(",");
 	const avatars = options.avatars ?? "off";
-	const assets = options.assets ?? "standard";
+	const emoteScale = options.emoteScale ?? 2;
+	const staticMedia = options.staticMedia ?? false;
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
 	const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
+	const removeMessage = useCallback((messageId: string) => {
+		setMessages((prev) => removeById(prev, messageId));
+	}, []);
 	// emotesRef/badgesRef are read via .current at append time on
 	// purpose; adding them to the deps would tear down and rebuild the
 	// chat connection whenever a map loads (see use-emotes.ts).
@@ -107,7 +108,7 @@ export function useTwitchChat(
 			}
 		};
 
-		setMessages([]);
+		setMessages((prev) => (prev.length === 0 ? prev : []));
 		const disconnect = connectChat(
 			channel,
 			{
@@ -147,11 +148,11 @@ export function useTwitchChat(
 							() => promote(message.id),
 							delaySeconds * 1000,
 						);
-						// the buffer evicts its oldest entry when full; clear that
-						// stale timer so a promoted-then-dropped id can't fire
-						const evicted = pending.add(message.id, { message, timer });
-						if (evicted) {
-							clearTimeout(evicted.timer);
+						// Clear the timer for either a capacity eviction or a new
+						// duplicate that the buffer rejected.
+						const discarded = pending.add(message.id, { message, timer });
+						if (discarded) {
+							clearTimeout(discarded.timer);
 						}
 						return;
 					}
@@ -176,7 +177,7 @@ export function useTwitchChat(
 						return;
 					}
 					dropPending(() => true);
-					setMessages([]);
+					setMessages((prev) => (prev.length === 0 ? prev : []));
 				},
 				onStatus: (status) => {
 					if (active) {
@@ -184,7 +185,7 @@ export function useTwitchChat(
 					}
 				},
 			},
-			{ events, assets },
+			{ emoteScale, events, staticMedia },
 		);
 		return () => {
 			active = false;
@@ -201,8 +202,9 @@ export function useTwitchChat(
 		pronouns,
 		eventsKey,
 		avatars,
-		assets,
+		emoteScale,
+		staticMedia,
 	]);
 
-	return { messages, status };
+	return { messages, removeMessage, status };
 }

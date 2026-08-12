@@ -81,6 +81,8 @@ describe("visible-list ops", () => {
 		const list = [msg("1", "a"), msg("2", "b"), msg("3", "a")];
 		expect(removeById(list, "2").map((m) => m.id)).toEqual(["1", "3"]);
 		expect(removeByLogin(list, "a").map((m) => m.id)).toEqual(["2"]);
+		expect(removeById(list, "missing")).toBe(list);
+		expect(removeByLogin(list, "missing")).toBe(list);
 	});
 });
 
@@ -105,6 +107,18 @@ describe("PendingBuffer", () => {
 		const evicted = buf.add("3", entry("3", "c"));
 		expect(evicted?.message.id).toBe("1");
 		expect(buf.size).toBe(2);
+	});
+
+	test("a duplicate id keeps the original entry and capacity", () => {
+		const buf = new PendingBuffer<ReturnType<typeof entry>>(2);
+		const original = entry("2", "b");
+		const duplicate = entry("2", "b");
+		buf.add("1", entry("1", "a"));
+		buf.add("2", original);
+		expect(buf.add("2", duplicate)).toBe(duplicate);
+		expect(buf.size).toBe(2);
+		expect(buf.take("1")?.message.id).toBe("1");
+		expect(buf.take("2")).toBe(original);
 	});
 
 	test("drop by id and by login (a delete, a timeout or ban)", () => {

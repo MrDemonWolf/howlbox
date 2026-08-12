@@ -3,7 +3,7 @@
 // schema. Kept apart from the components so the state math is readable
 // and testable on its own.
 
-import type { BgMode, Theme } from "@/lib/overlay/params";
+import type { BgMode, MediaMode, Theme } from "@/lib/overlay/params";
 import {
 	normalizeLoginList,
 	OVERLAY_DEFAULTS,
@@ -25,6 +25,7 @@ export interface Config {
 	timestamps: boolean;
 	badges: boolean;
 	animate: boolean;
+	media: MediaMode;
 	pronouns: boolean;
 	hide: string;
 	allow: string;
@@ -52,6 +53,7 @@ export const DEFAULTS: Config = {
 	timestamps: OVERLAY_DEFAULTS.timestamps,
 	badges: OVERLAY_DEFAULTS.badges,
 	animate: OVERLAY_DEFAULTS.animate,
+	media: OVERLAY_DEFAULTS.media,
 	pronouns: OVERLAY_DEFAULTS.pronouns,
 	hide: "",
 	allow: "",
@@ -150,6 +152,7 @@ export function configToOverlay(config: Config, cleanChannel: string) {
 		timestamps: config.timestamps,
 		badges: config.badges,
 		animate: config.animate,
+		media: config.media,
 		pronouns: config.pronouns,
 		hide: normalizeLoginList(config.hide),
 		allow: normalizeLoginList(config.allow),
@@ -179,6 +182,7 @@ export function parsedToConfig(parsed: OverlayParams): Config {
 		timestamps: parsed.timestamps,
 		badges: parsed.badges,
 		animate: parsed.animate,
+		media: parsed.media,
 		pronouns: parsed.pronouns,
 		hide: parsed.hide.join(", "),
 		allow: parsed.allow.join(", "),

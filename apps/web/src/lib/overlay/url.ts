@@ -1,5 +1,6 @@
 import {
 	type BgMode,
+	type MediaMode,
 	OVERLAY_DEFAULTS,
 	overlayParamsSchema,
 	type Theme,
@@ -24,6 +25,7 @@ export interface OverlayConfig {
 	timestamps: boolean;
 	badges: boolean;
 	animate: boolean;
+	media: MediaMode;
 	pronouns: boolean;
 	hide: string[];
 	allow: string[];
@@ -76,6 +78,9 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (!config.animate) {
 		qs.set("animate", "false");
+	}
+	if (config.media !== OVERLAY_DEFAULTS.media) {
+		qs.set("media", config.media);
 	}
 	if (config.pronouns) {
 		qs.set("pronouns", "true");

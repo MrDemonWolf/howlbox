@@ -1,14 +1,38 @@
-// The batcher is the part a live overlay cannot prove on demand: it only
-// shows itself when many new logins land inside the same 300ms window,
-// which needs a chat burst to happen naturally. Drive it directly here.
+// Drive the batching logic directly because a live overlay only reveals it
+// when many new logins arrive inside the same 300ms window.
 
-import { expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, expect, mock, test } from "bun:test";
 
-import { resolveAvatar, warmAvatar } from "@/lib/twitch/avatars";
+import {
+	resetAvatarStateForTests,
+	resolveAvatar,
+	warmAvatar,
+} from "@/lib/twitch/avatars";
+
+const realFetch = globalThis.fetch;
 
 function logo(login: string) {
 	return `https://static-cdn.jtvnw.net/jtv_user_pictures/${login}-profile_image-abc-600x600.png`;
 }
+
+async function waitFor(predicate: () => boolean, timeoutMs = 1500) {
+	const deadline = performance.now() + timeoutMs;
+	while (!predicate()) {
+		if (performance.now() >= deadline) {
+			throw new Error("Timed out waiting for test condition");
+		}
+		await Bun.sleep(10);
+	}
+}
+
+beforeEach(() => {
+	resetAvatarStateForTests();
+});
+
+afterEach(() => {
+	resetAvatarStateForTests();
+	globalThis.fetch = realFetch;
+});
 
 test("a burst of logins collapses into batched requests", async () => {
 	const calls: string[][] = [];
@@ -23,12 +47,10 @@ test("a burst of logins collapses into batched requests", async () => {
 	});
 	globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-	// 60 logins in one tick: one full batch of 50, then the remainder
 	const logins = Array.from({ length: 60 }, (_, i) => `chatter${i}`);
 	for (const login of logins) {
 		warmAvatar(login);
 	}
-	// repeats inside the same window must not queue twice
 	for (const login of logins) {
 		warmAvatar(login);
 	}
@@ -38,14 +60,12 @@ test("a burst of logins collapses into batched requests", async () => {
 	expect(calls.length).toBe(2);
 	expect(calls[0]?.length).toBe(50);
 	expect(calls[1]?.length).toBe(10);
-	// every login resolved exactly once, at the downscaled size
 	expect(new Set(calls.flat()).size).toBe(60);
 	expect(resolveAvatar("chatter0")).toBe(
 		"https://static-cdn.jtvnw.net/jtv_user_pictures/chatter0-profile_image-abc-70x70.png",
 	);
 	expect(resolveAvatar("chatter59")).toBeTruthy();
 
-	// an already-resolved login costs no further request
 	warmAvatar("chatter0");
 	await Bun.sleep(400);
 	expect(calls.length).toBe(2);
@@ -55,7 +75,6 @@ test("a login the API omits resolves empty instead of retrying forever", async (
 	let requests = 0;
 	globalThis.fetch = mock(() => {
 		requests++;
-		// ivr.fi returns [] for a banned or nonexistent login
 		return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
 	}) as unknown as typeof fetch;
 
@@ -67,4 +86,57 @@ test("a login the API omits resolves empty instead of retrying forever", async (
 	warmAvatar("ghost_user");
 	await Bun.sleep(400);
 	expect(requests).toBe(1);
+});
+
+test("concurrency stays capped while later batches wait", async () => {
+	let active = 0;
+	let peak = 0;
+	const releases: (() => void)[] = [];
+	globalThis.fetch = mock((url: string) => {
+		active++;
+		peak = Math.max(peak, active);
+		const logins = (new URL(url).searchParams.get("login") ?? "").split(",");
+		return new Promise((resolve) => {
+			releases.push(() => {
+				active--;
+				resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve(
+							logins.map((login) => ({ login, logo: logo(login) })),
+						),
+				});
+			});
+		});
+	}) as unknown as typeof fetch;
+
+	for (let i = 0; i < 120; i++) {
+		warmAvatar(`busy${i}`);
+	}
+	await waitFor(() => releases.length === 2);
+	expect(releases.length).toBe(2);
+	expect(peak).toBe(2);
+
+	for (const release of releases.splice(0)) {
+		release();
+	}
+	await waitFor(() => releases.length === 1);
+	expect(releases.length).toBe(1);
+	releases[0]?.();
+	await waitFor(() => active === 0);
+});
+
+test("a provider outage opens a cooldown for other logins", async () => {
+	let requests = 0;
+	globalThis.fetch = mock(() => {
+		requests++;
+		return Promise.reject(new Error("provider down"));
+	}) as unknown as typeof fetch;
+
+	warmAvatar("failed_one");
+	await waitFor(() => requests === 1);
+	warmAvatar("failed_two");
+	await Bun.sleep(600);
+	expect(requests).toBe(1);
+	expect(resolveAvatar("failed_one")).toBeNull();
 });

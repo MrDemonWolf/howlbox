@@ -4,6 +4,9 @@
 // message. Nothing here touches the network or the DOM, so every line
 // below is checkable in isolation (see events.test.ts).
 
+import type { MediaPreferences } from "@/lib/emotes/media";
+import { resolveMediaPreferences } from "@/lib/emotes/media";
+
 import type { ChatEvent, ChatEventKind } from "./types";
 
 // Two shapes of event row. An attached event decorates a real message,
@@ -39,9 +42,16 @@ export function cheerTier(bits: number): number {
 
 // Global cheermote art, no token needed. Channel-custom cheer prefixes
 // would need Helix, so those fall back to the plain bits count.
-export function cheermoteUrl(bits: number, dark = true, scale = "2"): string {
+export function cheermoteUrl(
+	bits: number,
+	dark = true,
+	preferences: MediaPreferences = {},
+): string {
 	const theme = dark ? "dark" : "light";
-	return `https://static-cdn.jtvnw.net/bits/${theme}/animated/${cheerTier(bits)}/${scale}.gif`;
+	const { assetScale, staticMedia } = resolveMediaPreferences(preferences);
+	const motion = staticMedia ? "static" : "animated";
+	const extension = staticMedia ? "png" : "gif";
+	return `https://static-cdn.jtvnw.net/bits/${theme}/${motion}/${cheerTier(bits)}/${assetScale}.${extension}`;
 }
 
 function plural(count: number, word: string): string {
@@ -166,11 +176,14 @@ export function describeRaid(raider: string, viewers: number): ChatEvent {
 	};
 }
 
-export function describeCheer(bits: number, scale = "2"): ChatEvent {
+export function describeCheer(
+	bits: number,
+	preferences: MediaPreferences = {},
+): ChatEvent {
 	return {
 		kind: "cheer",
 		text: `cheered ${plural(bits, "bit")}`,
-		cheermoteUrl: cheermoteUrl(bits, true, scale),
+		cheermoteUrl: cheermoteUrl(bits, true, preferences),
 	};
 }
 
@@ -220,12 +233,12 @@ export interface MessageFlags {
 export function decorateMessage(
 	flags: MessageFlags,
 	kinds: ReadonlySet<ChatEventKind>,
-	cheerScale = "2",
+	preferences: MediaPreferences = {},
 ): ChatEvent | undefined {
 	// a cheer outranks a first message: it is the rarer signal, and the
 	// bits amount is what the streamer actually wants to see
 	if (kinds.has("cheer") && flags.isCheer && flags.bits > 0) {
-		return describeCheer(flags.bits, cheerScale);
+		return describeCheer(flags.bits, preferences);
 	}
 	if (kinds.has("first") && (flags.isFirst || flags.isReturningChatter)) {
 		return describeFirstChat(!flags.isFirst);

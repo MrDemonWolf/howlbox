@@ -1,6 +1,103 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { gistIdFrom, parseCustomBadgeArt, parseGistBadgeArt } from "./badges";
+import { resetCacheCooldownsForTests } from "../cache";
+import {
+	fetchBadgeMap,
+	gistIdFrom,
+	parseCustomBadgeArt,
+	parseGistBadgeArt,
+} from "./badges";
+
+const realFetch = globalThis.fetch;
+let requestUrls: string[];
+let invalidGlobal: boolean;
+
+function installStorage() {
+	const store = new Map<string, string>();
+	(globalThis as { localStorage?: unknown }).localStorage = {
+		getItem: (key: string) => store.get(key) ?? null,
+		setItem: (key: string, value: string) => store.set(key, value),
+		removeItem: (key: string) => store.delete(key),
+		key: (index: number) => [...store.keys()][index] ?? null,
+		get length() {
+			return store.size;
+		},
+	};
+}
+
+beforeEach(() => {
+	requestUrls = [];
+	invalidGlobal = false;
+	resetCacheCooldownsForTests();
+	installStorage();
+	globalThis.fetch = (async (input) => {
+		const url = String(input);
+		requestUrls.push(url);
+		const global = url.endsWith("/badges/global");
+		const payload = global
+			? invalidGlobal
+				? { invalid: true }
+				: [
+						{
+							set_id: "moderator",
+							versions: [
+								{
+									id: "1",
+									image_url_1x: "https://cdn.example/mod-1.png",
+									image_url_2x: "https://cdn.example/mod-2.png",
+									image_url_4x: "https://cdn.example/mod-4.png",
+								},
+							],
+						},
+					]
+			: [
+					{
+						set_id: "subscriber",
+						versions: [
+							{
+								id: "1",
+								image_url_1x: "https://cdn.example/sub-1.png",
+								image_url_2x: "https://cdn.example/sub-2.png",
+								image_url_4x: "https://cdn.example/sub-4.png",
+							},
+						],
+					},
+				];
+		return { ok: true, json: async () => payload } as Response;
+	}) as typeof fetch;
+});
+
+afterEach(() => {
+	globalThis.fetch = realFetch;
+	(globalThis as { localStorage?: unknown }).localStorage = undefined;
+});
+
+describe("fetchBadgeMap", () => {
+	test("selects the requested provider image scale", async () => {
+		const scale1 = await fetchBadgeMap("channel", { assetScale: 1 });
+		expect(scale1.get("moderator/1")).toBe("https://cdn.example/mod-1.png");
+		expect(scale1.get("subscriber/1")).toBe("https://cdn.example/sub-1.png");
+
+		const scale3 = await fetchBadgeMap("other", { assetScale: 3 });
+		expect(scale3.get("moderator/1")).toBe("https://cdn.example/mod-4.png");
+		expect(scale3.get("subscriber/1")).toBe("https://cdn.example/sub-4.png");
+	});
+
+	test("forced refresh keeps the global badge TTL", async () => {
+		await fetchBadgeMap("channel");
+		requestUrls = [];
+		await fetchBadgeMap("channel", { forceChannel: true });
+		expect(requestUrls).toHaveLength(1);
+		expect(requestUrls[0]).toContain("/badges/channel?");
+	});
+
+	test("invalid global payload does not hide valid channel badges", async () => {
+		invalidGlobal = true;
+		const map = await fetchBadgeMap("channel");
+		expect(map.has("moderator/1")).toBe(false);
+		expect(map.get("subscriber/1")).toBe("https://cdn.example/sub-1.png");
+	});
+});
 
 describe("parseCustomBadgeArt", () => {
 	test("parses set=url and set/version=url pairs", () => {

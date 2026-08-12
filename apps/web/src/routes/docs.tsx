@@ -61,12 +61,12 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "size",
 					values: "50 to 300, percent",
-					body: "Scales the theme's own font size. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. Default 100.",
+					body: "Scales the theme's own font size, with a 12px rendered floor for broadcast readability. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. Default 100.",
 				},
 				{
 					name: "emotescale",
 					values: "1 to 4, half steps",
-					body: "Grows emotes on messages that are nothing but emotes. One word alongside the emote and that message renders at normal size, so a wall of PogChamp stands out and a sentence does not. Any value between the half steps snaps to the nearest one. Cheermote art follows the same multiplier; badges, pronoun pills, avatars and text do not. Past an effective 2x, once this and size are multiplied together, the overlay switches to the largest art each emote service publishes rather than upscaling the 2x file, so a 3x emote costs more bandwidth than a 1x one. Default 1.",
+					body: "Grows emotes on messages that are nothing but emotes. One word alongside the emote and that message renders at normal size, so a wall of PogChamp stands out and a sentence does not. Any value between the half steps snaps to the nearest one. Cheermote art follows the same multiplier; badges, pronoun pills, avatars and text do not. This counts toward the source art the overlay requests the same way size does, so raising it past 2x pulls larger files from the emote services and costs more bandwidth. Default 1.",
 				},
 				{
 					name: "avatars",
@@ -123,6 +123,11 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 					values: "true, false",
 					body: "Entrance animation on new messages. Transform and opacity only, so it stays cheap on CPU-rendered OBS setups. Default true.",
 				},
+				{
+					name: "media",
+					values: "animated, static",
+					body: "Controls animated emotes and cheer art separately from row entrances. Static reduces network transfer, decoded pixels, and continuous frame paints. A reduced-motion preference also selects static art. Default animated.",
+				},
 			],
 		},
 		{
@@ -175,7 +180,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "refresh",
 					values: "0, or 5 to 1440, minutes",
-					body: "Refetch the emote and badge maps this often, so emotes added mid-stream show up without reloading the source. 0 turns it off. The floor is 5 minutes on purpose: the emote APIs are free and unauthenticated, and a tighter loop is rude to them. Default 5.",
+					body: "Refetch channel-scoped emote and badge maps this often, so art added mid-stream shows up without reloading the source. Global maps keep their normal cache TTL. 0 turns refresh off and is the default. The 5-minute floor protects the free, unauthenticated upstream APIs.",
 				},
 			],
 		},
@@ -308,7 +313,7 @@ const TROUBLE = [
 	},
 	{
 		q: "7TV or BTTV emotes are missing",
-		a: "Those services only return emotes for channels that have set them up. If the channel has no 7TV account, there are no 7TV emotes to fetch. Channel emotes override globals, and results are cached in localStorage, so a change on their side shows up on the next refresh interval.",
+		a: "Those services only return emotes for channels that have set them up. If the channel has no 7TV account, there are no 7TV emotes to fetch. Channel emotes override globals, and results are cached in localStorage. Reload the source to pick up changes, or enable a refresh interval for channel art.",
 	},
 	{
 		q: "Custom badge art is not showing",
@@ -543,9 +548,9 @@ function DocsPage() {
 							</p>
 							<p className="hb-text-2 mt-3 leading-relaxed">
 								The gist is read through the public GitHub API with no token,
-								which allows 60 unauthenticated requests per hour per IP. The
-								default 5-minute refresh interval and its 5-minute floor keep a
-								gist far under that, so there is nothing to tune.
+								which allows 60 unauthenticated requests per hour per IP.
+								Refresh is off by default. If enabled, its 5-minute floor keeps
+								a gist far under that limit.
 							</p>
 						</section>
 

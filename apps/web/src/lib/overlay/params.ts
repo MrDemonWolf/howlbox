@@ -1,112 +1,35 @@
 import { z } from "zod";
 
+import { AVATAR_MODES, EVENT_KINDS } from "@/lib/twitch/types";
+
 import {
-	AVATAR_MODES,
-	type AvatarMode,
-	type ChatEventKind,
-	EVENT_KINDS,
-} from "@/lib/twitch/types";
+	BG_MODES,
+	FALSY_TOKENS,
+	LOGIN_RE,
+	MEDIA_MODES,
+	normalizeEventList,
+	normalizeLoginList,
+	THEMES,
+	TRUTHY_TOKENS,
+} from "./config";
 
-export const BG_MODES = ["off", "panel", "bubble"] as const;
-export const THEMES = [
-	"wolf",
-	"glass",
-	"terminal",
-	"neon",
-	"dark",
-	"light",
-	"contrast",
-	"cozy",
-	"nobox",
-	"retro95",
-	"xp",
-	"xbox",
-	"arcade",
-	"galaxy",
-	"mocha",
-] as const;
-
-export type BgMode = (typeof BG_MODES)[number];
-export type Theme = (typeof THEMES)[number];
-
-// Resolved default for each non-empty param. Mirrors the schema's
-// per-field .catch() fallbacks below, and is the shared source the
-// config builder serializes against so the two cannot disagree.
-export const OVERLAY_DEFAULTS = {
-	bg: "off",
-	theme: "wolf",
-	size: 100,
-	emotescale: 1,
-	max: 50,
-	delay: 0,
-	fade: 0,
-	hidebots: false,
-	hidecommands: false,
-	timestamps: false,
-	badges: true,
-	animate: true,
-	badgeart: "",
-	badgegist: "",
-	refresh: 5,
-	pronouns: false,
-	events: [] as ChatEventKind[],
-	avatars: "off",
-} satisfies {
-	bg: BgMode;
-	theme: Theme;
-	size: number;
-	emotescale: number;
-	max: number;
-	delay: number;
-	fade: number;
-	hidebots: boolean;
-	hidecommands: boolean;
-	timestamps: boolean;
-	badges: boolean;
-	animate: boolean;
-	badgeart: string;
-	badgegist: string;
-	refresh: number;
-	pronouns: boolean;
-	events: ChatEventKind[];
-	avatars: AvatarMode;
-};
-
-// One valid Twitch login: 1-25 chars of lowercase alnum/underscore.
-const LOGIN_RE = /^[a-z0-9_]{1,25}$/;
-
-// Shared single-login validator. The config builder gates the channel
-// field on this, the channel param regexes the same source, and
-// normalizeLoginList filters the list params with it, so none of the
-// three can disagree on what a real Twitch login looks like.
-export function isValidLogin(login: string): boolean {
-	return LOGIN_RE.test(login);
-}
-
-// string tokens that read as on / off in a URL param
-const TRUTHY_TOKENS = ["1", "true", "on", "yes"];
-const FALSY_TOKENS = ["0", "false", "off", "no"];
-
-// Split a comma list into valid, lowercased logins, dropping anything
-// that is not a real Twitch login shape. Shared with the config
-// builder so it and the overlay agree on what survives.
-export function normalizeLoginList(raw: string): string[] {
-	return raw
-		.split(",")
-		.map((login) => login.trim().toLowerCase())
-		.filter(isValidLogin);
-}
-
-// Split a comma list into valid event kinds, dropping unknown tokens.
-// "all" is a shorthand for every kind, so ?events=all keeps working when
-// a new kind is added. Shared with the config builder.
-export function normalizeEventList(raw: string): ChatEventKind[] {
-	const tokens = raw.split(",").map((token) => token.trim().toLowerCase());
-	if (tokens.includes("all")) {
-		return [...EVENT_KINDS];
-	}
-	return EVENT_KINDS.filter((kind) => tokens.includes(kind));
-}
+export type {
+	AssetScale,
+	BgMode,
+	MediaMode,
+	OverlayParams,
+	Theme,
+} from "./config";
+export {
+	assetScaleFor,
+	BG_MODES,
+	isValidLogin,
+	MEDIA_MODES,
+	normalizeEventList,
+	normalizeLoginList,
+	OVERLAY_DEFAULTS,
+	THEMES,
+} from "./config";
 
 // Every option rides in the OBS source URL. Invalid or missing values
 // fall back to defaults instead of erroring: a typo in OBS must never
@@ -189,8 +112,8 @@ export const overlayParamsSchema = z.object({
 	size: z
 		.preprocess(numberish, z.coerce.number().int().min(50).max(300))
 		.catch(100),
-	// emote multiplier, applied only to messages that are nothing but
-	// emotes. Half steps, so not .int(); anything between snaps.
+	// emote multiplier for messages that are nothing but emotes. Half
+	// steps, so not .int(); anything in between snaps to the nearest one.
 	emotescale: z
 		.preprocess(numberish, z.coerce.number().min(1).max(4))
 		.catch(1)
@@ -212,6 +135,9 @@ export const overlayParamsSchema = z.object({
 	badges: boolParamOn,
 	timestamps: boolParam,
 	animate: boolParamOn,
+	// Animated art is separate from the message entrance animation.
+	// The runtime also makes art static for a reduced-motion preference.
+	media: z.enum(MEDIA_MODES).catch("animated"),
 	// pronoun badges from pronouns.alejo.io (per-user third-party lookup)
 	pronouns: boolParam,
 	// sub/cheer/raid/first-chat rows; same string-or-array round trip
@@ -242,13 +168,9 @@ export const overlayParamsSchema = z.object({
 	// public GitHub gist of custom badge art (id or gist URL); fetched
 	// and merged under the inline badgeart in lib/twitch/badges.ts
 	badgegist: z.preprocess(scalarToString, z.string()).catch(""),
-	// re-fetch emote/badge maps every N minutes, cache bypassed. 0 = off;
-	// a 5-minute floor keeps the small upstream APIs (ivr.fi, the gist)
-	// well under their rate limits even when left on all stream.
+	// Re-fetch channel-scoped art every N minutes. Globals retain their TTL.
 	refresh: z
 		.preprocess(numberish, z.coerce.number().int().min(0).max(1440))
-		.catch(5)
+		.catch(0)
 		.transform((v) => (v > 0 && v < 5 ? 5 : v)),
 });
-
-export type OverlayParams = z.infer<typeof overlayParamsSchema>;
