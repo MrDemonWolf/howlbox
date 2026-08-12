@@ -98,6 +98,7 @@ the short version.
 | `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `xp`, `xbox`, `arcade`, `galaxy`, `mocha` | Color theme preset |
 | `bg`           | `off`, `panel`, `bubble`                 | Display mode (default `off`). `panel` draws its backdrop only while there are messages |
 | `size`         | percent, `50` to `300` (default `100`)   | Scales theme text, with a 12px rendered floor           |
+| `emotescale`   | `1` to `4`, half steps (default `1`)     | Grows emotes on messages that are nothing but emotes    |
 | `max`          | `1` to `200` (default `50`)              | Max messages kept on screen                             |
 | `hidebots`     | flag                                     | Hide known chat bots (Nightbot, etc.)                   |
 | `hide`         | comma-separated logins                   | Always hide these users                                 |

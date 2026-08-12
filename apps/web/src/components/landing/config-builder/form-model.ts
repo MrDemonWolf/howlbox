@@ -16,6 +16,7 @@ export interface Config {
 	theme: Theme;
 	bg: BgMode;
 	size: number;
+	emotescale: number;
 	max: number;
 	delay: number;
 	fade: number;
@@ -43,6 +44,7 @@ export const DEFAULTS: Config = {
 	theme: OVERLAY_DEFAULTS.theme,
 	bg: OVERLAY_DEFAULTS.bg,
 	size: OVERLAY_DEFAULTS.size,
+	emotescale: OVERLAY_DEFAULTS.emotescale,
 	max: OVERLAY_DEFAULTS.max,
 	delay: OVERLAY_DEFAULTS.delay,
 	fade: OVERLAY_DEFAULTS.fade,
@@ -109,6 +111,16 @@ export const SIZE_PRESETS = [
 	{ label: "XL", value: 160 },
 ];
 
+// Emote multiplier stops. 1x is off; the slider covers the halves in
+// between. Past 4x a single emote is taller than three lines of chat.
+export const EMOTE_SCALE_PRESETS = [
+	{ label: "1x", value: 1 },
+	{ label: "1.5x", value: 1.5 },
+	{ label: "2x", value: 2 },
+	{ label: "3x", value: 3 },
+	{ label: "4x", value: 4 },
+];
+
 // Clamp a typed number into [min, max]. A valid in-range 0 must survive
 // (Number(raw) || fallback would turn a legitimate 0 into the fallback,
 // so ?max=0 snapped to 50 instead of clamping to the min of 1); only a
@@ -131,6 +143,7 @@ export function configToOverlay(config: Config, cleanChannel: string) {
 		theme: config.theme,
 		bg: config.bg,
 		size: config.size,
+		emotescale: config.emotescale,
 		max: config.max,
 		delay: config.delay,
 		fade: config.fade,
@@ -160,6 +173,7 @@ export function parsedToConfig(parsed: OverlayParams): Config {
 		theme: parsed.theme,
 		bg: parsed.bg,
 		size: parsed.size,
+		emotescale: parsed.emotescale,
 		max: parsed.max,
 		delay: parsed.delay,
 		fade: parsed.fade,

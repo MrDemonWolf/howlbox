@@ -17,6 +17,12 @@ const CASES = [
 	"channel=123456&size=125&badges=0&hidebots=1",
 	"channel=%22123456%22&hide=%5B%22first%22%2C%22second%22%5D&events=%5B%22sub%22%2C%22raid%22%5D",
 	"size=%5B125%5D&badgeart=%7B%22bad%22%3Atrue%7D",
+	// emotescale is the one non-integer param, so its snapping and its
+	// fallbacks have to agree between the two parsers as well
+	"emotescale=2.5&size=150",
+	"emotescale=2.3",
+	"emotescale=9&max=10",
+	"emotescale=true&emotescale=1.5",
 ] as const;
 
 describe("parseOverlaySearch", () => {

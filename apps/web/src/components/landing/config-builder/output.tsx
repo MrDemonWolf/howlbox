@@ -98,6 +98,7 @@ export function ConfigOutput({
 				showBadges={config.badges}
 				showPronouns={config.pronouns}
 				showTimestamps={config.timestamps}
+				emoteScale={config.emotescale}
 				size={config.size}
 				theme={config.theme}
 			/>

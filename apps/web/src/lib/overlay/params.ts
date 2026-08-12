@@ -112,6 +112,12 @@ export const overlayParamsSchema = z.object({
 	size: z
 		.preprocess(numberish, z.coerce.number().int().min(50).max(300))
 		.catch(100),
+	// emote multiplier for messages that are nothing but emotes. Half
+	// steps, so not .int(); anything in between snaps to the nearest one.
+	emotescale: z
+		.preprocess(numberish, z.coerce.number().min(1).max(4))
+		.catch(1)
+		.transform((v) => Math.round(v * 2) / 2),
 	max: z
 		.preprocess(numberish, z.coerce.number().int().min(1).max(200))
 		.catch(50),

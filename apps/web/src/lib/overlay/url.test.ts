@@ -8,6 +8,7 @@ const FULL: OverlayConfig = {
 	theme: "neon",
 	bg: "panel",
 	size: 125,
+	emotescale: 2.5,
 	max: 100,
 	delay: 10,
 	fade: 30,
@@ -34,6 +35,7 @@ describe("overlayQuery", () => {
 			theme: "wolf",
 			bg: "off",
 			size: 100,
+			emotescale: 1,
 			max: 50,
 			delay: 0,
 			fade: 0,
@@ -105,6 +107,7 @@ describe("round trip", () => {
 		expect(parsed.theme).toBe(FULL.theme);
 		expect(parsed.bg).toBe(FULL.bg);
 		expect(parsed.size).toBe(FULL.size);
+		expect(parsed.emotescale).toBe(FULL.emotescale);
 		expect(parsed.max).toBe(FULL.max);
 		expect(parsed.delay).toBe(FULL.delay);
 		expect(parsed.fade).toBe(FULL.fade);

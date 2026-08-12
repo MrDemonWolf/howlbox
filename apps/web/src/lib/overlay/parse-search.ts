@@ -72,6 +72,21 @@ function integer(
 		: fallback;
 }
 
+// emotescale is the one non-integer param: in range it snaps to the
+// nearest half step, out of range it falls back like every other scalar.
+function halfStep(
+	raw: unknown,
+	min: number,
+	max: number,
+	fallback: number,
+): number {
+	if (typeof raw === "boolean") return fallback;
+	const value = Number(raw);
+	return Number.isFinite(value) && value >= min && value <= max
+		? Math.round(value * 2) / 2
+		: fallback;
+}
+
 function boolOffByDefault(raw: unknown): boolean {
 	if (typeof raw === "boolean") return raw;
 	if (typeof raw === "number") return raw === 1;
@@ -130,6 +145,7 @@ export function parseOverlaySearch(search: URLSearchParams): OverlayParams {
 		bg: oneOf(BG_MODES, decoded.bg, OVERLAY_DEFAULTS.bg),
 		theme: oneOf(THEMES, decoded.theme, OVERLAY_DEFAULTS.theme),
 		size: integer(decoded.size, 50, 300, OVERLAY_DEFAULTS.size),
+		emotescale: halfStep(decoded.emotescale, 1, 4, OVERLAY_DEFAULTS.emotescale),
 		max: integer(decoded.max, 1, 200, OVERLAY_DEFAULTS.max),
 		hidebots: boolOffByDefault(decoded.hidebots),
 		hide: loginList(decoded.hide),

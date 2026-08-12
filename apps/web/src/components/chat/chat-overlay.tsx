@@ -16,6 +16,7 @@ interface ChatOverlayProps {
 	animate: boolean;
 	fadeSeconds: number;
 	size: number;
+	emoteScale: number;
 	onMessageExpired?: (id: string) => void;
 }
 
@@ -37,10 +38,17 @@ export function ChatOverlay({
 	animate,
 	fadeSeconds,
 	size,
+	emoteScale,
 	onMessageExpired,
 }: ChatOverlayProps) {
 	return (
-		<HbRoot bg={bg} className="fixed inset-0" size={size} theme={theme}>
+		<HbRoot
+			bg={bg}
+			className="fixed inset-0"
+			emoteScale={emoteScale}
+			size={size}
+			theme={theme}
+		>
 			{status !== "connected" && (
 				<div
 					className="hb-status absolute top-2 left-2 rounded-md bg-black/80 px-2 py-1 text-white text-xs [font-family:system-ui,sans-serif]"

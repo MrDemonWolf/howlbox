@@ -189,11 +189,17 @@ over an adjective.
 Schema lives in `lib/overlay/params.ts`. Full param reference is the
 Usage table in `README.md`; keep both in sync. Defaults:
 `bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=0`,
-`avatars=off`, `media=animated`, `events` empty, `badgeart`/`badgegist` empty, `badges`
+`avatars=off`, `media=animated`, `emotescale=1`, `events` empty,
+`badgeart`/`badgegist` empty, `badges`
 and `animate` on, all other flags off (`pronouns` too - opt-in, since
 it is a per-user pronouns.alejo.io lookup; `avatars` for the same
 reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
-0-600s, `refresh` 0 or 5-1440min. `channel`/`hide`/`allow` validate against
+0-600s, `refresh` 0 or 5-1440min, `emotescale` 1-4 in half steps. That
+last one is the only non-integer param: it snaps to the nearest half
+step rather than rejecting, in BOTH `params.ts` and `parse-search.ts`,
+or the parity test fails. It also feeds `assetScaleFor` alongside
+`size`, since a 3x emote needs the same source art a 300% overlay does.
+`channel`/`hide`/`allow` validate against
 the Twitch login regex; bad logins are dropped, not errored. Custom
 badge art (`badgeart`, `badgegist`) is parsed/validated in
 `lib/twitch/badges.ts`. `events` is a comma list of `sub,cheer,raid,
@@ -250,6 +256,26 @@ lets them win at equal specificity. Both default on `.hb-root`, so a new
 theme inherits a working circle and accent and only needs an entry when
 it wants a square or a different highlight (nothing fails to compile
 here, unlike the `Record<Theme, ...>` maps).
+
+`?emotescale` rides THREE vars, all defaulting on `.hb-root` in the same
+block as the avatar vars, and the split is load-bearing:
+`--hb-emote-scale` is the OBS Custom CSS hook and is never written
+inline; `--hb-emote-boost` is the configured multiplier, written inline
+on `.hb-root` by `HbRoot`; `--hb-emote-jumbo` is the boost in force on
+one row, set inline by `chat-message.tsx` ONLY where `isEmoteOnly` holds.
+`.hb-emote`/`.hb-cheermote` height multiplies the hook by the row value.
+Do NOT collapse the hook and the row value into one name: an inline
+row-level write beats an inherited `.hb-root` rule, so a Custom CSS
+`--hb-emote-scale` would then silently skip the jumbo rows, which is the
+one place it most obviously should apply. Keeping the gate in CSS rather
+than a prop is what lets `ChatMessageRow` stay memoized and spares
+`MessageList`/`ChatOverlay` a pass-through;
+`hb-message[data-emote-only]` targets the jumbo rows on their own.
+
+`isEmoteOnly` takes a second `hasCheermote` argument. A cheer's `CheerN`
+tokens are stripped from the body, so a bits-only message reaches the row
+with NO parts while still rendering tier art; without the flag it would
+be the one all-art body that does not grow.
 
 ## Deploy
 
