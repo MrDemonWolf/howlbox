@@ -47,11 +47,20 @@ export function groupParts(parts: MessagePart[]): RenderGroup[] {
 	return groups;
 }
 
-// True when the message body is nothing but emotes: at least one emote,
-// and every other part is whitespace. That is the case the ?emotescale
-// jumbo applies to, so one word alongside the emote keeps the row normal.
-export function isEmoteOnly(parts: MessagePart[]): boolean {
-	let seen = false;
+// True when the message body is nothing but art: at least one emote, and
+// every other part whitespace. That is the case the ?emotescale jumbo
+// applies to, so one word alongside the emote keeps the row normal.
+//
+// hasCheermote counts as art of its own. A cheer's "CheerN" tokens are
+// stripped from the body (see stripCheermoteTokens), so a message that
+// was only bits arrives here with no parts at all while still rendering
+// the tier image. Without this it would be the one all-art body that
+// does not grow, even though "Cheer100 PogChamp" does.
+export function isEmoteOnly(
+	parts: MessagePart[],
+	hasCheermote = false,
+): boolean {
+	let seen = hasCheermote;
 	for (const part of parts) {
 		if (part.type === "emote") {
 			seen = true;

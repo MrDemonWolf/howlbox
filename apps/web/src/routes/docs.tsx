@@ -286,7 +286,7 @@ const CSS_HOOKS = [
 	{ cls: "hb-sep", body: "The colon between the name and the message." },
 	{
 		cls: "hb-emote",
-		body: "One emote image inside the message body. Height is 1.6em times --hb-emote-scale, which is 1 unless the row is emote-only; setting --hb-emote-scale on hb-root grows every emote, emote-only or not.",
+		body: "One emote image inside the message body. Height is 1.6em times --hb-emote-scale times --hb-emote-jumbo. The first is yours to set on hb-root and scales every emote; the second is the emotescale multiplier and is 1 on any row that is not emote-only.",
 	},
 	{
 		cls: "hb-status",

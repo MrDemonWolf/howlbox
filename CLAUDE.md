@@ -257,16 +257,25 @@ theme inherits a working circle and accent and only needs an entry when
 it wants a square or a different highlight (nothing fails to compile
 here, unlike the `Record<Theme, ...>` maps).
 
-`--hb-emote-boost` and `--hb-emote-scale` (`?emotescale`) also default on
-`.hb-root`, in the same block as the avatar vars. Two vars on purpose:
-`HbRoot` writes the configured multiplier to `--hb-emote-boost`, and
-`chat-message.tsx` hands it to `--hb-emote-scale` inline ONLY on rows
-where `isEmoteOnly(parts)` holds, which is what `.hb-emote` and
-`.hb-cheermote` size against. That keeps the gate out of the props, so
-`ChatMessageRow` stays memoized and `MessageList`/`ChatOverlay` need no
-pass-through, and it gives OBS Custom CSS two hooks: `--hb-emote-scale`
-on `.hb-root` grows every emote, `hb-message[data-emote-only]` targets
-the jumbo rows on their own.
+`?emotescale` rides THREE vars, all defaulting on `.hb-root` in the same
+block as the avatar vars, and the split is load-bearing:
+`--hb-emote-scale` is the OBS Custom CSS hook and is never written
+inline; `--hb-emote-boost` is the configured multiplier, written inline
+on `.hb-root` by `HbRoot`; `--hb-emote-jumbo` is the boost in force on
+one row, set inline by `chat-message.tsx` ONLY where `isEmoteOnly` holds.
+`.hb-emote`/`.hb-cheermote` height multiplies the hook by the row value.
+Do NOT collapse the hook and the row value into one name: an inline
+row-level write beats an inherited `.hb-root` rule, so a Custom CSS
+`--hb-emote-scale` would then silently skip the jumbo rows, which is the
+one place it most obviously should apply. Keeping the gate in CSS rather
+than a prop is what lets `ChatMessageRow` stay memoized and spares
+`MessageList`/`ChatOverlay` a pass-through;
+`hb-message[data-emote-only]` targets the jumbo rows on their own.
+
+`isEmoteOnly` takes a second `hasCheermote` argument. A cheer's `CheerN`
+tokens are stripped from the body, so a bits-only message reaches the row
+with NO parts while still rendering tier art; without the flag it would
+be the one all-art body that does not grow.
 
 ## Deploy
 

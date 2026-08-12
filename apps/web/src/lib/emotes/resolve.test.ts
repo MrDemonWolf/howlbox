@@ -59,6 +59,19 @@ describe("isEmoteOnly", () => {
 		// a raid row: no parts at all, just the event line
 		expect(isEmoteOnly([{ type: "text", text: "" }])).toBe(false);
 	});
+
+	test("a bits-only cheer counts on its tier art alone", () => {
+		// "Cheer100" with nothing else: stripCheermoteTokens empties the
+		// body, so the cheermote is the whole message
+		expect(isEmoteOnly([], true)).toBe(true);
+		expect(isEmoteOnly([kappa], true)).toBe(true);
+	});
+
+	test("a cheer with words in it still stays at normal size", () => {
+		expect(isEmoteOnly([{ type: "text", text: "nice stream" }], true)).toBe(
+			false,
+		);
+	});
 });
 
 describe("groupParts zero-width overlay grouping", () => {
