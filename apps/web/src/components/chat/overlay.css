@@ -311,6 +311,17 @@
 	image-rendering: pixelated;
 }
 
+/* Emotes carry a small negative block margin so a 1.6em image does not
+   push a ~1.35em line apart. On a jumbo row that tuck is no longer a
+   rounding difference: the art is taller than the line box, so a fixed
+   -0.25rem lets it bleed over the rows above and below. Drop it there and
+   let the row grow to the art it contains. */
+.hb-message[data-emote-only] .hb-emote,
+.hb-message[data-emote-only] .hb-cheermote {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
 /* celestial deep violet with star speckle */
 .hb-root[data-theme="galaxy"] {
 	--hb-radius: 16px;

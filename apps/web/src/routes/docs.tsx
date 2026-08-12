@@ -66,7 +66,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "emotescale",
 					values: "1 to 4, half steps",
-					body: "Grows emotes on messages that are nothing but emotes. One word alongside the emote and that message renders at normal size, so a wall of PogChamp stands out and a sentence does not. Any value between the half steps snaps to the nearest one. Cheermote art follows the same multiplier; badges, pronoun pills, avatars and text do not. This counts toward the source art the overlay requests the same way size does, so raising it past 2x pulls larger files from the emote services and costs more bandwidth. Default 1.",
+					body: "Grows emotes on messages that are nothing but emotes. One word alongside the emote and that message renders at normal size, so a wall of PogChamp stands out and a sentence does not. Any value between the half steps snaps to the nearest one. The multiplier is shared out across the emotes in the message: a single emote gets the full value, and a message of N gets 1 + (value - 1) / N. Spam therefore grows a little and one reaction grows a lot, which keeps an eleven-emote message from filling a third of the source. Cheermote art follows the same multiplier; badges, pronoun pills, avatars and text do not. This counts toward the source art the overlay requests the same way size does, so raising it past 2x pulls larger files from the emote services and costs more bandwidth. Default 1.",
 				},
 				{
 					name: "avatars",

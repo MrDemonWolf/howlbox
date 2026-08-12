@@ -277,6 +277,17 @@ tokens are stripped from the body, so a bits-only message reaches the row
 with NO parts while still rendering tier art; without the flag it would
 be the one all-art body that does not grow.
 
+The jumbo DECAYS with the art count: `emoteOnlyCount` feeds
+`calc(1 + (var(--hb-emote-boost,1) - 1) / N)`, so the extra size is shared
+out and a row's added width stays near `(scale - 1)` emote widths however
+many were spammed. Measured against live chat before it existed: eleven
+emotes at `emotescale=3` in a 370px source wrapped to four lines, 275px,
+35% of the overlay. Do not "simplify" this back to a flat multiplier.
+Keep it a `calc()` rather than resolving the number in JS, or the boost
+stops being overridable from OBS Custom CSS. `emoteOnlyCount` returning 0
+means "not emote-only", and the row only divides when it is above 0, so
+the division can never be by zero.
+
 ## Deploy
 
 GitHub Pages via `.github/workflows/deploy.yml`: bun build with
