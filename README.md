@@ -7,9 +7,11 @@ its entire configuration from URL query parameters, so an OBS source
 URL is the whole setup.
 
 Reading chat anonymously is what removes the account, and it is also
-the limit: HowlBox cannot send messages, moderate, or read anything
-Twitch gates behind a token (subs, follows, bits). If you need those,
-you need an overlay with a backend.
+the limit: HowlBox cannot send messages, moderate, or show follower
+alerts (follows only arrive over EventSub). Subs, gifts, raids, and
+cheers do arrive over anonymous IRC, and the `events` parameter
+renders them. If you need to send, moderate, or see follows, you need
+an overlay with a backend.
 
 Your chat. Your colors. Your howl.
 
@@ -28,6 +30,9 @@ Your chat. Your colors. Your howl.
 - **Full emote support** - Native Twitch emotes plus 7TV (including
   zero-width overlay emotes), BTTV, and FrankerFaceZ, resolved per
   channel and cached in localStorage.
+- **Adjustable emote size** - `emotescale` (1 to 4, half steps) grows
+  messages that are nothing but emotes, without inflating regular text
+  messages.
 - **Badge art without secrets** - Every global and per-channel Twitch
   badge (including subscriber and bits art) via public, CORS-safe
   APIs, plus custom badge art overrides inline through the `badgeart`
@@ -36,6 +41,15 @@ Your chat. Your colors. Your howl.
   names, from pronouns.alejo.io, the service 7TV and FrankerFaceZ read.
   Each chatter's login is looked up there; enable it only if that
   third-party call is acceptable for your channel.
+- **Profile picture avatars** - Opt-in (`avatars=all` or
+  `avatars=subs`) chatter avatars before names, fetched in batches
+  from api.ivr.fi and cached locally. `subs` mode only looks up
+  subscribers and founders.
+- **Sub, cheer, raid, and first-chat alerts** - Opt-in
+  (`events=sub,cheer,raid,first,announce` or `events=all`) event rows
+  for subs, gift bombs, raids, cheers, first-time chatters, and
+  announcements, riding the same anonymous connection as chat. A
+  100-gift bomb collapses to one row instead of one hundred.
 - **Moderation aware** - Deleted messages, timeouts, and bans vanish
   from the overlay instantly. An optional delay holds non-mod messages
   so moderation lands before anything renders.
@@ -210,8 +224,9 @@ settings, set Pages > Source to "GitHub Actions". The site serves at
 `BASE_PATH=/howlbox/`; use a custom domain and drop the variable for
 root hosting).
 
-A copy of `index.html` is deployed as `404.html` so the `/overlay`
-route resolves on a static host.
+The build generates a noindexed `404.html` plus a real `index.html`
+per route (including `/overlay`), so every route resolves with an
+HTTP 200 instead of falling back to the SPA's 404 status.
 
 #### Coolify or any static host
 
@@ -247,7 +262,7 @@ howlbox/
 │           │   ├── emotes/    # 7TV/BTTV/FFZ fetch, cache, resolution
 │           │   ├── overlay/   # URL param schema + builder
 │           │   └── twitch/    # Anonymous chat client, badges, colors
-│           └── routes/        # / landing, /config builder, /overlay
+│           └── routes/        # / landing, /config builder, /docs reference, /overlay
 ├── packages/
 │   ├── config/                # Shared tsconfig base
 │   └── ui/                    # Shared shadcn/ui components and styles
