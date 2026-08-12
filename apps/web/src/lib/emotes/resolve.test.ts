@@ -3,7 +3,12 @@ import { describe, expect, test } from "bun:test";
 import type { MessagePart } from "@/lib/twitch/types";
 
 import type { EmoteMap } from "./emotes";
-import { groupParts, isEmoteOnly, splitTextPart } from "./resolve";
+import {
+	emoteOnlyCount,
+	groupParts,
+	isEmoteOnly,
+	splitTextPart,
+} from "./resolve";
 
 const emotes: EmoteMap = new Map([
 	["Kappa", { url: "https://cdn/kappa.png", zeroWidth: false }],
@@ -71,6 +76,40 @@ describe("isEmoteOnly", () => {
 		expect(isEmoteOnly([{ type: "text", text: "nice stream" }], true)).toBe(
 			false,
 		);
+	});
+});
+
+describe("emoteOnlyCount", () => {
+	const emote = (name: string): MessagePart => ({
+		type: "emote",
+		name,
+		url: `https://cdn/${name}.png`,
+	});
+
+	test("counts the art on an emote-only row", () => {
+		expect(emoteOnlyCount([emote("a")])).toBe(1);
+		expect(
+			emoteOnlyCount([emote("a"), { type: "text", text: " " }, emote("b")]),
+		).toBe(2);
+		// the cheermote is art the parts list never carries
+		expect(emoteOnlyCount([emote("a")], true)).toBe(2);
+		expect(emoteOnlyCount([], true)).toBe(1);
+	});
+
+	test("is 0 for any row that is not emote-only", () => {
+		expect(emoteOnlyCount([{ type: "text", text: "hi" }, emote("a")])).toBe(0);
+		expect(emoteOnlyCount([])).toBe(0);
+	});
+
+	test("never returns 0 for a row isEmoteOnly accepts", () => {
+		// the count divides the scale in chat-message.tsx, so a 0 here
+		// would divide by zero on a row that is about to be scaled
+		for (const parts of [[emote("a")], [emote("a"), emote("b")]]) {
+			if (isEmoteOnly(parts)) {
+				expect(emoteOnlyCount(parts)).toBeGreaterThan(0);
+			}
+		}
+		expect(emoteOnlyCount([], true)).toBeGreaterThan(0);
 	});
 });
 
