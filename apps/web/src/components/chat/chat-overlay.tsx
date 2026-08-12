@@ -16,6 +16,7 @@ interface ChatOverlayProps {
 	animate: boolean;
 	fadeSeconds: number;
 	size: number;
+	emoteScale: number;
 }
 
 const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
@@ -36,9 +37,16 @@ export function ChatOverlay({
 	animate,
 	fadeSeconds,
 	size,
+	emoteScale,
 }: ChatOverlayProps) {
 	return (
-		<HbRoot bg={bg} className="fixed inset-0" size={size} theme={theme}>
+		<HbRoot
+			bg={bg}
+			className="fixed inset-0"
+			emoteScale={emoteScale}
+			size={size}
+			theme={theme}
+		>
 			{status !== "connected" && (
 				<div className="hb-status absolute top-2 left-2 rounded-md bg-black/70 px-2 py-1 font-sans text-white text-xs">
 					{STATUS_LABEL[status]}

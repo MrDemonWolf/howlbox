@@ -37,6 +37,21 @@ export function groupParts(parts: MessagePart[]): RenderGroup[] {
 	return groups;
 }
 
+// True when the message body is nothing but emotes: at least one emote,
+// and every other part is whitespace. That is the case the ?emotescale
+// jumbo applies to, so one word alongside the emote keeps the row normal.
+export function isEmoteOnly(parts: MessagePart[]): boolean {
+	let seen = false;
+	for (const part of parts) {
+		if (part.type === "emote") {
+			seen = true;
+		} else if (part.text.trim() !== "") {
+			return false;
+		}
+	}
+	return seen;
+}
+
 export function splitTextPart(text: string, emotes: EmoteMap): MessagePart[] {
 	const out: MessagePart[] = [];
 	let pendingText = "";

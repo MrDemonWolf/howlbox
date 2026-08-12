@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import type { MessagePart } from "@/lib/twitch/types";
 
 import type { EmoteMap } from "./emotes";
-import { groupParts, splitTextPart } from "./resolve";
+import { groupParts, isEmoteOnly, splitTextPart } from "./resolve";
 
 const emotes: EmoteMap = new Map([
 	["Kappa", { url: "https://cdn/kappa.png", zeroWidth: false }],
@@ -29,6 +29,35 @@ describe("splitTextPart", () => {
 		expect(splitTextPart("just words", emotes)).toEqual([
 			{ type: "text", text: "just words" },
 		]);
+	});
+});
+
+describe("isEmoteOnly", () => {
+	const kappa: MessagePart = {
+		type: "emote",
+		name: "Kappa",
+		url: "https://cdn/kappa.png",
+	};
+
+	test("a lone emote counts", () => {
+		expect(isEmoteOnly([kappa])).toBe(true);
+	});
+
+	test("several emotes separated by whitespace count", () => {
+		expect(isEmoteOnly([kappa, { type: "text", text: "  " }, kappa])).toBe(
+			true,
+		);
+	});
+
+	test("one word alongside the emote disqualifies the row", () => {
+		expect(isEmoteOnly([{ type: "text", text: "lol " }, kappa])).toBe(false);
+	});
+
+	test("text alone and an empty body do not count", () => {
+		expect(isEmoteOnly([{ type: "text", text: "hello" }])).toBe(false);
+		expect(isEmoteOnly([])).toBe(false);
+		// a raid row: no parts at all, just the event line
+		expect(isEmoteOnly([{ type: "text", text: "" }])).toBe(false);
 	});
 });
 
