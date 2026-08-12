@@ -36,6 +36,7 @@ export const OVERLAY_DEFAULTS = {
 	bg: "off",
 	theme: "wolf",
 	size: 100,
+	emotescale: 1,
 	max: 50,
 	delay: 0,
 	fade: 0,
@@ -54,6 +55,7 @@ export const OVERLAY_DEFAULTS = {
 	bg: BgMode;
 	theme: Theme;
 	size: number;
+	emotescale: number;
 	max: number;
 	delay: number;
 	fade: number;
@@ -187,6 +189,12 @@ export const overlayParamsSchema = z.object({
 	size: z
 		.preprocess(numberish, z.coerce.number().int().min(50).max(300))
 		.catch(100),
+	// emote multiplier, applied only to messages that are nothing but
+	// emotes. Half steps, so not .int(); anything between snaps.
+	emotescale: z
+		.preprocess(numberish, z.coerce.number().min(1).max(4))
+		.catch(1)
+		.transform((v) => Math.round(v * 2) / 2),
 	max: z
 		.preprocess(numberish, z.coerce.number().int().min(1).max(200))
 		.catch(50),

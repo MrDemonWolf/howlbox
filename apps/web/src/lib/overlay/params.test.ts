@@ -66,6 +66,20 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		);
 	});
 
+	test("emotescale keeps half steps and snaps anything between", () => {
+		expect(overlayParamsSchema.parse({ emotescale: 2.5 }).emotescale).toBe(2.5);
+		expect(overlayParamsSchema.parse({ emotescale: 2.3 }).emotescale).toBe(2.5);
+		expect(overlayParamsSchema.parse({ emotescale: 1.2 }).emotescale).toBe(1);
+	});
+
+	test("an out-of-range or non-numeric emotescale falls back to 1", () => {
+		for (const raw of [0, 9, -2, true, "big"]) {
+			expect(overlayParamsSchema.parse({ emotescale: raw }).emotescale).toBe(
+				OVERLAY_DEFAULTS.emotescale,
+			);
+		}
+	});
+
 	test("refresh below the 5-minute floor is bumped to 5", () => {
 		expect(overlayParamsSchema.parse({ refresh: 3 }).refresh).toBe(5);
 		expect(overlayParamsSchema.parse({ refresh: 0 }).refresh).toBe(0);

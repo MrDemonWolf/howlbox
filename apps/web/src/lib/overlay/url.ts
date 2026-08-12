@@ -15,6 +15,7 @@ export interface OverlayConfig {
 	theme: Theme;
 	bg: BgMode;
 	size: number;
+	emotescale: number;
 	max: number;
 	delay: number;
 	fade: number;
@@ -48,6 +49,9 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (config.size !== OVERLAY_DEFAULTS.size) {
 		qs.set("size", String(config.size));
+	}
+	if (config.emotescale !== OVERLAY_DEFAULTS.emotescale) {
+		qs.set("emotescale", String(config.emotescale));
 	}
 	if (config.max !== OVERLAY_DEFAULTS.max) {
 		qs.set("max", String(config.max));
