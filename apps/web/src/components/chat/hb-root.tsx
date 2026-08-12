@@ -1,5 +1,4 @@
-import { cn } from "@howlbox/ui/lib/utils";
-import type { CSSProperties, ReactNode } from "react";
+import { type CSSProperties, type ReactNode, useEffect } from "react";
 
 import type { BgMode, Theme } from "@/lib/overlay/params";
 
@@ -12,7 +11,7 @@ import type { BgMode, Theme } from "@/lib/overlay/params";
 // the ?size param scales every theme proportionally instead of flattening
 // the ones that deliberately ship smaller type.
 export const HB_ROOT_CLASS =
-	"hb-root flex flex-col justify-end overflow-hidden text-(--hb-text) leading-snug [font-family:var(--hb-font)] [font-size:calc(var(--hb-font-size)*var(--hb-font-scale,1))]";
+	"hb-root flex flex-col justify-end overflow-hidden text-(--hb-text) leading-snug [font-family:var(--hb-font)] [font-size:max(0.75rem,calc(var(--hb-font-size)*var(--hb-font-scale,1)))]";
 
 export function HbRoot({
 	bg,
@@ -31,9 +30,21 @@ export function HbRoot({
 	className?: string;
 	children: ReactNode;
 }) {
+	useEffect(() => {
+		if (theme === "arcade") {
+			// Only arcade pays for its custom font; every other OBS theme stays
+			// on the system stack and skips the font CSS and network request.
+			void import("@fontsource/press-start-2p/latin-400.css").catch(
+				() => undefined,
+			);
+		}
+	}, [theme]);
+	const rootClassName = className
+		? `${HB_ROOT_CLASS} ${className}`
+		: HB_ROOT_CLASS;
 	return (
 		<div
-			className={cn(HB_ROOT_CLASS, className)}
+			className={rootClassName}
 			data-bg={bg}
 			data-theme={theme}
 			style={

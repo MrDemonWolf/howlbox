@@ -23,14 +23,24 @@ export interface RenderGroup {
 export function groupParts(parts: MessagePart[]): RenderGroup[] {
 	const groups: RenderGroup[] = [];
 	for (const part of parts) {
-		const last = groups.at(-1);
-		if (
-			part.type === "emote" &&
-			part.zeroWidth &&
-			last?.part.type === "emote"
-		) {
-			last.overlays.push(part);
-			continue;
+		if (part.type === "emote" && part.zeroWidth) {
+			const last = groups.at(-1);
+			if (last?.part.type === "emote") {
+				last.overlays.push(part);
+				continue;
+			}
+			// Chat emote tokens are separated by whitespace. Consume that
+			// separator when a zero-width emote follows a rendered emote, so the
+			// overlay stacks instead of becoming its own image slot.
+			if (
+				last?.part.type === "text" &&
+				/^\s+$/.test(last.part.text) &&
+				groups.at(-2)?.part.type === "emote"
+			) {
+				groups.pop();
+				groups.at(-1)?.overlays.push(part);
+				continue;
+			}
 		}
 		groups.push({ part, overlays: [] });
 	}

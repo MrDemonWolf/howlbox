@@ -1,22 +1,22 @@
-import { cn } from "@howlbox/ui/lib/utils";
 import { type CSSProperties, memo } from "react";
 
 import { groupParts, isEmoteOnly } from "@/lib/emotes/resolve";
 import type { OverlayParams } from "@/lib/overlay/params";
-import { readableUserColor } from "@/lib/twitch/colors";
+import { readableUserColor, userColorOutline } from "@/lib/twitch/colors";
 import { isStandaloneEvent } from "@/lib/twitch/events";
 import type { ChatMessageView } from "@/lib/twitch/types";
 
 interface ChatMessageRowProps {
 	message: ChatMessageView;
 	bg: OverlayParams["bg"];
-	surfaceTone: "dark" | "light";
+	surfaceColor?: string;
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
 	showAvatars: boolean;
 	animate: boolean;
 	fadeSeconds: number;
+	onExpire?: (id: string) => void;
 }
 
 function formatTime(timestamp: number): string {
@@ -27,12 +27,12 @@ function formatTime(timestamp: number): string {
 }
 
 const BUBBLE_CLASSES =
-	"w-fit max-w-full rounded-(--hb-radius) border border-(--hb-border) px-2.5 py-1.5 [background:var(--hb-surface)] [box-shadow:var(--hb-shadow)]";
+	"w-fit max-w-full rounded-(--hb-radius) border border-(--hb-border) px-2.5 py-1.5 [background:var(--hb-bubble-surface,var(--hb-surface))] [box-shadow:var(--hb-bubble-shadow,var(--hb-shadow))]";
 
 // --hb-emote-scale is 1 everywhere except on emote-only rows, where the
 // row hands it the configured ?emotescale multiplier (see below).
 const EMOTE_CLASSES =
-	"hb-emote -my-1 inline-block h-[calc(1.6em*var(--hb-emote-scale,1))] min-w-[calc(1.6em*var(--hb-emote-scale,1))] align-middle";
+	"hb-emote -my-1 inline-block h-[calc(1.6em*var(--hb-emote-scale,1))] w-auto align-middle";
 
 // text badge (pronouns) sized to sit with the image badges: same height,
 // hairline pill in the theme's border/text colors
@@ -58,13 +58,14 @@ const CHEERMOTE_CLASSES =
 export const ChatMessageRow = memo(function ChatMessageRow({
 	message,
 	bg,
-	surfaceTone,
+	surfaceColor,
 	showBadges,
 	showPronouns,
 	showTimestamps,
 	showAvatars,
 	animate,
 	fadeSeconds,
+	onExpire,
 }: ChatMessageRowProps) {
 	// image badges follow the badges toggle, text/pronoun badges follow
 	// their own; both share the row in resolved order
@@ -77,7 +78,11 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 		bg === "off"
 			? "[text-shadow:var(--hb-shadow-off)]"
 			: "[text-shadow:var(--hb-glow)]";
-	const color = readableUserColor(message.color, surfaceTone);
+	const color = readableUserColor(message.color, surfaceColor);
+	const nameStyle = {
+		color,
+		...(bg === "off" ? { textShadow: userColorOutline(color) } : {}),
+	};
 	// a sub or raid line names everyone involved in its own sentence, so
 	// it drops the author header; a cheer or first message decorates a
 	// real message and keeps it
@@ -100,6 +105,14 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 		]
 			.filter(Boolean)
 			.join(", ") || undefined;
+	const className = [
+		"hb-message [overflow-wrap:anywhere]",
+		textShadow,
+		bg === "bubble" ? BUBBLE_CLASSES : undefined,
+		message.isAction ? "italic" : undefined,
+	]
+		.filter(Boolean)
+		.join(" ");
 
 	// The ?emotescale jumbo, gated to rows whose body is nothing but
 	// emotes. HbRoot puts the configured multiplier on --hb-emote-boost;
@@ -119,15 +132,22 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 
 	return (
 		<div
-			className={cn(
-				"hb-message [overflow-wrap:anywhere]",
-				textShadow,
-				bg === "bubble" && BUBBLE_CLASSES,
-				message.isAction && "italic",
-			)}
+			className={className}
 			data-emote-only={emoteOnly ? "" : undefined}
 			data-event={message.event?.kind}
 			style={style}
+			onAnimationEnd={
+				onExpire && fadeSeconds > 0
+					? (event) => {
+							if (
+								event.currentTarget === event.target &&
+								event.animationName === "hb-fade-out"
+							) {
+								onExpire(message.id);
+							}
+						}
+					: undefined
+			}
 		>
 			{showTimestamps && (
 				<span className="hb-time mr-1 align-middle text-[0.78em] opacity-60">
@@ -138,9 +158,12 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 				<img
 					alt=""
 					className={AVATAR_CLASSES}
+					decoding="async"
+					height={70}
 					loading="lazy"
 					referrerPolicy="no-referrer"
 					src={message.avatarUrl}
+					width={70}
 				/>
 			)}
 			{badges.map((badge, index) =>
@@ -148,6 +171,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 					<img
 						alt=""
 						className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
+						decoding="async"
 						key={`${message.id}-badge-${index}`}
 						referrerPolicy="no-referrer"
 						src={badge.url}
@@ -162,7 +186,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 				),
 			)}
 			{!standalone && (
-				<span className="hb-name font-semibold" style={{ color }}>
+				<span className="hb-name font-semibold" style={nameStyle}>
 					{message.displayName}
 				</span>
 			)}
@@ -170,6 +194,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 				<img
 					alt=""
 					className={CHEERMOTE_CLASSES}
+					decoding="async"
 					referrerPolicy="no-referrer"
 					src={message.event.cheermoteUrl}
 				/>
@@ -188,7 +213,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 			{message.isAction && " "}
 			<span
 				className="hb-text"
-				style={message.isAction ? { color } : undefined}
+				style={message.isAction ? nameStyle : undefined}
 			>
 				{groupParts(message.parts).map((group, index) => {
 					// parts are immutable per message; index keys are stable here
@@ -201,6 +226,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 							<img
 								alt={group.part.name}
 								className={EMOTE_CLASSES}
+								decoding="async"
 								key={key}
 								referrerPolicy="no-referrer"
 								src={group.part.url}
@@ -213,6 +239,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 							<img
 								alt={group.part.name}
 								className={EMOTE_CLASSES}
+								decoding="async"
 								referrerPolicy="no-referrer"
 								src={group.part.url}
 								title={group.part.name}
@@ -221,6 +248,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 								<img
 									alt={overlay.name}
 									className="absolute inset-0 m-auto h-full w-auto"
+									decoding="async"
 									key={`${key}-zw-${overlayIndex}`}
 									referrerPolicy="no-referrer"
 									src={overlay.url}

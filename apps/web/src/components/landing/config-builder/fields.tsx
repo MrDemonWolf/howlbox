@@ -6,7 +6,7 @@
 import { Checkbox } from "@howlbox/ui/components/checkbox";
 import { Input } from "@howlbox/ui/components/input";
 import { Label } from "@howlbox/ui/components/label";
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 
 import { clampNumber, FIELD } from "./form-model";
 
@@ -59,18 +59,30 @@ export function Field({
 	hint?: React.ReactNode;
 	children: React.ReactNode;
 }) {
-	// The hint carries the constraint (allowed range, expected syntax), so
-	// it has to reach screen readers too: give it an id and hand that to
-	// the control through aria-describedby.
-	const hintId = htmlFor && hint ? `${htmlFor}-hint` : undefined;
+	const generatedId = useId();
 
+	if (!htmlFor) {
+		const groupHintId = hint ? `${generatedId}-hint` : undefined;
+		return (
+			<fieldset aria-describedby={groupHintId} className="grid gap-2">
+				<legend className="mb-2 font-medium text-sm">{label}</legend>
+				{children}
+				{hint && (
+					<p
+						className="text-[color:var(--site-txt-2)] text-xs leading-relaxed"
+						id={groupHintId}
+					>
+						{hint}
+					</p>
+				)}
+			</fieldset>
+		);
+	}
+
+	const hintId = hint ? `${htmlFor}-hint` : undefined;
 	return (
 		<div className="grid gap-2">
-			{htmlFor ? (
-				<Label htmlFor={htmlFor}>{label}</Label>
-			) : (
-				<span className="font-medium text-sm">{label}</span>
-			)}
+			<Label htmlFor={htmlFor}>{label}</Label>
 			{hintId ? describe(children, hintId) : children}
 			{hint && (
 				<p

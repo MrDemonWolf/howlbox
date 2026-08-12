@@ -17,6 +17,7 @@ const FULL: OverlayConfig = {
 	timestamps: true,
 	badges: false,
 	animate: false,
+	media: "static",
 	pronouns: true,
 	hide: ["somebot", "anotheruser"],
 	allow: ["featured"],
@@ -43,12 +44,13 @@ describe("overlayQuery", () => {
 			timestamps: false,
 			badges: true,
 			animate: true,
+			media: "animated",
 			pronouns: false,
 			hide: [],
 			allow: [],
 			badgeart: "",
 			badgegist: "",
-			refresh: 5,
+			refresh: 0,
 			events: [],
 			avatars: "off",
 		});
@@ -114,6 +116,7 @@ describe("round trip", () => {
 		expect(parsed.timestamps).toBe(FULL.timestamps);
 		expect(parsed.badges).toBe(FULL.badges);
 		expect(parsed.animate).toBe(FULL.animate);
+		expect(parsed.media).toBe(FULL.media);
 		expect(parsed.pronouns).toBe(FULL.pronouns);
 		expect(parsed.hide).toEqual(FULL.hide);
 		expect(parsed.allow).toEqual(FULL.allow);

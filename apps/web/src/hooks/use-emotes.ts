@@ -1,7 +1,7 @@
 import { type RefObject, useCallback, useEffect, useRef } from "react";
 
-import type { AssetTier } from "@/lib/emotes/asset-tier";
 import { type EmoteMap, fetchEmoteMap } from "@/lib/emotes/emotes";
+import type { MediaPreferences } from "@/lib/emotes/media";
 import type { BadgeMap } from "@/lib/emotes/resolve";
 import {
 	fetchBadgeMap,
@@ -9,36 +9,61 @@ import {
 	parseCustomBadgeArt,
 } from "@/lib/twitch/badges";
 
-// Returned as a ref (not state) on purpose: the chat hook reads
-// .current at append time, so a map arriving after connect never
-// re-triggers the connection effect or re-renders old rows. The
-// `active` guard drops a late resolve after the channel changed.
-// refreshMinutes > 0 re-runs the fetcher on an interval with the
-// cache TTLs bypassed (mid-stream emote/badge adds show up without a
-// reload). OBS throttles timers in hidden sources, so a tick can land
-// late; nothing is visible then anyway.
+interface AsyncFetchOptions {
+	forceChannel: boolean;
+	signal: AbortSignal;
+}
+
+function mapIsEmpty(value: ReadonlyMap<unknown, unknown>): boolean {
+	return value.size === 0;
+}
+
+// Returned as a ref, not state, on purpose: the chat hook reads .current
+// at append time, so a map arriving after connect never reconnects or
+// re-renders old rows. The effect owns its AbortSignal, so a channel
+// change or unmount cancels all provider work started by that effect.
 function useAsyncRef<T>(
 	channel: string | undefined,
-	fetcher: (channel: string, force: boolean) => Promise<T>,
+	fetcher: (channel: string, options: AsyncFetchOptions) => Promise<T>,
 	refreshMinutes = 0,
+	isEmpty?: (value: T) => boolean,
 ): RefObject<T | null> {
 	const ref = useRef<T | null>(null);
+	const previousChannelRef = useRef(channel);
 	useEffect(() => {
-		ref.current = null;
+		if (previousChannelRef.current !== channel || !channel) {
+			ref.current = null;
+		}
+		previousChannelRef.current = channel;
 		if (!channel) {
 			return;
 		}
 		let active = true;
-		const load = (force: boolean) =>
-			fetcher(channel, force)
+		let inFlight = false;
+		const controller = new AbortController();
+		const load = (forceChannel: boolean) => {
+			if (inFlight) {
+				return;
+			}
+			inFlight = true;
+			void fetcher(channel, {
+				forceChannel,
+				signal: controller.signal,
+			})
 				.then((value) => {
-					if (active) {
+					// A total provider outage must not replace a working in-memory
+					// map. A new channel still accepts empty as its initial result.
+					if (active && (ref.current === null || !isEmpty?.(value))) {
 						ref.current = value;
 					}
 				})
 				.catch(() => {
-					// the overlay works fine without this data
+					// The overlay works fine without third-party media.
+				})
+				.finally(() => {
+					inFlight = false;
 				});
+		};
 		load(false);
 		const timer =
 			refreshMinutes > 0
@@ -46,47 +71,56 @@ function useAsyncRef<T>(
 				: undefined;
 		return () => {
 			active = false;
+			controller.abort();
 			if (timer !== undefined) {
 				clearInterval(timer);
 			}
 		};
-	}, [channel, fetcher, refreshMinutes]);
+	}, [channel, fetcher, refreshMinutes, isEmpty]);
 	return ref;
 }
 
-// tier is the CDN variant bucket (see lib/emotes/asset-tier). It is a
-// string, so the fetcher identity is stable while the bucket is, and
-// nudging ?emotescale inside one bucket does not refetch.
 export function useEmoteMap(
 	channel: string | undefined,
 	refreshMinutes = 0,
-	tier: AssetTier = "standard",
+	preferences: MediaPreferences = {},
 ) {
+	const assetScale = preferences.assetScale ?? 1;
+	const staticMedia = preferences.staticMedia ?? false;
 	const fetcher = useCallback(
-		(login: string, force: boolean) => fetchEmoteMap(login, force, tier),
-		[tier],
+		(login: string, options: AsyncFetchOptions) =>
+			fetchEmoteMap(login, { ...options, assetScale, staticMedia }),
+		[assetScale, staticMedia],
 	);
-	return useAsyncRef<EmoteMap>(channel, fetcher, refreshMinutes);
+	return useAsyncRef<EmoteMap>(channel, fetcher, refreshMinutes, mapIsEmpty);
 }
 
-// customArt is the raw ?badgeart string, gistRef the ?badgegist id/URL;
-// both override the fetched Twitch art (global + per-channel sets ride
-// in fetchBadgeMap). Precedence, weakest to strongest: Twitch < gist <
-// inline, so a one-off inline tweak beats the shared gist.
+// Precedence, weakest to strongest: Twitch < gist < inline, so a one-off
+// inline tweak beats the shared gist. Provider failures are isolated so
+// custom art still works when Twitch or GitHub is unavailable.
 export function useBadgeMap(
 	channel: string | undefined,
 	customArt = "",
 	gistRef = "",
 	refreshMinutes = 0,
+	preferences: MediaPreferences = {},
 ) {
+	const assetScale = preferences.assetScale ?? 1;
 	const fetcher = useCallback(
-		async (login: string, force: boolean): Promise<BadgeMap> => {
-			const [map, gistPairs] = await Promise.all([
-				fetchBadgeMap(login, force),
+		async (login: string, options: AsyncFetchOptions): Promise<BadgeMap> => {
+			const [mapResult, gistResult] = await Promise.allSettled([
+				fetchBadgeMap(login, {
+					...options,
+					assetScale,
+				}),
 				gistRef
-					? fetchGistBadgeArt(gistRef, force).catch(() => [])
+					? fetchGistBadgeArt(gistRef, options)
 					: Promise.resolve([] as [string, string][]),
 			]);
+			const map: BadgeMap =
+				mapResult.status === "fulfilled" ? mapResult.value : new Map();
+			const gistPairs =
+				gistResult.status === "fulfilled" ? gistResult.value : [];
 			for (const [key, url] of gistPairs) {
 				map.set(key, url);
 			}
@@ -95,7 +129,7 @@ export function useBadgeMap(
 			}
 			return map;
 		},
-		[customArt, gistRef],
+		[assetScale, customArt, gistRef],
 	);
-	return useAsyncRef<BadgeMap>(channel, fetcher, refreshMinutes);
+	return useAsyncRef<BadgeMap>(channel, fetcher, refreshMinutes, mapIsEmpty);
 }

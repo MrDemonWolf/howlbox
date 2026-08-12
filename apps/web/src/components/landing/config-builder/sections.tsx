@@ -8,7 +8,7 @@ import { cn } from "@howlbox/ui/lib/utils";
 import { ChevronDown, ClipboardPaste } from "lucide-react";
 import type React from "react";
 
-import { BG_MODES, THEMES } from "@/lib/overlay/params";
+import { BG_MODES, MEDIA_MODES, THEMES } from "@/lib/overlay/params";
 import { BG_LABEL, THEME_LABEL, THEME_SWATCH } from "@/lib/overlay/theme-meta";
 import { type ChatEventKind, EVENT_KINDS } from "@/lib/twitch/types";
 
@@ -43,7 +43,7 @@ export function ConfigSections({
 	onImportPaste: (event: React.ClipboardEvent<HTMLInputElement>) => void;
 }) {
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="order-1 flex flex-col gap-4 lg:order-2">
 			{/* import: the fastest path for anyone who already has an overlay */}
 			<Fieldset
 				hint="Already have an overlay in OBS? Paste that URL here and every setting loads on its own."
@@ -73,7 +73,7 @@ export function ConfigSections({
 						onClick={onImport}
 						type="button"
 					>
-						<ClipboardPaste className="size-4" /> Load
+						<ClipboardPaste aria-hidden="true" className="size-4" /> Load
 					</button>
 				</div>
 			</Fieldset>
@@ -151,6 +151,7 @@ export function ConfigSections({
 								type="button"
 							>
 								<span
+									aria-hidden="true"
 									className="hb-hairline size-4 shrink-0 rounded-full border"
 									style={{ background: THEME_SWATCH[t] }}
 								/>
@@ -289,6 +290,27 @@ export function ConfigSections({
 					label="Animate messages in"
 					onChange={(v) => set("animate", v)}
 				/>
+				<Field
+					hint="Static freezes animated emotes and cheer art to reduce continuous OBS decoding."
+					label="Emote and cheer motion"
+				>
+					<div className="flex flex-wrap gap-2">
+						{MEDIA_MODES.map((mode) => (
+							<button
+								aria-pressed={config.media === mode}
+								className={cn(
+									"hb-btn hb-btn-sm hb-btn-secondary",
+									config.media === mode && "hb-btn-selected",
+								)}
+								key={mode}
+								onClick={() => set("media", mode)}
+								type="button"
+							>
+								{mode === "animated" ? "Animated" : "Static"}
+							</button>
+						))}
+					</div>
+				</Field>
 			</Fieldset>
 
 			<Fieldset title="Messages">
@@ -420,7 +442,10 @@ export function ConfigSections({
 							Custom badge art and how often emotes refresh
 						</span>
 					</span>
-					<ChevronDown className="size-4 shrink-0 text-[color:var(--site-txt-2)] transition-transform group-open:rotate-180" />
+					<ChevronDown
+						aria-hidden="true"
+						className="size-4 shrink-0 text-[color:var(--site-txt-2)] transition-transform group-open:rotate-180"
+					/>
 				</summary>
 				<div className="flex flex-col gap-5 px-5 pt-1 pb-5">
 					<div className="flex flex-col gap-4">

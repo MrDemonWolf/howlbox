@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	assetScaleFor,
 	isValidLogin,
 	normalizeLoginList,
 	OVERLAY_DEFAULTS,
@@ -39,6 +40,28 @@ describe("normalizeLoginList", () => {
 
 	test("empty string yields an empty list", () => {
 		expect(normalizeLoginList("")).toEqual([]);
+	});
+});
+
+describe("assetScaleFor", () => {
+	test("uses only the resolution needed by the configured size", () => {
+		expect(assetScaleFor(50)).toBe(1);
+		expect(assetScaleFor(100)).toBe(1);
+		expect(assetScaleFor(101)).toBe(2);
+		expect(assetScaleFor(200)).toBe(2);
+		expect(assetScaleFor(201)).toBe(3);
+		expect(assetScaleFor(300)).toBe(3);
+	});
+
+	test("emotescale counts toward the resolution too", () => {
+		// a default-size overlay stays on 1x art until emotes grow
+		expect(assetScaleFor(100, 1)).toBe(1);
+		expect(assetScaleFor(100, 1.5)).toBe(2);
+		expect(assetScaleFor(100, 2)).toBe(2);
+		expect(assetScaleFor(100, 2.5)).toBe(3);
+		// and the two factors multiply rather than either one winning
+		expect(assetScaleFor(150, 2)).toBe(3);
+		expect(assetScaleFor(200, 1)).toBe(2);
 	});
 });
 
@@ -86,6 +109,13 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		expect(overlayParamsSchema.parse({ refresh: 720 }).refresh).toBe(720);
 	});
 
+	test("media accepts static and safely falls back to animated", () => {
+		expect(overlayParamsSchema.parse({ media: "static" }).media).toBe("static");
+		expect(overlayParamsSchema.parse({ media: "invalid" }).media).toBe(
+			OVERLAY_DEFAULTS.media,
+		);
+	});
+
 	test("an invalid channel is dropped rather than erroring", () => {
 		expect(overlayParamsSchema.parse({ channel: "bad name" }).channel).toBe(
 			undefined,
@@ -101,6 +131,8 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		const parsed = overlayParamsSchema.parse({});
 		expect(parsed.theme).toBe(OVERLAY_DEFAULTS.theme);
 		expect(parsed.badges).toBe(true);
+		expect(parsed.refresh).toBe(0);
+		expect(parsed.media).toBe("animated");
 		expect(parsed.events).toEqual([]);
 	});
 });

@@ -42,36 +42,88 @@ function relativeLuminance([r, g, b]: [number, number, number]): number {
 	);
 }
 
+function contrastRatio(
+	foreground: [number, number, number],
+	background: [number, number, number],
+): number {
+	const foregroundLuminance = relativeLuminance(foreground);
+	const backgroundLuminance = relativeLuminance(background);
+	return (
+		(Math.max(foregroundLuminance, backgroundLuminance) + 0.05) /
+		(Math.min(foregroundLuminance, backgroundLuminance) + 0.05)
+	);
+}
+
 function mixToward(
 	[r, g, b]: [number, number, number],
 	target: number,
 	amount: number,
-): string {
+): [number, number, number] {
 	const channel = (v: number) => Math.round(v + (target - v) * amount);
-	return `#${[channel(r), channel(g), channel(b)]
-		.map((v) => v.toString(16).padStart(2, "0"))
-		.join("")}`;
+	return [channel(r), channel(g), channel(b)];
 }
 
-// Twitch lets users pick any color, including navy on a dark overlay
-// or pale yellow on a light one. Same fix the popular S0N0S KapChat
-// themes use: pull extremes toward readable without erasing identity.
+function toHex([r, g, b]: [number, number, number]): string {
+	return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+const MIN_TEXT_CONTRAST = 4.5;
+
+// Twitch lets users pick any color, including navy on a dark overlay or
+// pale yellow on a light one. Move only as far toward black or white as the
+// actual theme surface requires, rather than using broad light/dark
+// thresholds that still leave many ordinary Twitch colors below 4.5:1.
 export function readableUserColor(
 	color: string,
-	surface: "dark" | "light",
+	backgroundColor?: string,
 ): string {
 	const rgb = parseHex(color);
-	if (!rgb) {
+	const background = backgroundColor ? parseHex(backgroundColor) : null;
+	if (!rgb || !background) {
 		return color;
 	}
-	const luminance = relativeLuminance(rgb);
-	if (surface === "dark" && luminance < 0.18) {
-		return mixToward(rgb, 255, 0.45);
+
+	if (contrastRatio(rgb, background) >= MIN_TEXT_CONTRAST) {
+		return color;
 	}
-	if (surface === "light" && luminance > 0.6) {
-		return mixToward(rgb, 0, 0.45);
+
+	// Use whichever endpoint has more contrast with this particular surface.
+	const black: [number, number, number] = [0, 0, 0];
+	const white: [number, number, number] = [255, 255, 255];
+	const target =
+		contrastRatio(white, background) >= contrastRatio(black, background)
+			? 255
+			: 0;
+
+	// Binary-search 8-bit mix steps. This is deterministic, takes at most
+	// eight iterations per new row, and preserves as much hue as AA allows.
+	let low = 0;
+	let high = 255;
+	while (low < high) {
+		const middle = Math.floor((low + high) / 2);
+		const candidate = mixToward(rgb, target, middle / 255);
+		if (contrastRatio(candidate, background) >= MIN_TEXT_CONTRAST) {
+			high = middle;
+		} else {
+			low = middle + 1;
+		}
 	}
-	return color;
+	return toHex(mixToward(rgb, target, low / 255));
+}
+
+const DARK_TEXT_OUTLINE =
+	"-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95), -1px 1px 0 rgb(255 255 255 / 0.95), 1px 1px 0 rgb(255 255 255 / 0.95), 0 1px 3px rgb(0 0 0 / 0.5)";
+const LIGHT_TEXT_OUTLINE =
+	"-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95), 0 1px 3px rgb(0 0 0 / 0.7)";
+
+// A transparent page cannot know the gameplay color OBS will composite
+// behind it. Give each dynamic name the opposite-luminance outline.
+export function userColorOutline(color: string): string {
+	const rgb = parseHex(color);
+	if (!rgb) {
+		return LIGHT_TEXT_OUTLINE;
+	}
+	return relativeLuminance(rgb) < 0.35 ? DARK_TEXT_OUTLINE : LIGHT_TEXT_OUTLINE;
 }
 
 export function fallbackColor(login: string): string {
