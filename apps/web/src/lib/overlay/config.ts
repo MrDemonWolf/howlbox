@@ -38,6 +38,9 @@ export const THEMES = [
 	"frost",
 	"paper",
 	"comic",
+	"luxe",
+	"brutal",
+	"holo",
 ] as const;
 
 export type BgMode = (typeof BG_MODES)[number];
@@ -80,6 +83,9 @@ export const THEME_VARIANTS = {
 	frost: [],
 	paper: [],
 	comic: [],
+	luxe: ["silver", "rose"],
+	brutal: [],
+	holo: [],
 } as const satisfies Record<Theme, readonly string[]>;
 
 // "" means the theme default. Both parsers (Zod schema and the direct

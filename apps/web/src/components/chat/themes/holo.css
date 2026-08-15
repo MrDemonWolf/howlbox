@@ -1,0 +1,36 @@
+/* Holographic: silver card under a static iridescent sheen. The conic
+   gradient stays near 0.14 alpha so the surface luminance barely moves
+   and dynamic name colors keep their contrast. */
+.hb-root[data-theme="holo"] {
+	--hb-radius: 16px;
+	--hb-text: #1c1e2a;
+	--hb-surface:
+		conic-gradient(
+			from 210deg at 50% -20%,
+			rgb(255 120 200 / 0.14),
+			rgb(120 200 255 / 0.14),
+			rgb(160 255 200 / 0.12),
+			rgb(255 220 140 / 0.12),
+			rgb(255 120 200 / 0.14)
+		),
+		linear-gradient(135deg, rgb(244 246 252 / 0.94), rgb(226 230 242 / 0.9));
+	--hb-surface-solid: linear-gradient(135deg, #f4f6fc, #e2e6f2);
+	--hb-border: rgb(150 160 200 / 0.45);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 0.95), 0 6px 20px rgb(120 130 180 / 0.25);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95),
+		-1px 1px 0 rgb(255 255 255 / 0.95), 1px 1px 0 rgb(255 255 255 / 0.95),
+		0 2px 5px rgb(255 255 255 / 0.8);
+	--hb-event-accent: #6236c8;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="holo"],
+	.hb-root[data-theme="holo"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}
