@@ -22,6 +22,9 @@ const THEME_SURFACE_REFERENCE: Record<Theme, string> = {
 	arcade: "#140e2e",
 	galaxy: "#2b1a52",
 	mocha: "#e2d0bd",
+	gameboy: "#9bbc0f",
+	vhs: "#101012",
+	vapor: "#7c2c56",
 };
 
 // Typed off THEME_VARIANTS, so declaring a variant without a surface
@@ -45,6 +48,9 @@ const VARIANT_SURFACE_REFERENCE: {
 	arcade: {},
 	galaxy: {},
 	mocha: {},
+	gameboy: { pocket: "#b8b8a8", virtual: "#0a0000" },
+	vhs: {},
+	vapor: {},
 };
 
 function surfaceColorFor(
