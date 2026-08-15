@@ -36,7 +36,21 @@ export function loadThemeCss(theme: Theme, timeoutMs = 2000): Promise<void> {
 	return new Promise((resolve) => {
 		const timer = setTimeout(resolve, timeoutMs);
 		importer()
-			.catch(() => undefined)
+			.then(
+				() => undefined,
+				() => {
+					// OBS often autostarts at boot before the network is up, and
+					// a chunk that failed once would otherwise leave the whole
+					// session on wolf. One event-driven re-attempt when the
+					// network returns, mirroring the chat.ts nudge pattern; no
+					// timer loops, hidden sources throttle timers.
+					window.addEventListener(
+						"online",
+						() => void importer().catch(() => undefined),
+						{ once: true },
+					);
+				},
+			)
 			.then(() => {
 				clearTimeout(timer);
 				resolve();
