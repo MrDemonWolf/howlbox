@@ -14,7 +14,9 @@
 		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
 		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
 		0 0 6px rgb(255 45 180 / 0.4);
-	--hb-event-accent: #ff5ccd;
+	/* lighter than the border pink: #ff5ccd sat at the AA edge on the
+	   panel's lighter endpoint */
+	--hb-event-accent: #ff7ad6;
 }
 
 /* Solid fallback. Keep this block last in the file: it ties the theme and

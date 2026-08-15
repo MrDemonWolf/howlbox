@@ -16,7 +16,7 @@
 		-1px -1px 0 rgb(255 255 255 / 0.95),
 		1px -1px 0 rgb(255 255 255 / 0.95),
 		-1px 1px 0 rgb(255 255 255 / 0.95), 1px 1px 0 rgb(255 255 255 / 0.95),
-		0 2px 5px rgb(255 255 255 / 0.65);
+		0 2px 5px rgb(255 255 255 / 0.8);
 	--hb-avatar-radius: 3px;
 	--hb-event-accent: #0855dd;
 }
