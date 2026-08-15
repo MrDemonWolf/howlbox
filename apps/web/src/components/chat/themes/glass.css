@@ -20,6 +20,12 @@
 		inset -10px -8px 0 -11px rgb(255 255 255 / 0.9),
 		inset 10px 8px 0 -11px rgb(255 255 255 / 0.35),
 		0 8px 32px rgb(0 0 0 / 0.35);
+	/* same stack the base declares; stated here so the chunk carries the
+	   full contract on its own */
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 2px 5px rgb(0 0 0 / 0.65);
 	--hb-event-accent: #9fe0ff;
 }
 
