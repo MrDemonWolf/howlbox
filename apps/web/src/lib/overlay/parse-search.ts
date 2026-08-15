@@ -1,8 +1,10 @@
 import { AVATAR_MODES } from "@/lib/twitch/types";
 
 import {
+	ALIGNS,
 	BG_MODES,
 	FALSY_TOKENS,
+	LAYOUTS,
 	LOGIN_RE,
 	MEDIA_MODES,
 	normalizeEventList,
@@ -149,6 +151,9 @@ export function parseOverlaySearch(search: URLSearchParams): OverlayParams {
 		bg: oneOf(BG_MODES, decoded.bg, OVERLAY_DEFAULTS.bg),
 		theme,
 		variant: normalizeVariant(theme, decoded.variant),
+		layout: oneOf(LAYOUTS, decoded.layout, OVERLAY_DEFAULTS.layout),
+		align: oneOf(ALIGNS, decoded.align, OVERLAY_DEFAULTS.align),
+		group: boolOffByDefault(decoded.group),
 		size: integer(decoded.size, 50, 300, OVERLAY_DEFAULTS.size),
 		emotescale: halfStep(decoded.emotescale, 1, 4, OVERLAY_DEFAULTS.emotescale),
 		max: integer(decoded.max, 1, 200, OVERLAY_DEFAULTS.max),

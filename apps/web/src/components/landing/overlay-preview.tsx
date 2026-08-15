@@ -4,7 +4,13 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { HbRoot } from "@/components/chat/hb-root";
 import { MessageList } from "@/components/chat/message-list";
 import { useDemoStream } from "@/components/landing/demo-messages";
-import type { BgMode, MediaMode, Theme } from "@/lib/overlay/params";
+import type {
+	Align,
+	BgMode,
+	Layout,
+	MediaMode,
+	Theme,
+} from "@/lib/overlay/params";
 import type {
 	AvatarMode,
 	ChatEventKind,
@@ -21,6 +27,9 @@ export const OBS_DIMENSIONS = `${OBS_WIDTH} × ${OBS_HEIGHT}`;
 interface OverlayPreviewProps {
 	theme: Theme;
 	variant?: string;
+	layout?: Layout;
+	align?: Align;
+	group?: boolean;
 	bg: BgMode;
 	showBadges: boolean;
 	showPronouns?: boolean;
@@ -99,6 +108,9 @@ function staticMedia(message: ChatMessageView): ChatMessageView {
 export function OverlayPreview({
 	theme,
 	variant = "",
+	layout = "inline",
+	align = "left",
+	group = false,
 	bg,
 	showBadges,
 	showPronouns = false,
@@ -146,9 +158,11 @@ export function OverlayPreview({
 				)}
 			/>
 			<HbRoot
+				align={align}
 				bg={bg}
 				className="absolute inset-0"
 				emoteScale={emoteScale}
+				layout={layout}
 				size={size}
 				theme={theme}
 				variant={variant}
@@ -157,6 +171,7 @@ export function OverlayPreview({
 					animate={animate}
 					bg={bg}
 					fadeSeconds={fadeSeconds}
+					group={group}
 					messages={previewMessages}
 					onMessageExpired={removeMessage}
 					showAvatars={

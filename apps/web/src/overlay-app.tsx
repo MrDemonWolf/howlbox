@@ -68,9 +68,12 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 
 	return (
 		<ChatOverlay
+			align={params.align}
 			animate={params.animate}
 			bg={params.bg}
 			emoteScale={params.emotescale}
+			group={params.group}
+			layout={params.layout}
 			fadeSeconds={params.fade}
 			messages={messages}
 			onMessageExpired={removeMessage}

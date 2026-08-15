@@ -3,8 +3,10 @@ import { z } from "zod";
 import { AVATAR_MODES, EVENT_KINDS } from "@/lib/twitch/types";
 
 import {
+	ALIGNS,
 	BG_MODES,
 	FALSY_TOKENS,
+	LAYOUTS,
 	LOGIN_RE,
 	MEDIA_MODES,
 	normalizeEventList,
@@ -15,16 +17,20 @@ import {
 } from "./config";
 
 export type {
+	Align,
 	AssetScale,
 	BgMode,
+	Layout,
 	MediaMode,
 	OverlayParams,
 	Theme,
 } from "./config";
 export {
+	ALIGNS,
 	assetScaleFor,
 	BG_MODES,
 	isValidLogin,
+	LAYOUTS,
 	MEDIA_MODES,
 	normalizeEventList,
 	normalizeLoginList,
@@ -113,6 +119,11 @@ const overlayParamsShape = z.object({
 	// theme-aware validation happens in the schema-level transform below,
 	// where the resolved theme is in scope
 	variant: z.preprocess(scalarToString, z.string()).catch(""),
+	// stacked = badges and name on their own line above the message
+	layout: z.enum(LAYOUTS).catch("inline"),
+	align: z.enum(ALIGNS).catch("left"),
+	// Discord-style: consecutive rows from one chatter share one header
+	group: boolParam,
 	// text scale as a percentage of the theme's own --hb-font-size, so a
 	// theme that ships smaller type (arcade) stays proportionally smaller
 	size: z

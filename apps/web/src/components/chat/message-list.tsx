@@ -69,6 +69,8 @@ interface MessageListProps {
 	bg: BgMode;
 	theme: Theme;
 	variant?: string;
+	// ?group: consecutive rows from one chatter share one header
+	group?: boolean;
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
@@ -87,6 +89,7 @@ export function MessageList({
 	bg,
 	theme,
 	variant = "",
+	group = false,
 	showBadges,
 	showPronouns,
 	showTimestamps,
@@ -112,21 +115,35 @@ export function MessageList({
 
 	return (
 		<div className={className}>
-			{messages.map((message) => (
-				<ChatMessageRow
-					animate={animate}
-					bg={bg}
-					fadeSeconds={fadeSeconds}
-					key={message.id}
-					message={message}
-					onExpire={onMessageExpired}
-					showAvatars={showAvatars}
-					showBadges={showBadges}
-					showPronouns={showPronouns}
-					showTimestamps={showTimestamps}
-					surfaceColor={surfaceColor}
-				/>
-			))}
+			{messages.map((message, index) => {
+				// Adjacency is recomputed every render, so a continuation row
+				// whose predecessor gets evicted (delay buffer, fade, max)
+				// regrows its header on its own. Event rows never group and
+				// always break a chain: their text names people itself.
+				const previous = index > 0 ? messages[index - 1] : undefined;
+				const grouped =
+					group &&
+					previous !== undefined &&
+					!message.event &&
+					!previous.event &&
+					previous.login === message.login;
+				return (
+					<ChatMessageRow
+						animate={animate}
+						bg={bg}
+						fadeSeconds={fadeSeconds}
+						grouped={grouped}
+						key={message.id}
+						message={message}
+						onExpire={onMessageExpired}
+						showAvatars={showAvatars}
+						showBadges={showBadges}
+						showPronouns={showPronouns}
+						showTimestamps={showTimestamps}
+						surfaceColor={surfaceColor}
+					/>
+				);
+			})}
 		</div>
 	);
 }

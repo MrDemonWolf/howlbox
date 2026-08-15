@@ -32,6 +32,12 @@ const CASES = [
 	"theme=glass&variant=a&variant=b",
 	"variant=%5B%22frost%22%5D",
 	"variant=123&theme=terminal",
+	// layout, align and group must fall back identically in both parsers,
+	// including bare-flag group and malformed shapes
+	"layout=stacked&align=right&group",
+	"layout=sideways&align=center&group=maybe",
+	"layout=stacked&layout=inline&group=1",
+	"layout=%5B%22stacked%22%5D&align=true",
 ] as const;
 
 describe("parseOverlaySearch", () => {

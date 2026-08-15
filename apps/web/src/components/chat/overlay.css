@@ -101,6 +101,31 @@
 	vertical-align: var(--hb-emote-align, middle);
 }
 
+/* ?layout=stacked: the hb-head wrapper is display:contents by default
+   (invisible to layout), so promoting it to a block puts badges and
+   name on their own line, the StreamElements block style. The ": "
+   separator makes no sense across a line break and hides. */
+.hb-root[data-layout="stacked"] .hb-message .hb-head {
+	display: block;
+}
+
+.hb-root[data-layout="stacked"] .hb-message .hb-sep {
+	display: none;
+}
+
+/* ?align=right, for chat parked on the right edge of the scene */
+.hb-root[data-align="right"] .hb-messages {
+	align-items: flex-end;
+	text-align: right;
+}
+
+/* ?group continuation rows: same chatter as the row above, header and
+   separator hide, text stands alone */
+.hb-message[data-grouped] .hb-head,
+.hb-message[data-grouped] .hb-sep {
+	display: none;
+}
+
 /* entrance + auto-hide, transform/opacity only (cheap on CPU raster;
    CSS animation clocks keep running while OBS hides the source) */
 @keyframes hb-msg-in {

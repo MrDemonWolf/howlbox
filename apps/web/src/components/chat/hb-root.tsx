@@ -1,6 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect } from "react";
 
-import type { BgMode, Theme } from "@/lib/overlay/params";
+import type { Align, BgMode, Layout, Theme } from "@/lib/overlay/params";
 
 // The hb-root surface every overlay view shares: theme font/color vars
 // plus the data-bg/data-theme hooks the CSS themes key off. The live
@@ -17,6 +17,8 @@ export function HbRoot({
 	bg,
 	theme,
 	variant = "",
+	layout = "inline",
+	align = "left",
 	size = 100,
 	emoteScale = 1,
 	className,
@@ -28,6 +30,10 @@ export function HbRoot({
 	// data-variant attribute at all, so variant CSS blocks match only a
 	// deliberate selection
 	variant?: string;
+	// ?layout and ?align stamp data attributes only when non-default,
+	// same rule as variant; the structural rules live in overlay.css
+	layout?: Layout;
+	align?: Align;
 	// percentage of the theme's base size; 100 = untouched
 	size?: number;
 	// ?emotescale, applied by the row only to emote-only messages
@@ -50,7 +56,9 @@ export function HbRoot({
 	return (
 		<div
 			className={rootClassName}
+			data-align={align === "left" ? undefined : align}
 			data-bg={bg}
+			data-layout={layout === "inline" ? undefined : layout}
 			data-theme={theme}
 			data-variant={variant || undefined}
 			style={
