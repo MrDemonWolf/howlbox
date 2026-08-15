@@ -35,6 +35,9 @@ const THEME_SURFACE_REFERENCE: Record<Theme, string> = {
 	frost: "#d6e8f8",
 	paper: "#f9e88f",
 	comic: "#f7f7f2",
+	luxe: "#0d0b09",
+	brutal: "#ffffff",
+	holo: "#e2e6f2",
 };
 
 // Typed off THEME_VARIANTS, so declaring a variant without a surface
@@ -71,6 +74,11 @@ const VARIANT_SURFACE_REFERENCE: {
 	frost: {},
 	paper: {},
 	comic: {},
+	// luxe variants only reskin the metal ring, so they keep the base
+	// near-black surface reference
+	luxe: { silver: "#0d0b09", rose: "#0d0b09" },
+	brutal: {},
+	holo: {},
 };
 
 function surfaceColorFor(

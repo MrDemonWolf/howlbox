@@ -32,6 +32,9 @@ const THEME_CSS: Record<Theme, (() => Promise<unknown>) | null> = {
 	frost: () => import("./frost.css"),
 	paper: () => import("./paper.css"),
 	comic: () => import("./comic.css"),
+	luxe: () => import("./luxe.css"),
+	brutal: () => import("./brutal.css"),
+	holo: () => import("./holo.css"),
 };
 
 // Resolves when the theme sheet has applied, the import failed, or the

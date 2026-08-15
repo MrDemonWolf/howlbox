@@ -43,6 +43,9 @@ export const THEME_FAMILY: Record<Theme, ThemeFamily> = {
 	frost: "cozy",
 	paper: "cozy",
 	comic: "cozy",
+	luxe: "clean",
+	brutal: "clean",
+	holo: "clean",
 };
 
 // Per-variant picker metadata, typed off THEME_VARIANTS so a declared
@@ -80,6 +83,9 @@ export const VARIANT_LABEL: VariantMeta = {
 	frost: {},
 	paper: {},
 	comic: {},
+	luxe: { silver: "Silver", rose: "Rose Gold" },
+	brutal: {},
+	holo: {},
 };
 
 export const VARIANT_SWATCH: VariantMeta = {
@@ -114,6 +120,12 @@ export const VARIANT_SWATCH: VariantMeta = {
 	frost: {},
 	paper: {},
 	comic: {},
+	luxe: {
+		silver: "linear-gradient(135deg,#0d0b09 55%,#c8ccd4)",
+		rose: "linear-gradient(135deg,#0d0b09 55%,#e0a48c)",
+	},
+	brutal: {},
+	holo: {},
 };
 
 // swatch gradient per theme so pickers/gallery read at a glance
@@ -146,6 +158,9 @@ export const THEME_SWATCH: Record<Theme, string> = {
 	frost: "linear-gradient(135deg,#f0f8ff,#7ab4e6)",
 	paper: "linear-gradient(135deg,#fdf1a7,#b4963c)",
 	comic: "linear-gradient(135deg,#ffffff 55%,#c21e2a)",
+	luxe: "linear-gradient(135deg,#0d0b09 55%,#d4af37)",
+	brutal: "linear-gradient(135deg,#ffffff 60%,#0a0a0a)",
+	holo: "linear-gradient(135deg,#ff78c8,#78c8ff 45%,#a0ffc8)",
 };
 
 // human labels for the gallery/pickers (enum values stay the URL contract)
@@ -178,6 +193,9 @@ export const THEME_LABEL: Record<Theme, string> = {
 	frost: "Frost",
 	paper: "Sticky Note",
 	comic: "Comic",
+	luxe: "Gold Luxe",
+	brutal: "Brutalist",
+	holo: "Holographic",
 };
 
 export const BG_LABEL: Record<BgMode, string> = {
