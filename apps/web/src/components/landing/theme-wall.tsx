@@ -2,8 +2,15 @@ import { Link } from "@tanstack/react-router";
 
 import { HbRoot } from "@/components/chat/hb-root";
 import { MessageList } from "@/components/chat/message-list";
-import { THEMES, type Theme } from "@/lib/overlay/params";
-import { THEME_LABEL } from "@/lib/overlay/theme-meta";
+import { THEME_VARIANTS, THEMES, type Theme } from "@/lib/overlay/params";
+import {
+	FAMILY_LABEL,
+	FAMILY_ORDER,
+	THEME_FAMILY,
+	THEME_LABEL,
+	VARIANT_LABEL,
+	VARIANT_SWATCH,
+} from "@/lib/overlay/theme-meta";
 import type { ChatMessageView } from "@/lib/twitch/types";
 
 import "@/components/chat/overlay.css";
@@ -52,42 +59,79 @@ const SAMPLE: ChatMessageView[] = [
 ];
 
 function ThemeTile({ theme }: { theme: Theme }) {
+	const variants: readonly string[] = THEME_VARIANTS[theme];
 	return (
-		<Link
-			className="hb-card group flex flex-col overflow-hidden transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-			search={{ theme }}
-			to="/config"
-		>
-			<div className="relative flex min-h-[9rem] items-end overflow-hidden bg-[linear-gradient(135deg,#0b1017_0%,#141a28_100%)]">
-				<HbRoot bg="bubble" className="w-full" theme={theme}>
-					<MessageList
-						animate={false}
-						bg="bubble"
-						fadeSeconds={0}
-						messages={SAMPLE}
-						showAvatars={true}
-						showBadges={false}
-						showPronouns={false}
-						showTimestamps={false}
-						theme={theme}
-					/>
-				</HbRoot>
-			</div>
-			<div className="hb-hairline flex items-center justify-between border-t px-4 py-3">
-				<span className="font-semibold text-sm">{THEME_LABEL[theme]}</span>
-				<code className="hb-text-2 font-mono text-xs transition-colors group-hover:text-[color:var(--site-brand-text)]">
-					?theme={theme}
-				</code>
-			</div>
-		</Link>
+		// content-visibility skips rendering below-fold tiles until they
+		// scroll near, which keeps a 30-tile wall cheap with no observer code
+		<div className="[contain-intrinsic-size:auto_16rem] [content-visibility:auto]">
+			<Link
+				className="hb-card group flex flex-col overflow-hidden transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+				search={{ theme }}
+				to="/config"
+			>
+				<div className="relative flex min-h-[9rem] items-end overflow-hidden bg-[linear-gradient(135deg,#0b1017_0%,#141a28_100%)]">
+					<HbRoot bg="bubble" className="w-full" theme={theme}>
+						<MessageList
+							animate={false}
+							bg="bubble"
+							fadeSeconds={0}
+							messages={SAMPLE}
+							showAvatars={true}
+							showBadges={false}
+							showPronouns={false}
+							showTimestamps={false}
+							theme={theme}
+						/>
+					</HbRoot>
+				</div>
+				<div className="hb-hairline flex items-center justify-between border-t px-4 py-3">
+					<span className="font-semibold text-sm">{THEME_LABEL[theme]}</span>
+					<code className="hb-text-2 font-mono text-xs transition-colors group-hover:text-[color:var(--site-brand-text)]">
+						?theme={theme}
+					</code>
+				</div>
+			</Link>
+			{variants.length > 0 && (
+				<div className="mt-2 flex flex-wrap gap-1.5 px-1">
+					{variants.map((variant) => (
+						<Link
+							className="hb-hairline-strong flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[color:var(--site-txt-2)] text-xs transition-colors hover:border-[color:var(--site-brand)] hover:text-[color:var(--site-txt-1)]"
+							key={variant}
+							search={{ theme, variant }}
+							to="/config"
+						>
+							<span
+								aria-hidden="true"
+								className="hb-hairline size-3 shrink-0 rounded-full border"
+								style={{
+									background: (VARIANT_SWATCH[theme] as Record<string, string>)[
+										variant
+									],
+								}}
+							/>
+							{(VARIANT_LABEL[theme] as Record<string, string>)[variant]}
+						</Link>
+					))}
+				</div>
+			)}
+		</div>
 	);
 }
 
 export function ThemeWall() {
 	return (
-		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{THEMES.map((theme) => (
-				<ThemeTile key={theme} theme={theme} />
+		<div className="flex flex-col gap-10">
+			{FAMILY_ORDER.map((family) => (
+				<section key={family}>
+					<h3 className="hb-kicker mb-4">{FAMILY_LABEL[family]}</h3>
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{THEMES.filter((theme) => THEME_FAMILY[theme] === family).map(
+							(theme) => (
+								<ThemeTile key={theme} theme={theme} />
+							),
+						)}
+					</div>
+				</section>
 			))}
 		</div>
 	);
