@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { THEMES } from "../../../lib/overlay/config";
+import { THEME_VARIANTS, THEMES } from "../../../lib/overlay/config";
 
 // The Record<Theme, ...> maps catch a missing label or swatch at compile
 // time, but nothing in the type system sees CSS. This test is the CSS
@@ -37,6 +37,15 @@ describe("theme css chunks", () => {
 			expect(css).toContain(`.hb-root[data-theme="${theme}"] {`);
 			for (const declaration of REQUIRED_DECLARATIONS) {
 				expect(css).toContain(declaration);
+			}
+		});
+
+		test(`${theme} has a block for every declared variant`, () => {
+			const css = chunkCss(theme);
+			for (const variant of THEME_VARIANTS[theme]) {
+				expect(css).toContain(
+					`.hb-root[data-theme="${theme}"][data-variant="${variant}"] {`,
+				);
 			}
 		});
 
