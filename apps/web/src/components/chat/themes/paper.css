@@ -1,0 +1,32 @@
+/* Sticky Note: note-yellow fill with a folded bottom-right corner. No
+   rotation on the row: a static transform would fight the entrance
+   animation's translateY keyframe. */
+.hb-root[data-theme="paper"] {
+	--hb-font: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+	--hb-radius: 4px;
+	--hb-text: #3a3220;
+	--hb-surface:
+		linear-gradient(315deg, rgb(0 0 0 / 0.12) 0 6px, transparent 6px) bottom
+		right / 18px 18px no-repeat,
+		linear-gradient(rgb(253 241 167 / 0.95), rgb(248 226 126 / 0.94));
+	--hb-surface-solid: #f9e88f;
+	--hb-border: rgb(180 150 60 / 0.4);
+	--hb-shadow: 0 3px 10px rgb(60 50 20 / 0.3);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(255 250 220 / 0.95), 1px -1px 0 rgb(255 250 220 / 0.95),
+		-1px 1px 0 rgb(255 250 220 / 0.95), 1px 1px 0 rgb(255 250 220 / 0.95),
+		0 2px 5px rgb(255 250 220 / 0.8);
+	--hb-avatar-radius: 4px;
+	/* darkened from the ink brown so the accent clears 4.5:1 on the note */
+	--hb-event-accent: #6b540f;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="paper"],
+	.hb-root[data-theme="paper"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}
