@@ -194,7 +194,8 @@ Usage table in `README.md`; keep both in sync. Defaults:
 and `animate` on, all other flags off (`pronouns` too - opt-in, since
 it is a per-user pronouns.alejo.io lookup; `avatars` for the same
 reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
-0-600s, `refresh` 0 or 5-1440min, `emotescale` 1-4 in half steps. That
+0-600s, `refresh` 0 or 1-1440min (1-4 round up to 5), `emotescale` 1-4
+in half steps. That
 last one is the only non-integer param: it snaps to the nearest half
 step rather than rejecting, in BOTH `params.ts` and `parse-search.ts`,
 or the parity test fails. It also feeds `assetScaleFor` alongside
