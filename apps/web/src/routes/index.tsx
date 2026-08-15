@@ -21,7 +21,7 @@ import {
 	SiteShell,
 } from "@/components/landing/site-chrome";
 import { ThemeWall } from "@/components/landing/theme-wall";
-import type { BgMode } from "@/lib/overlay/params";
+import { type BgMode, THEMES } from "@/lib/overlay/params";
 
 export const Route = createFileRoute("/")({
 	component: LandingPage,
@@ -33,7 +33,7 @@ const TRUST = ["MIT licensed", "No account", "Runs on your host"];
 
 // fact band: the numbers a self-hosting streamer actually shops on
 const STATS = [
-	{ value: "15", label: "themes" },
+	{ value: String(THEMES.length), label: "themes" },
 	{ value: "3", label: "display modes" },
 	{ value: "4", label: "emote sources, merged per channel" },
 	{ value: "0", label: "accounts, servers, or fees" },
@@ -43,7 +43,7 @@ const AUDIENCES = [
 	{
 		icon: Palette,
 		title: "You want chat to match your scene",
-		body: "Fifteen finished looks: wolf glass, Win95, Windows XP, Xbox, CRT terminal, synthwave, pixel arcade, kawaii pastel. Swap one with a query param.",
+		body: "Thirty-one finished looks in four families: Win95 and Game Boy, cyberpunk and sci-fi HUD, sakura and sticky note, gold serif and brutalist. Nine carry color variants. Swap any of it with a query param.",
 	},
 	{
 		icon: MonitorPlay,
@@ -284,7 +284,7 @@ function LandingPage() {
 				<SectionHead
 					align="center"
 					index="02"
-					kicker="Fifteen themes"
+					kicker="Thirty-one themes"
 					sub="Rendered live, not screenshotted. Click one to open the builder with it selected."
 					title="Every theme is one query param"
 				/>

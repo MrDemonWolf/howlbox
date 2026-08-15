@@ -52,7 +52,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "theme",
 					values: THEMES.join(", "),
-					body: "One of the fifteen presets. Each theme sets its own font, radius, surface, border, shadow, and text glow through CSS variables, so themes are swappable without touching layout. The overlay only downloads the CSS for the theme in the URL. Default wolf.",
+					body: "One of the thirty-one presets. Each theme sets its own font, radius, surface, border, shadow, and text glow through CSS variables, so themes are swappable without touching layout. The overlay only downloads the CSS for the theme in the URL. Default wolf.",
 				},
 				{
 					name: "variant",

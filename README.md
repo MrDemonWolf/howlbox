@@ -19,11 +19,15 @@ Your chat. Your colors. Your howl.
 
 - **Anonymous chat connection** - Read-only Twitch chat over
   `@twurple/chat`. No account, no keys, nothing to expire mid-stream.
-- **15 themes** - Wolf brand glass, macOS-style Liquid Glass, CRT
-  terminal, synthwave neon, Windows 95, Windows XP, Xbox, pixel
-  arcade, kawaii pastel, celestial galaxy, cozy mocha, esports
-  no-box, plus dark, light, and an accessible high-contrast preset.
-  All CSS-variable driven.
+- **31 themes in four families** - Clean (wolf glass, Liquid Glass,
+  midnight, daylight, high contrast, bare text, gold luxe, brutalist,
+  holographic), Gamer (synthwave neon, Xbox, galaxy, ember, cyberpunk,
+  sci-fi HUD, aurora), Cozy (kawaii pastel, mocha, sakura, forest,
+  deep sea, frost, sticky note, comic), and Retro (CRT terminal,
+  Windows 95, Windows XP, pixel arcade, Game Boy, VHS, vaporwave).
+  Nine of them carry color variants through `variant`, for 45 looks in
+  total. All CSS-variable driven, and a browser source downloads only
+  the CSS for the theme in its URL.
 - **Three display modes** - Transparent messages over gameplay
   (`bg=off`), one themed backdrop panel (`bg=panel`), or per-message
   bubbles (`bg=bubble`).
@@ -110,8 +114,8 @@ the short version.
 | Parameter      | Values                                   | Description                                             |
 | -------------- | ---------------------------------------- | ------------------------------------------------------- |
 | `channel`      | Twitch login name                        | Channel to join (required)                              |
-| `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `xp`, `xbox`, `arcade`, `galaxy`, `mocha` | Color theme preset |
-| `variant`      | theme-specific | Color variation of the chosen theme; unknown values fall back to the theme default |
+| `theme`        | 31 values, listed in full at [/docs#themes](https://mrdemonwolf.github.io/howlbox/docs#themes) | Color theme preset (default `wolf`) |
+| `variant`      | theme-specific (e.g. `theme=terminal&variant=amber`) | Color variation of the chosen theme; unknown values fall back to the theme default |
 | `layout`       | `inline`, `stacked` | Name inline with the message, or on its own line above it |
 | `align`        | `left`, `right` | Which edge messages hug |
 | `group`        | `true`, `false` | Consecutive messages from one chatter share a single header |
