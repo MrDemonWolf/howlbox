@@ -29,10 +29,49 @@ export type MediaMode = (typeof MEDIA_MODES)[number];
 export type Theme = (typeof THEMES)[number];
 export type AssetScale = 1 | 2 | 3;
 
+// Color variations per theme, selected by ?variant. The lists are the
+// URL contract: a variant outside its theme's list falls back to the
+// theme default, which serializes as no param at all. A variant is a
+// color-only override block in the theme's own themes/<name>.css chunk.
+export const THEME_VARIANTS = {
+	wolf: [],
+	glass: [],
+	terminal: [],
+	neon: [],
+	dark: [],
+	light: [],
+	contrast: [],
+	cozy: [],
+	nobox: [],
+	retro95: [],
+	xp: [],
+	xbox: [],
+	arcade: [],
+	galaxy: [],
+	mocha: [],
+} as const satisfies Record<Theme, readonly string[]>;
+
+// "" means the theme default. Both parsers (Zod schema and the direct
+// OBS parser) run raw input through this one function, so their outputs
+// cannot drift. Scalars stringify the way the router decoder would;
+// arrays and objects fall through to the default.
+export function normalizeVariant(theme: Theme, raw: unknown): string {
+	const value =
+		typeof raw === "number" || typeof raw === "boolean" || raw === null
+			? String(raw)
+			: raw;
+	if (typeof value !== "string") {
+		return "";
+	}
+	const allowed: readonly string[] = THEME_VARIANTS[theme];
+	return allowed.includes(value) ? value : "";
+}
+
 export interface OverlayParams {
 	channel?: string;
 	bg: BgMode;
 	theme: Theme;
+	variant: string;
 	size: number;
 	emotescale: number;
 	max: number;
@@ -71,6 +110,7 @@ export function assetScaleFor(size: number, emotescale = 1): AssetScale {
 export const OVERLAY_DEFAULTS = {
 	bg: "off",
 	theme: "wolf",
+	variant: "",
 	size: 100,
 	emotescale: 1,
 	max: 50,
@@ -91,6 +131,7 @@ export const OVERLAY_DEFAULTS = {
 } satisfies {
 	bg: BgMode;
 	theme: Theme;
+	variant: string;
 	size: number;
 	emotescale: number;
 	max: number;

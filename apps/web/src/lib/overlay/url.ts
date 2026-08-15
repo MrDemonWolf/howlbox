@@ -2,6 +2,7 @@ import {
 	type BgMode,
 	type MediaMode,
 	OVERLAY_DEFAULTS,
+	OVERLAY_PARAM_KEYS,
 	overlayParamsSchema,
 	type Theme,
 } from "@/lib/overlay/params";
@@ -14,6 +15,7 @@ import {
 export interface OverlayConfig {
 	channel: string;
 	theme: Theme;
+	variant: string;
 	bg: BgMode;
 	size: number;
 	emotescale: number;
@@ -45,6 +47,10 @@ export function overlayQuery(config: OverlayConfig): string {
 	qs.set("channel", config.channel || "your_channel");
 	if (config.theme !== OVERLAY_DEFAULTS.theme) {
 		qs.set("theme", config.theme);
+	}
+	// "" is the theme default and stays out of the URL
+	if (config.variant) {
+		qs.set("variant", config.variant);
 	}
 	if (config.bg !== OVERLAY_DEFAULTS.bg) {
 		qs.set("bg", config.bg);
@@ -140,7 +146,7 @@ export function parseOverlayUrl(raw: string) {
 	// Require at least one param the overlay actually knows, so pasting
 	// unrelated text reports an error instead of silently wiping the form
 	// back to defaults.
-	const known = new Set(Object.keys(overlayParamsSchema.shape));
+	const known = new Set(OVERLAY_PARAM_KEYS);
 	if (![...search.keys()].some((key) => known.has(key))) {
 		return null;
 	}

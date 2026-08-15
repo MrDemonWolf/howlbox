@@ -101,6 +101,7 @@ export function ConfigOutput({
 				emoteScale={config.emotescale}
 				size={config.size}
 				theme={config.theme}
+				variant={config.variant}
 			/>
 
 			{/* terminal-style readout: the whole config, as one URL */}

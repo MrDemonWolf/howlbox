@@ -81,6 +81,7 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 			size={params.size}
 			status={status}
 			theme={params.theme}
+			variant={params.variant}
 		/>
 	);
 }

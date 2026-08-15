@@ -6,6 +6,7 @@ import { overlayQuery, parseOverlayUrl } from "./url";
 const FULL: OverlayConfig = {
 	channel: "xqc",
 	theme: "neon",
+	variant: "",
 	bg: "panel",
 	size: 125,
 	emotescale: 2.5,
@@ -63,6 +64,15 @@ describe("overlayQuery", () => {
 		expect(params.get("channel")).toBe("your_channel");
 	});
 
+	test("a variant serializes only when set", () => {
+		expect(
+			new URLSearchParams(overlayQuery({ ...FULL, variant: "cyan" })).get(
+				"variant",
+			),
+		).toBe("cyan");
+		expect(new URLSearchParams(overlayQuery(FULL)).get("variant")).toBeNull();
+	});
+
 	test("every selected event serializes to the all shorthand", () => {
 		const qs = overlayQuery({
 			...FULL,
@@ -89,6 +99,11 @@ describe("parseOverlayUrl", () => {
 		expect(parseOverlayUrl("channel=xqc#anchor")?.channel).toBe("xqc");
 	});
 
+	test("a variant its theme never declared falls back to the default", () => {
+		const parsed = parseOverlayUrl("channel=xqc&theme=neon&variant=notreal");
+		expect(parsed?.variant).toBe("");
+	});
+
 	test("returns null when no known param is present", () => {
 		expect(parseOverlayUrl("hello world")).toBeNull();
 		expect(parseOverlayUrl("")).toBeNull();
@@ -105,6 +120,7 @@ describe("round trip", () => {
 		}
 		expect(parsed.channel).toBe(FULL.channel);
 		expect(parsed.theme).toBe(FULL.theme);
+		expect(parsed.variant).toBe(FULL.variant);
 		expect(parsed.bg).toBe(FULL.bg);
 		expect(parsed.size).toBe(FULL.size);
 		expect(parsed.emotescale).toBe(FULL.emotescale);

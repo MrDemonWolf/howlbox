@@ -20,6 +20,7 @@ export const OBS_DIMENSIONS = `${OBS_WIDTH} × ${OBS_HEIGHT}`;
 
 interface OverlayPreviewProps {
 	theme: Theme;
+	variant?: string;
 	bg: BgMode;
 	showBadges: boolean;
 	showPronouns?: boolean;
@@ -97,6 +98,7 @@ function staticMedia(message: ChatMessageView): ChatMessageView {
 // over a gameplay stand-in, so bg=off transparency reads honestly.
 export function OverlayPreview({
 	theme,
+	variant = "",
 	bg,
 	showBadges,
 	showPronouns = false,
@@ -149,6 +151,7 @@ export function OverlayPreview({
 				emoteScale={emoteScale}
 				size={size}
 				theme={theme}
+				variant={variant}
 			>
 				<MessageList
 					animate={animate}
@@ -163,6 +166,7 @@ export function OverlayPreview({
 					showPronouns={showPronouns}
 					showTimestamps={showTimestamps}
 					theme={theme}
+					variant={variant}
 				/>
 			</HbRoot>
 		</>
