@@ -14,7 +14,7 @@
 	--hb-shadow-off:
 		0 0 1px rgb(255 255 255 / 0.9), 1px 1px 0 #ffffff,
 		-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff,
-		0 2px 6px rgb(255 255 255 / 0.6);
+		0 2px 6px rgb(255 255 255 / 0.8);
 	--hb-avatar-radius: 0;
 	--hb-avatar-ring: 1px 1px 0 0 rgb(10 10 10 / 0.9);
 	--hb-event-accent: #000080;

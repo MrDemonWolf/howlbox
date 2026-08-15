@@ -11,7 +11,7 @@
 			rgb(255 255 255 / 0.03) 40%,
 			rgb(255 255 255 / 0.09)
 		),
-		linear-gradient(rgb(22 24 32 / 0.72), rgb(22 24 32 / 0.72));
+		linear-gradient(rgb(22 24 32 / 0.75), rgb(22 24 32 / 0.75));
 	--hb-surface-solid: linear-gradient(rgb(44 46 56), rgb(30 32 40));
 	--hb-border: rgb(255 255 255 / 0.35);
 	--hb-glow: 0 1px 2px rgb(0 0 0 / 0.6);
