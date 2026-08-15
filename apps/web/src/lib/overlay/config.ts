@@ -28,6 +28,10 @@ export const THEMES = [
 	"gameboy",
 	"vhs",
 	"vapor",
+	"cyber",
+	"hud",
+	"ember",
+	"aurora",
 ] as const;
 
 export type BgMode = (typeof BG_MODES)[number];
@@ -60,6 +64,10 @@ export const THEME_VARIANTS = {
 	gameboy: ["pocket", "virtual"],
 	vhs: [],
 	vapor: [],
+	cyber: ["gold"],
+	hud: [],
+	ember: ["coal"],
+	aurora: [],
 } as const satisfies Record<Theme, readonly string[]>;
 
 // "" means the theme default. Both parsers (Zod schema and the direct

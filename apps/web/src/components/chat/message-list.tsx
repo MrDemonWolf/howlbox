@@ -25,6 +25,10 @@ const THEME_SURFACE_REFERENCE: Record<Theme, string> = {
 	gameboy: "#9bbc0f",
 	vhs: "#101012",
 	vapor: "#7c2c56",
+	cyber: "#0c1014",
+	hud: "#061420",
+	ember: "#241611",
+	aurora: "#0e2030",
 };
 
 // Typed off THEME_VARIANTS, so declaring a variant without a surface
@@ -51,6 +55,10 @@ const VARIANT_SURFACE_REFERENCE: {
 	gameboy: { pocket: "#b8b8a8", virtual: "#0a0000" },
 	vhs: {},
 	vapor: {},
+	cyber: { gold: "#14110a" },
+	hud: {},
+	ember: { coal: "#1c1c20" },
+	aurora: {},
 };
 
 function surfaceColorFor(

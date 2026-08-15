@@ -33,6 +33,10 @@ export const THEME_FAMILY: Record<Theme, ThemeFamily> = {
 	gameboy: "retro",
 	vhs: "retro",
 	vapor: "retro",
+	cyber: "gamer",
+	hud: "gamer",
+	ember: "gamer",
+	aurora: "gamer",
 };
 
 // Per-variant picker metadata, typed off THEME_VARIANTS so a declared
@@ -60,6 +64,10 @@ export const VARIANT_LABEL: VariantMeta = {
 	gameboy: { pocket: "Pocket", virtual: "Virtual Boy" },
 	vhs: {},
 	vapor: {},
+	cyber: { gold: "Gold" },
+	hud: {},
+	ember: { coal: "Coal" },
+	aurora: {},
 };
 
 export const VARIANT_SWATCH: VariantMeta = {
@@ -84,6 +92,10 @@ export const VARIANT_SWATCH: VariantMeta = {
 	},
 	vhs: {},
 	vapor: {},
+	cyber: { gold: "linear-gradient(135deg,#14110a 55%,#fce303)" },
+	hud: {},
+	ember: { coal: "linear-gradient(135deg,#0e0e10,#c9ccd4)" },
+	aurora: {},
 };
 
 // swatch gradient per theme so pickers/gallery read at a glance
@@ -106,6 +118,10 @@ export const THEME_SWATCH: Record<Theme, string> = {
 	gameboy: "linear-gradient(135deg,#9bbc0f 60%,#0f380f)",
 	vhs: "linear-gradient(135deg,#101012 65%,#ff4040)",
 	vapor: "linear-gradient(135deg,#a4386e,#1e165c 60%,#64f0ff)",
+	cyber: "linear-gradient(135deg,#0c1014 55%,#03dffc)",
+	hud: "linear-gradient(135deg,#061420 60%,#7df9ff)",
+	ember: "linear-gradient(135deg,#120c08,#ff6018)",
+	aurora: "linear-gradient(135deg,#050a14,#40e8b4 70%,#7864ff)",
 };
 
 // human labels for the gallery/pickers (enum values stay the URL contract)
@@ -128,6 +144,10 @@ export const THEME_LABEL: Record<Theme, string> = {
 	gameboy: "Game Boy",
 	vhs: "VHS Tape",
 	vapor: "Vaporwave",
+	cyber: "Cyberpunk",
+	hud: "Sci-fi HUD",
+	ember: "Ember",
+	aurora: "Aurora",
 };
 
 export const BG_LABEL: Record<BgMode, string> = {

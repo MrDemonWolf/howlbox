@@ -1,0 +1,55 @@
+/* Ember: charcoal glass lit from below by a static radial fire glow */
+.hb-root[data-theme="ember"] {
+	--hb-text: #ffe9d6;
+	--hb-surface:
+		var(--hb-noise),
+		radial-gradient(
+			120% 140% at 50% 110%,
+			rgb(255 96 24 / 0.32),
+			transparent 55%
+		),
+		linear-gradient(rgb(26 18 14 / 0.88), rgb(14 10 8 / 0.88));
+	--hb-surface-solid: linear-gradient(#241611, #120c08);
+	--hb-border: rgb(255 122 40 / 0.45);
+	--hb-shadow:
+		inset 0 -6px 16px -8px rgb(255 96 24 / 0.35), 0 8px 24px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(255 122 40 / 0.3);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 0 6px rgb(255 96 24 / 0.4);
+	--hb-event-accent: #ff9142;
+}
+
+/* Coal: the fire burned out, same shape in greys */
+.hb-root[data-theme="ember"][data-variant="coal"] {
+	--hb-text: #e8e8ec;
+	--hb-surface:
+		var(--hb-noise),
+		radial-gradient(
+			120% 140% at 50% 110%,
+			rgb(200 200 210 / 0.22),
+			transparent 55%
+		),
+		linear-gradient(rgb(22 22 26 / 0.88), rgb(12 12 14 / 0.88));
+	--hb-surface-solid: linear-gradient(#1c1c20, #0e0e10);
+	--hb-border: rgb(180 185 195 / 0.35);
+	--hb-shadow:
+		inset 0 -6px 16px -8px rgb(200 200 210 / 0.25), 0 8px 24px rgb(0 0 0 / 0.5);
+	--hb-glow: none;
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 2px 5px rgb(0 0 0 / 0.65);
+	--hb-event-accent: #c9ccd4;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="ember"],
+	.hb-root[data-theme="ember"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

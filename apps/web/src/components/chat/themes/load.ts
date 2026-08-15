@@ -22,6 +22,10 @@ const THEME_CSS: Record<Theme, (() => Promise<unknown>) | null> = {
 	gameboy: () => import("./gameboy.css"),
 	vhs: () => import("./vhs.css"),
 	vapor: () => import("./vapor.css"),
+	cyber: () => import("./cyber.css"),
+	hud: () => import("./hud.css"),
+	ember: () => import("./ember.css"),
+	aurora: () => import("./aurora.css"),
 };
 
 // Resolves when the theme sheet has applied, the import failed, or the
