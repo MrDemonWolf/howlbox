@@ -9,7 +9,9 @@ import { ChevronDown, ClipboardPaste } from "lucide-react";
 import type React from "react";
 
 import {
+	ALIGNS,
 	BG_MODES,
+	LAYOUTS,
 	MEDIA_MODES,
 	THEME_VARIANTS,
 	THEMES,
@@ -236,6 +238,50 @@ export function ConfigSections({
 					</Field>
 				)}
 
+				<Field
+					hint="On top puts badges and name on their own line above the message."
+					label="Name position"
+				>
+					<div className="flex flex-wrap gap-2">
+						{LAYOUTS.map((mode) => (
+							<button
+								aria-pressed={config.layout === mode}
+								className={cn(
+									"hb-btn hb-btn-sm hb-btn-secondary",
+									config.layout === mode && "hb-btn-selected",
+								)}
+								key={mode}
+								onClick={() => set("layout", mode)}
+								type="button"
+							>
+								{mode === "inline" ? "Inline" : "On top"}
+							</button>
+						))}
+					</div>
+				</Field>
+
+				<Field
+					hint="Right hugs messages to the right edge, for chat parked on that side of the scene."
+					label="Alignment"
+				>
+					<div className="flex flex-wrap gap-2">
+						{ALIGNS.map((side) => (
+							<button
+								aria-pressed={config.align === side}
+								className={cn(
+									"hb-btn hb-btn-sm hb-btn-secondary",
+									config.align === side && "hb-btn-selected",
+								)}
+								key={side}
+								onClick={() => set("align", side)}
+								type="button"
+							>
+								{side === "left" ? "Left" : "Right"}
+							</button>
+						))}
+					</div>
+				</Field>
+
 				{/* text size: presets for the common answer, slider for the rest */}
 				<Field
 					hint="Scales the theme's own text size, so a theme that ships smaller type stays proportionally smaller."
@@ -409,6 +455,13 @@ export function ConfigSections({
 						value={config.fade}
 					/>
 				</div>
+				<Toggle
+					checked={config.group}
+					hint="Consecutive messages from one chatter show the name once."
+					id="cfg-group"
+					label="Group repeat chatters"
+					onChange={(v) => set("group", v)}
+				/>
 			</Fieldset>
 
 			<Fieldset title="Events">
