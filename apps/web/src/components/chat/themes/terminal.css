@@ -1,0 +1,35 @@
+/* CRT phosphor terminal */
+.hb-root[data-theme="terminal"] {
+	--hb-font:
+		ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+	--hb-radius: 6px;
+	--hb-text: #a9f5bc;
+	--hb-surface:
+		repeating-linear-gradient(
+			0deg,
+			rgb(0 0 0 / 0.22) 0 1px,
+			transparent 1px 3px
+		),
+		linear-gradient(rgb(4 14 8 / 0.9), rgb(2 10 5 / 0.9));
+	--hb-surface-solid: #06130a;
+	--hb-border: rgb(74 246 128 / 0.35);
+	--hb-shadow:
+		inset 0 0 24px rgb(74 246 128 / 0.07), 0 4px 16px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(74 246 128 / 0.4);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 0 5px rgb(74 246 128 / 0.35);
+	--hb-avatar-radius: 0;
+	--hb-event-accent: #7dffa4;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="terminal"],
+	.hb-root[data-theme="terminal"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

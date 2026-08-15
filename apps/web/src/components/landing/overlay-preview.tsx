@@ -12,6 +12,7 @@ import type {
 } from "@/lib/twitch/types";
 
 import "@/components/chat/overlay.css";
+import "@/components/chat/themes/index.css";
 
 export const OBS_WIDTH = 480;
 export const OBS_HEIGHT = 800;

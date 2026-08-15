@@ -8,6 +8,7 @@ import { assetScaleFor, type OverlayParams } from "@/lib/overlay/config";
 import { KNOWN_BOTS } from "@/lib/twitch/bots";
 
 import "@/components/chat/overlay.css";
+import "@/components/chat/themes/index.css";
 
 export function OverlayApp({ params }: { params: OverlayParams }) {
 	const hiddenLogins = params.hidebots

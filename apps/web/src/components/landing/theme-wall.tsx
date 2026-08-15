@@ -7,6 +7,7 @@ import { THEME_LABEL } from "@/lib/overlay/theme-meta";
 import type { ChatMessageView } from "@/lib/twitch/types";
 
 import "@/components/chat/overlay.css";
+import "@/components/chat/themes/index.css";
 
 // two short, static messages rendered in each theme's real surface, so
 // the gallery shows the actual product instead of a gradient swatch

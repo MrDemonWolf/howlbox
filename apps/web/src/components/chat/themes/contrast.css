@@ -1,0 +1,27 @@
+/* accessible high contrast: opaque, no glass */
+.hb-root[data-theme="contrast"] {
+	--hb-radius: 8px;
+	--hb-text: #ffffff;
+	--hb-surface: #000000;
+	--hb-surface-solid: #000000;
+	--hb-border: rgb(255 255 255 / 0.85);
+	--hb-shadow: none;
+	--hb-bubble-shadow: none;
+	--hb-glow: none;
+	--hb-shadow-off:
+		-1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000,
+		1px 1px 0 #000000, 0 2px 5px rgb(0 0 0 / 0.75);
+	--hb-avatar-radius: 0;
+	--hb-avatar-ring: 0 0 0 2px #ffffff;
+	--hb-event-accent: #ffff00;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="contrast"],
+	.hb-root[data-theme="contrast"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

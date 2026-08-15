@@ -1,0 +1,28 @@
+/* synthwave neon */
+.hb-root[data-theme="neon"] {
+	--hb-text: #f4f0ff;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(44 16 78 / 0.8), rgb(18 10 46 / 0.72));
+	--hb-surface-solid: linear-gradient(135deg, rgb(40 14 70), rgb(16 9 42));
+	--hb-border: rgb(255 92 205 / 0.45);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 130 225 / 0.35), 0 0 18px rgb(255 45 180 / 0.28),
+		0 8px 28px rgb(8 3 22 / 0.55);
+	--hb-glow: 0 0 8px rgb(64 232 255 / 0.3);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 0 6px rgb(255 45 180 / 0.4);
+	--hb-event-accent: #ff5ccd;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="neon"],
+	.hb-root[data-theme="neon"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}
