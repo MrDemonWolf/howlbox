@@ -1,5 +1,7 @@
 import {
+	type Align,
 	type BgMode,
+	type Layout,
 	type MediaMode,
 	OVERLAY_DEFAULTS,
 	OVERLAY_PARAM_KEYS,
@@ -16,6 +18,9 @@ export interface OverlayConfig {
 	channel: string;
 	theme: Theme;
 	variant: string;
+	layout: Layout;
+	align: Align;
+	group: boolean;
 	bg: BgMode;
 	size: number;
 	emotescale: number;
@@ -51,6 +56,15 @@ export function overlayQuery(config: OverlayConfig): string {
 	// "" is the theme default and stays out of the URL
 	if (config.variant) {
 		qs.set("variant", config.variant);
+	}
+	if (config.layout !== OVERLAY_DEFAULTS.layout) {
+		qs.set("layout", config.layout);
+	}
+	if (config.align !== OVERLAY_DEFAULTS.align) {
+		qs.set("align", config.align);
+	}
+	if (config.group) {
+		qs.set("group", "true");
 	}
 	if (config.bg !== OVERLAY_DEFAULTS.bg) {
 		qs.set("bg", config.bg);

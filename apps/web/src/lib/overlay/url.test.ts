@@ -7,6 +7,9 @@ const FULL: OverlayConfig = {
 	channel: "xqc",
 	theme: "neon",
 	variant: "",
+	layout: "stacked",
+	align: "right",
+	group: true,
 	bg: "panel",
 	size: 125,
 	emotescale: 2.5,
@@ -34,6 +37,9 @@ describe("overlayQuery", () => {
 		const qs = overlayQuery({
 			...FULL,
 			theme: "wolf",
+			layout: "inline",
+			align: "left",
+			group: false,
 			bg: "off",
 			size: 100,
 			emotescale: 1,
@@ -121,6 +127,9 @@ describe("round trip", () => {
 		expect(parsed.channel).toBe(FULL.channel);
 		expect(parsed.theme).toBe(FULL.theme);
 		expect(parsed.variant).toBe(FULL.variant);
+		expect(parsed.layout).toBe(FULL.layout);
+		expect(parsed.align).toBe(FULL.align);
+		expect(parsed.group).toBe(FULL.group);
 		expect(parsed.bg).toBe(FULL.bg);
 		expect(parsed.size).toBe(FULL.size);
 		expect(parsed.emotescale).toBe(FULL.emotescale);

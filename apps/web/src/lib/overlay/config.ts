@@ -6,6 +6,9 @@ import {
 
 export const BG_MODES = ["off", "panel", "bubble"] as const;
 export const MEDIA_MODES = ["animated", "static"] as const;
+// stacked puts badges and name on their own line above the message
+export const LAYOUTS = ["inline", "stacked"] as const;
+export const ALIGNS = ["left", "right"] as const;
 export const THEMES = [
 	"wolf",
 	"glass",
@@ -26,6 +29,8 @@ export const THEMES = [
 
 export type BgMode = (typeof BG_MODES)[number];
 export type MediaMode = (typeof MEDIA_MODES)[number];
+export type Layout = (typeof LAYOUTS)[number];
+export type Align = (typeof ALIGNS)[number];
 export type Theme = (typeof THEMES)[number];
 export type AssetScale = 1 | 2 | 3;
 
@@ -72,6 +77,9 @@ export interface OverlayParams {
 	bg: BgMode;
 	theme: Theme;
 	variant: string;
+	layout: Layout;
+	align: Align;
+	group: boolean;
 	size: number;
 	emotescale: number;
 	max: number;
@@ -111,6 +119,9 @@ export const OVERLAY_DEFAULTS = {
 	bg: "off",
 	theme: "wolf",
 	variant: "",
+	layout: "inline",
+	align: "left",
+	group: false,
 	size: 100,
 	emotescale: 1,
 	max: 50,
@@ -132,6 +143,9 @@ export const OVERLAY_DEFAULTS = {
 	bg: BgMode;
 	theme: Theme;
 	variant: string;
+	layout: Layout;
+	align: Align;
+	group: boolean;
 	size: number;
 	emotescale: number;
 	max: number;
