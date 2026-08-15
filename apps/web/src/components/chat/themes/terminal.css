@@ -24,6 +24,50 @@
 	--hb-event-accent: #7dffa4;
 }
 
+/* Amber: the P3 phosphor tube */
+.hb-root[data-theme="terminal"][data-variant="amber"] {
+	--hb-text: #ffc37a;
+	--hb-surface:
+		repeating-linear-gradient(
+			0deg,
+			rgb(0 0 0 / 0.22) 0 1px,
+			transparent 1px 3px
+		),
+		linear-gradient(rgb(20 12 4 / 0.9), rgb(14 8 2 / 0.9));
+	--hb-surface-solid: #140c04;
+	--hb-border: rgb(255 176 82 / 0.4);
+	--hb-shadow:
+		inset 0 0 24px rgb(255 176 82 / 0.07), 0 4px 16px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(255 176 82 / 0.4);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 0 5px rgb(255 176 82 / 0.35);
+	--hb-event-accent: #ffb052;
+}
+
+/* Ice: a cold cyan tube */
+.hb-root[data-theme="terminal"][data-variant="ice"] {
+	--hb-text: #a9e6f5;
+	--hb-surface:
+		repeating-linear-gradient(
+			0deg,
+			rgb(0 0 0 / 0.22) 0 1px,
+			transparent 1px 3px
+		),
+		linear-gradient(rgb(4 12 16 / 0.9), rgb(2 8 12 / 0.9));
+	--hb-surface-solid: #06131a;
+	--hb-border: rgb(130 220 245 / 0.35);
+	--hb-shadow:
+		inset 0 0 24px rgb(130 220 245 / 0.07), 0 4px 16px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(130 220 245 / 0.4);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 0 5px rgb(130 220 245 / 0.35);
+	--hb-event-accent: #7adcf5;
+}
+
 /* Solid fallback. Keep this block last in the file: it ties the theme and
    variant blocks above on specificity and wins on within-file order. */
 @media (prefers-reduced-transparency: reduce) {

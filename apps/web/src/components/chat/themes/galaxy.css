@@ -23,6 +23,29 @@
 	--hb-event-accent: #c9a8ff;
 }
 
+/* Nebula: the same star field over a teal cloud */
+.hb-root[data-theme="galaxy"][data-variant="nebula"] {
+	--hb-surface:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='white'%3E%3Ccircle cx='12' cy='22' r='1' opacity='.5'/%3E%3Ccircle cx='47' cy='9' r='1.4' opacity='.35'/%3E%3Ccircle cx='83' cy='31' r='.9' opacity='.45'/%3E%3Ccircle cx='121' cy='14' r='1.2' opacity='.3'/%3E%3Ccircle cx='29' cy='58' r='1' opacity='.3'/%3E%3Ccircle cx='68' cy='72' r='1.5' opacity='.5'/%3E%3Ccircle cx='104' cy='55' r='.8' opacity='.4'/%3E%3Ccircle cx='134' cy='79' r='1' opacity='.35'/%3E%3Ccircle cx='16' cy='97' r='1.3' opacity='.45'/%3E%3Ccircle cx='55' cy='113' r='.9' opacity='.3'/%3E%3Ccircle cx='92' cy='102' r='1.1' opacity='.5'/%3E%3Ccircle cx='126' cy='126' r='1.4' opacity='.35'/%3E%3C/g%3E%3C/svg%3E"),
+		radial-gradient(
+			130% 150% at 18% 0%,
+			rgb(24 110 130 / 0.85),
+			rgb(10 50 70 / 0.8) 55%,
+			rgb(4 18 30 / 0.86)
+		);
+	--hb-surface-solid: linear-gradient(135deg, #123c4c, #04121e);
+	--hb-border: rgb(110 220 235 / 0.4);
+	--hb-shadow:
+		inset 0 1px 0 rgb(170 235 245 / 0.35), 0 0 20px rgb(60 180 210 / 0.28),
+		0 8px 28px rgb(2 10 16 / 0.55);
+	--hb-glow: 0 0 8px rgb(110 220 235 / 0.35);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 0 6px rgb(60 180 210 / 0.4);
+	--hb-event-accent: #7ce8f0;
+}
+
 /* Solid fallback. Keep this block last in the file: it ties the theme and
    variant blocks above on specificity and wins on within-file order. */
 @media (prefers-reduced-transparency: reduce) {
