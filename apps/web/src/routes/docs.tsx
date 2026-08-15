@@ -3,8 +3,9 @@ import { Link2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { BackLink, MONO, SiteShell } from "@/components/landing/site-chrome";
+import { ThemeExplorer } from "@/components/landing/theme-explorer";
 import { pickActiveSection } from "@/lib/docs/active-section";
-import { THEMES } from "@/lib/overlay/params";
+import { THEME_VARIANTS, THEMES } from "@/lib/overlay/params";
 import { THEME_LABEL } from "@/lib/overlay/theme-meta";
 
 export const Route = createFileRoute("/docs")({
@@ -497,16 +498,24 @@ function DocsPage() {
 						<section className="scroll-mt-24" id="themes">
 							<h2 className="hb-display text-2xl">Theme values</h2>
 							<p className="hb-text-2 mt-3 leading-relaxed">
-								The value on the left is what goes in the URL. Every theme is
-								previewed on{" "}
+								Pick a theme to render it live below, in any display mode. Only
+								the selected theme draws, so this list stays cheap no matter how
+								long it gets, and the query string under the preview is the one
+								to paste into OBS. The{" "}
 								<Link
 									className="text-[color:var(--site-brand-text)] underline underline-offset-2"
 									hash="themes"
 									to="/"
 								>
-									the theme wall
-								</Link>
-								.
+									theme wall
+								</Link>{" "}
+								shows them all side by side instead.
+							</p>
+							<div className="mt-6">
+								<ThemeExplorer />
+							</div>
+							<p className="hb-text-2 mt-8 leading-relaxed">
+								The value on the left is what goes in the URL.
 							</p>
 							<ul className="mt-6 grid gap-2 sm:grid-cols-2">
 								{THEMES.map((theme) => (
@@ -515,8 +524,13 @@ function DocsPage() {
 										key={theme}
 									>
 										<code className="hb-code">{theme}</code>
-										<span className="hb-text-2 text-sm">
+										<span className="hb-text-2 text-right text-sm">
 											{THEME_LABEL[theme]}
+											{THEME_VARIANTS[theme].length > 0 && (
+												<span className="block text-xs opacity-70">
+													variant: {THEME_VARIANTS[theme].join(", ")}
+												</span>
+											)}
 										</span>
 									</li>
 								))}
