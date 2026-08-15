@@ -71,7 +71,7 @@ const CARDS: Card[] = [
 		headline: "The whole overlay is",
 		accent: "one URL",
 		chip: "/overlay?channel=you&theme=wolf&bg=bubble",
-		facts: ["15 themes", "7TV, BTTV, FFZ", "No account", "Self-hosted"],
+		facts: ["31 themes", "7TV, BTTV, FFZ", "No account", "Self-hosted"],
 	},
 	{
 		file: "og-docs.png",
