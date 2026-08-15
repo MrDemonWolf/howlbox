@@ -16,6 +16,7 @@ export const HB_ROOT_CLASS =
 export function HbRoot({
 	bg,
 	theme,
+	variant = "",
 	size = 100,
 	emoteScale = 1,
 	className,
@@ -23,6 +24,10 @@ export function HbRoot({
 }: {
 	bg: BgMode;
 	theme: Theme;
+	// ?variant color variation; "" is the theme default and stamps no
+	// data-variant attribute at all, so variant CSS blocks match only a
+	// deliberate selection
+	variant?: string;
 	// percentage of the theme's base size; 100 = untouched
 	size?: number;
 	// ?emotescale, applied by the row only to emote-only messages
@@ -47,6 +52,7 @@ export function HbRoot({
 			className={rootClassName}
 			data-bg={bg}
 			data-theme={theme}
+			data-variant={variant || undefined}
 			style={
 				{
 					"--hb-font-scale": size / 100,

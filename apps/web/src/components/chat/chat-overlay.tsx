@@ -9,6 +9,7 @@ interface ChatOverlayProps {
 	status: ConnectionStatus;
 	bg: OverlayParams["bg"];
 	theme: OverlayParams["theme"];
+	variant: OverlayParams["variant"];
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
@@ -31,6 +32,7 @@ export function ChatOverlay({
 	status,
 	bg,
 	theme,
+	variant,
 	showBadges,
 	showPronouns,
 	showTimestamps,
@@ -48,6 +50,7 @@ export function ChatOverlay({
 			emoteScale={emoteScale}
 			size={size}
 			theme={theme}
+			variant={variant}
 		>
 			{status !== "connected" && (
 				<div
@@ -68,6 +71,7 @@ export function ChatOverlay({
 				showPronouns={showPronouns}
 				showTimestamps={showTimestamps}
 				theme={theme}
+				variant={variant}
 			/>
 		</HbRoot>
 	);

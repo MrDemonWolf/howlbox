@@ -1,4 +1,4 @@
-import type { BgMode, Theme } from "@/lib/overlay/params";
+import type { BgMode, THEME_VARIANTS, Theme } from "@/lib/overlay/params";
 import type { ChatMessageView } from "@/lib/twitch/types";
 
 import { ChatMessageRow } from "./chat-message";
@@ -24,8 +24,41 @@ const THEME_SURFACE_REFERENCE: Record<Theme, string> = {
 	mocha: "#e2d0bd",
 };
 
-function surfaceColorFor(theme: Theme, bg: BgMode): string | undefined {
-	return bg === "off" ? undefined : THEME_SURFACE_REFERENCE[theme];
+// Typed off THEME_VARIANTS, so declaring a variant without a surface
+// reference is a compile error: a hue-flipped variant (amber terminal)
+// silently breaks dynamic name contrast otherwise.
+const VARIANT_SURFACE_REFERENCE: {
+	[T in Theme]: Record<(typeof THEME_VARIANTS)[T][number], string>;
+} = {
+	wolf: {},
+	glass: {},
+	terminal: {},
+	neon: {},
+	dark: {},
+	light: {},
+	contrast: {},
+	cozy: {},
+	nobox: {},
+	retro95: {},
+	xp: {},
+	xbox: {},
+	arcade: {},
+	galaxy: {},
+	mocha: {},
+};
+
+function surfaceColorFor(
+	theme: Theme,
+	variant: string,
+	bg: BgMode,
+): string | undefined {
+	if (bg === "off") {
+		return undefined;
+	}
+	const variantReference = (
+		VARIANT_SURFACE_REFERENCE[theme] as Record<string, string>
+	)[variant];
+	return variantReference ?? THEME_SURFACE_REFERENCE[theme];
 }
 
 const PANEL_CLASSES =
@@ -35,6 +68,7 @@ interface MessageListProps {
 	messages: ChatMessageView[];
 	bg: BgMode;
 	theme: Theme;
+	variant?: string;
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
@@ -52,6 +86,7 @@ export function MessageList({
 	messages,
 	bg,
 	theme,
+	variant = "",
 	showBadges,
 	showPronouns,
 	showTimestamps,
@@ -60,7 +95,7 @@ export function MessageList({
 	fadeSeconds,
 	onMessageExpired,
 }: MessageListProps) {
-	const surfaceColor = surfaceColorFor(theme, bg);
+	const surfaceColor = surfaceColorFor(theme, variant, bg);
 	// An empty panel is a themed rectangle sitting on the stream with
 	// nothing in it. Drop the panel chrome until there is chat to hold,
 	// so a quiet channel reads as no overlay rather than a dead box.

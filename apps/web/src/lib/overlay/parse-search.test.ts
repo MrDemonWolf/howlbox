@@ -23,6 +23,15 @@ const CASES = [
 	"emotescale=2.3",
 	"emotescale=9&max=10",
 	"emotescale=true&emotescale=1.5",
+	// variant validates against the resolved theme's list, so both
+	// parsers must agree on the theme-then-variant order and on every
+	// malformed shape falling back to the theme default
+	"theme=glass&variant=frost",
+	"variant=frost",
+	"theme=glass&variant=bogus",
+	"theme=glass&variant=a&variant=b",
+	"variant=%5B%22frost%22%5D",
+	"variant=123&theme=terminal",
 ] as const;
 
 describe("parseOverlaySearch", () => {

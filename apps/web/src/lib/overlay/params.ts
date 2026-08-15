@@ -9,6 +9,7 @@ import {
 	MEDIA_MODES,
 	normalizeEventList,
 	normalizeLoginList,
+	normalizeVariant,
 	THEMES,
 	TRUTHY_TOKENS,
 } from "./config";
@@ -27,7 +28,9 @@ export {
 	MEDIA_MODES,
 	normalizeEventList,
 	normalizeLoginList,
+	normalizeVariant,
 	OVERLAY_DEFAULTS,
+	THEME_VARIANTS,
 	THEMES,
 } from "./config";
 
@@ -98,7 +101,7 @@ const scalarToString = (value: unknown) =>
 const numberish = (value: unknown) =>
 	typeof value === "boolean" ? Number.NaN : value;
 
-export const overlayParamsSchema = z.object({
+const overlayParamsShape = z.object({
 	channel: z
 		.preprocess(
 			scalarToString,
@@ -107,6 +110,9 @@ export const overlayParamsSchema = z.object({
 		.catch(undefined),
 	bg: z.enum(BG_MODES).catch("off"),
 	theme: z.enum(THEMES).catch("wolf"),
+	// theme-aware validation happens in the schema-level transform below,
+	// where the resolved theme is in scope
+	variant: z.preprocess(scalarToString, z.string()).catch(""),
 	// text scale as a percentage of the theme's own --hb-font-size, so a
 	// theme that ships smaller type (arcade) stays proportionally smaller
 	size: z
@@ -174,3 +180,15 @@ export const overlayParamsSchema = z.object({
 		.catch(0)
 		.transform((v) => (v > 0 && v < 5 ? 5 : v)),
 });
+
+// The known-URL-keys list for parseOverlayUrl. Taken from the inner
+// object because the transformed schema below has no .shape.
+export const OVERLAY_PARAM_KEYS = Object.keys(overlayParamsShape.shape);
+
+// variant is the one field whose validity depends on a sibling: it must
+// be one of the resolved theme's declared variants, so the check runs
+// after the object parse, when the theme has already settled.
+export const overlayParamsSchema = overlayParamsShape.transform((params) => ({
+	...params,
+	variant: normalizeVariant(params.theme, params.variant),
+}));
