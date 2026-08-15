@@ -47,8 +47,9 @@ Your chat. Your colors. Your howl.
   subscribers and founders.
 - **Sub, cheer, raid, and first-chat alerts** - Opt-in
   (`events=sub,cheer,raid,first,announce` or `events=all`) event rows
-  for subs, gift bombs, raids, cheers, first-time chatters, and
-  announcements, riding the same anonymous connection as chat. A
+  for subs, gift bombs, raids, cheers, first-time and returning
+  chatters, and announcements, riding the same anonymous connection
+  as chat. A
   100-gift bomb collapses to one row instead of one hundred.
 - **Moderation aware** - Deleted messages, timeouts, and bans vanish
   from the overlay instantly. An optional delay holds non-mod messages
@@ -145,8 +146,9 @@ Custom badge art precedence, weakest to strongest: fetched Twitch art,
 then `badgegist`, then inline `badgeart`. A bare `set` key (no
 `/version`) covers every version of that set. The gist is fetched from
 the public GitHub API (no token), which allows 60 unauthenticated
-requests per hour per IP. Refresh is off by default; when enabled, its
-5-minute floor keeps a gist well under that limit.
+requests per hour per IP. Refresh is off by default; when enabled, a
+value of 1 to 4 rounds up to the 5-minute floor rather than falling
+back to off, which keeps a gist well under that limit.
 The art URLs in `badgeart` and `badgegist` point at whatever image host
 you name, and your browser fetches them directly. Only HTTPS URLs are
 accepted (URLs carrying credentials are rejected), and badge, emote, and
@@ -224,7 +226,7 @@ settings, set Pages > Source to "GitHub Actions". The site serves at
 `BASE_PATH=/howlbox/`; use a custom domain and drop the variable for
 root hosting).
 
-The build generates a noindexed `404.html` plus a real `index.html`
+The build generates a `404.html` marked `noindex` plus a real `index.html`
 per route (including `/overlay`), so every route resolves with an
 HTTP 200 instead of falling back to the SPA's 404 status.
 
