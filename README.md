@@ -7,9 +7,11 @@ its entire configuration from URL query parameters, so an OBS source
 URL is the whole setup.
 
 Reading chat anonymously is what removes the account, and it is also
-the limit: HowlBox cannot send messages, moderate, or read anything
-Twitch gates behind a token (subs, follows, bits). If you need those,
-you need an overlay with a backend.
+the limit: HowlBox cannot send messages, moderate, or show follower
+alerts (follows only arrive over EventSub). Subs, gifts, raids, and
+cheers do arrive over anonymous IRC, and the `events` parameter
+renders them. If you need to send, moderate, or see follows, you need
+an overlay with a backend.
 
 Your chat. Your colors. Your howl.
 
@@ -28,6 +30,9 @@ Your chat. Your colors. Your howl.
 - **Full emote support** - Native Twitch emotes plus 7TV (including
   zero-width overlay emotes), BTTV, and FrankerFaceZ, resolved per
   channel and cached in localStorage.
+- **Adjustable emote size** - `emotescale` (1 to 4, half steps) grows
+  messages that are nothing but emotes, without inflating regular text
+  messages.
 - **Badge art without secrets** - Every global and per-channel Twitch
   badge (including subscriber and bits art) via public, CORS-safe
   APIs, plus custom badge art overrides inline through the `badgeart`
@@ -36,6 +41,16 @@ Your chat. Your colors. Your howl.
   names, from pronouns.alejo.io, the service 7TV and FrankerFaceZ read.
   Each chatter's login is looked up there; enable it only if that
   third-party call is acceptable for your channel.
+- **Profile picture avatars** - Opt-in (`avatars=all` or
+  `avatars=subs`) chatter avatars before names, fetched in batches
+  from api.ivr.fi and cached locally. `subs` mode only looks up
+  subscribers and founders.
+- **Sub, cheer, raid, and first-chat alerts** - Opt-in
+  (`events=sub,cheer,raid,first,announce` or `events=all`) event rows
+  for subs, gift bombs, raids, cheers, first-time and returning
+  chatters, and announcements, riding the same anonymous connection
+  as chat. A
+  100-gift bomb collapses to one row instead of one hundred.
 - **Moderation aware** - Deleted messages, timeouts, and bans vanish
   from the overlay instantly. An optional delay holds non-mod messages
   so moderation lands before anything renders.
@@ -115,7 +130,7 @@ the short version.
 | `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
 | `badgeart`     | comma-separated `set=url` or `set/version=url` pairs | Custom badge art overriding the Twitch defaults |
 | `badgegist`    | public gist id or URL                    | Custom badge art hosted in a gist (same pairs, one per line, or a JSON map) |
-| `refresh`      | minutes, `0` or `5` to `1440` (default `0`) | Re-fetch channel art every N minutes; globals retain their TTL |
+| `refresh`      | minutes, `0` or `1` to `1440` (default `0`) | Re-fetch channel art every N minutes; `1`-`4` round up to `5`; globals retain their TTL |
 
 Invalid or missing values fall back to safe defaults; a typo in OBS
 never produces a blank overlay.
@@ -131,8 +146,9 @@ Custom badge art precedence, weakest to strongest: fetched Twitch art,
 then `badgegist`, then inline `badgeart`. A bare `set` key (no
 `/version`) covers every version of that set. The gist is fetched from
 the public GitHub API (no token), which allows 60 unauthenticated
-requests per hour per IP. Refresh is off by default; when enabled, its
-5-minute floor keeps a gist well under that limit.
+requests per hour per IP. Refresh is off by default; when enabled, a
+value of 1 to 4 rounds up to the 5-minute floor rather than falling
+back to off, which keeps a gist well under that limit.
 The art URLs in `badgeart` and `badgegist` point at whatever image host
 you name, and your browser fetches them directly. Only HTTPS URLs are
 accepted (URLs carrying credentials are rejected), and badge, emote, and
@@ -210,8 +226,9 @@ settings, set Pages > Source to "GitHub Actions". The site serves at
 `BASE_PATH=/howlbox/`; use a custom domain and drop the variable for
 root hosting).
 
-A copy of `index.html` is deployed as `404.html` so the `/overlay`
-route resolves on a static host.
+The build generates a `404.html` marked `noindex` plus a real `index.html`
+per route (including `/overlay`), so every route resolves with an
+HTTP 200 instead of falling back to the SPA's 404 status.
 
 #### Coolify or any static host
 
@@ -247,7 +264,7 @@ howlbox/
 │           │   ├── emotes/    # 7TV/BTTV/FFZ fetch, cache, resolution
 │           │   ├── overlay/   # URL param schema + builder
 │           │   └── twitch/    # Anonymous chat client, badges, colors
-│           └── routes/        # / landing, /config builder, /overlay
+│           └── routes/        # / landing, /config builder, /docs reference, /overlay
 ├── packages/
 │   ├── config/                # Shared tsconfig base
 │   └── ui/                    # Shared shadcn/ui components and styles

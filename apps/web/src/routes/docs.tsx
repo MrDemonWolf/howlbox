@@ -39,7 +39,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "channel",
 					values: "a Twitch login name",
-					body: "The channel to join. Login name only, not a URL and not a display name: mrdemonwolf, not MrDemonWolf or twitch.tv/mrdemonwolf. Anything that fails the Twitch login pattern is dropped, and the overlay shows a status pill instead of joining.",
+					body: "The channel to join. Login name only, not a URL: mrdemonwolf, not twitch.tv/mrdemonwolf. Case does not matter (MrDemonWolf and mrdemonwolf both work, the value is lowercased first), but anything with characters outside a login (spaces, dots, slashes) fails the Twitch login pattern and is dropped, and the overlay shows a status pill instead of joining.",
 				},
 			],
 		},
@@ -56,12 +56,12 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "bg",
 					values: "off, panel, bubble",
-					body: "Display mode. off draws bare text over gameplay with an outline stack for legibility, panel puts one themed backdrop behind the whole column, bubble gives each message its own surface. The panel backdrop only draws while messages exist, so a quiet channel shows nothing rather than an empty rectangle. Default off.",
+					body: "Display mode. off draws bare text over gameplay with an outline stack for legibility, panel puts one themed backdrop behind the whole column, bubble gives each message its own surface. The panel backdrop only draws while messages exist, so a quiet channel shows nothing rather than an empty rectangle. A system reduced-transparency preference swaps every theme to its solid, opaque surface automatically. Default off.",
 				},
 				{
 					name: "size",
 					values: "50 to 300, percent",
-					body: "Scales the theme's own font size, with a 12px rendered floor for broadcast readability. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. Default 100.",
+					body: "Scales the theme's own font size, with a 12px rendered floor for broadcast readability. Change this rather than resizing the browser source with OBS transform handles, which resamples the render and blurs the text. size and emotescale together decide how large a resolution of emote art gets fetched, so size=300 at emotescale=1 requests the same source art as size=100 at emotescale=3. Default 100.",
 				},
 				{
 					name: "emotescale",
@@ -84,7 +84,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "events",
 					values: "comma-separated: sub, cheer, raid, first, announce, or all",
-					body: "Which events to show. Anonymous IRC carries all of these, so none of it needs an account: sub covers new subs, resubs, single and mass gifts, and Prime upgrades; cheer shows bits with the matching tier art; raid shows the raider and their viewer count; first marks a chatter's first message in the channel, and returning chatters; announce marks the /announce highlight from mods. Unknown values are dropped, and all is shorthand for every kind. A sub or raid row is a whole sentence with no separate name header, while a cheer, first message or announcement decorates the message it came with. A mass gift collapses to a single row: Twitch also sends one notice per recipient, and showing those would mean a hundred rows for one gift bomb. Default empty, meaning no events.",
+					body: "Which events to show. Anonymous IRC carries all of these, so none of it needs an account: sub covers new subs, resubs, single and mass gifts, and Prime upgrades; cheer shows bits with the matching tier art; raid shows the raider and their viewer count; first marks a chatter's first message in the channel, and returning chatters; announce marks the /announce highlight from mods. Unknown values are dropped, and all is shorthand for every kind. A sub or raid row is a whole sentence with no separate name header, while a cheer, first message or announcement decorates the message it came with. A mass gift collapses to a single row: Twitch also sends one notice per recipient, and showing those would mean a hundred rows for one gift bomb. The collapse has a 60-second window per gifter; a gift outside that window from the same person renders as its own row. A word inside a cheer message that happens to look like a cheer token (letters followed by digits, such as GG100) is stripped along with the real ones, since the two are indistinguishable by shape alone. Default empty, meaning no events.",
 				},
 			],
 		},
@@ -111,7 +111,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "pronouns",
 					values: "true, false",
-					body: "A text pronoun badge before the name, from pronouns.alejo.io, the same service 7TV and FrankerFaceZ read. Off by default because it is a per-user lookup: the first message from a given chatter usually misses the badge and later ones hit it. Turn it on only if that third-party call is acceptable for your channel.",
+					body: "A text pronoun badge before the name, from pronouns.alejo.io, the same service 7TV and FrankerFaceZ read. Off by default because it is a per-user lookup: the first message from a given chatter usually misses the badge and later ones hit it. Turn it on only if that third-party call is acceptable for your channel. Default false.",
 				},
 				{
 					name: "timestamps",
@@ -138,7 +138,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "delay",
 					values: "0 to 300, seconds",
-					body: "Hold non-mod messages this long before rendering them, so a deletion or timeout lands first. Messages from mods and the broadcaster skip the buffer. The buffer is bounded, and deletes, timeouts, and bans evict anything still pending. Default 0.",
+					body: "Hold non-mod messages this long before rendering them, so a deletion or timeout lands first. Messages from mods and the broadcaster skip the buffer. Sub, raid, cheer, first-chat and announcement rows skip the buffer too, so a raid alert never lands behind a moderation delay. The buffer is bounded, and deletes, timeouts, and bans evict anything still pending. Default 0.",
 				},
 				{
 					name: "hidebots",
@@ -153,12 +153,12 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "hide",
 					values: "comma-separated logins",
-					body: "Always hide these users. Anything that fails the login pattern is dropped from the list rather than erroring.",
+					body: "Always hide these users. Anything that fails the login pattern is dropped from the list rather than erroring. Default empty, meaning nobody is hidden.",
 				},
 				{
 					name: "allow",
 					values: "comma-separated logins",
-					body: "Featured mode: show only these users and nobody else. Leave it empty to show everyone.",
+					body: "Featured mode: show only these users and nobody else. Leave it empty to show everyone. Default empty, meaning everyone is shown.",
 				},
 			],
 		},
@@ -170,7 +170,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "badgeart",
 					values: "set=url or set/version=url pairs",
-					body: "Replace badge art inline, comma separated. See custom badge art below.",
+					body: "Replace badge art inline, comma separated. Badge URLs must be HTTPS with no username or password embedded in the URL; anything else is dropped silently. The combined list from badgeart and badgegist is capped at 200 entries. See custom badge art below.",
 				},
 				{
 					name: "badgegist",
@@ -180,7 +180,7 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "refresh",
 					values: "0, or 5 to 1440, minutes",
-					body: "Refetch channel-scoped emote and badge maps this often, so art added mid-stream shows up without reloading the source. Global maps keep their normal cache TTL. 0 turns refresh off and is the default. The 5-minute floor protects the free, unauthenticated upstream APIs.",
+					body: "Refetch channel-scoped emote and badge maps this often, so art added mid-stream shows up without reloading the source. Global maps keep their normal cache TTL. 0 turns refresh off and is the default. The 5-minute floor protects the free, unauthenticated upstream APIs: a value from 1 to 4 is not rejected, it is rounded up to 5 rather than falling back to 0, since a nonzero value means refresh was wanted.",
 				},
 			],
 		},
@@ -286,7 +286,7 @@ const CSS_HOOKS = [
 	{ cls: "hb-sep", body: "The colon between the name and the message." },
 	{
 		cls: "hb-emote",
-		body: "One emote image inside the message body. Height is 1.6em times --hb-emote-scale times --hb-emote-jumbo. The first is yours to set on hb-root and scales every emote; the second is the emotescale multiplier and is 1 on any row that is not emote-only.",
+		body: "One emote image inside the message body. Height is 1.6em times --hb-emote-scale times --hb-emote-jumbo. --hb-emote-scale is the Custom CSS hook, 1 by default and never written by the app, so a rule on it applies everywhere. emotescale itself lives in a separate variable, --hb-emote-boost, written inline on hb-root; --hb-emote-jumbo is computed per row from that boost and is 1 on any row that is not emote-only, so a Custom CSS override of --hb-emote-scale still multiplies jumbo rows instead of being silently skipped by them. Past 1x, a jumbo row also switches --hb-emote-align from middle to bottom so the name sits on the emote's lower edge instead of floating at its middle. A zero-width modifier stacked on top of a base emote is not itself an hb-emote: only the emote underneath carries the class, so a Custom CSS rule on .hb-emote will not reach the stacked overlay art.",
 	},
 	{
 		cls: "hb-status",
@@ -317,7 +317,7 @@ const TROUBLE = [
 	},
 	{
 		q: "Custom badge art is not showing",
-		a: "Check precedence: fetched Twitch art loses to badgegist, which loses to inline badgeart. A bare set key covers every version of that set, so moderator=... beats nothing but is beaten by moderator/1=.... The image URL has to be reachable from the browser and served with permissive CORS.",
+		a: "Check precedence: fetched Twitch art loses to badgegist, which loses to inline badgeart. A bare set key covers every version of that set, so moderator=... beats nothing but is beaten by moderator/1=.... The image URL has to be reachable from the browser and served with permissive CORS. It also has to be HTTPS with no embedded username or password, and a gist over 16 files or 64KB of content is skipped entirely.",
 	},
 ];
 
@@ -550,7 +550,9 @@ function DocsPage() {
 								The gist is read through the public GitHub API with no token,
 								which allows 60 unauthenticated requests per hour per IP.
 								Refresh is off by default. If enabled, its 5-minute floor keeps
-								a gist far under that limit.
+								a gist far under that limit. A gist is capped at 16 files and
+								64KB of total content; a gist over either limit is skipped
+								entirely rather than partially applied.
 							</p>
 						</section>
 
@@ -578,6 +580,13 @@ function DocsPage() {
 									</div>
 								))}
 							</dl>
+							<p className="hb-text-2 mt-6 leading-relaxed">
+								Avatar shape is three more variables on hb-root:
+								--hb-avatar-size (default 1.5em), --hb-avatar-radius (default
+								999px, a circle; several themes square it), and --hb-avatar-ring
+								(a 1px border-colored ring by default). --hb-event-accent sets
+								the event line's color, themed individually per preset.
+							</p>
 							<p className="hb-text-2 mt-6 leading-relaxed">
 								The theme variables are overridable the same way. To keep a
 								theme but change one color:
