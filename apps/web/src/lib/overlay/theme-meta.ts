@@ -125,7 +125,7 @@ export const VARIANT_SWATCH: VariantMeta = {
 	aurora: {},
 	sakura: {},
 	forest: {},
-	ocean: { tropic: "linear-gradient(135deg,#0a4a42,#52f0c8)" },
+	ocean: { tropic: "linear-gradient(135deg,#083a34,#52f0c8)" },
 	frost: {},
 	paper: {},
 	comic: {},

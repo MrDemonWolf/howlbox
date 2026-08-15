@@ -70,7 +70,7 @@ const VARIANT_SURFACE_REFERENCE: {
 	aurora: {},
 	sakura: {},
 	forest: {},
-	ocean: { tropic: "#0a4a42" },
+	ocean: { tropic: "#083a34" },
 	frost: {},
 	paper: {},
 	comic: {},
