@@ -130,7 +130,7 @@ the short version.
 | `fade`         | seconds, `0` to `600` (default `0`)      | Auto-hide each message N seconds after it appears       |
 | `badgeart`     | comma-separated `set=url` or `set/version=url` pairs | Custom badge art overriding the Twitch defaults |
 | `badgegist`    | public gist id or URL                    | Custom badge art hosted in a gist (same pairs, one per line, or a JSON map) |
-| `refresh`      | minutes, `0` or `5` to `1440` (default `0`) | Re-fetch channel art every N minutes; globals retain their TTL |
+| `refresh`      | minutes, `0` or `1` to `1440` (default `0`) | Re-fetch channel art every N minutes; `1`-`4` round up to `5`; globals retain their TTL |
 
 Invalid or missing values fall back to safe defaults; a typo in OBS
 never produces a blank overlay.
