@@ -19,6 +19,9 @@ const THEME_CSS: Record<Theme, (() => Promise<unknown>) | null> = {
 	arcade: () => import("./arcade.css"),
 	galaxy: () => import("./galaxy.css"),
 	mocha: () => import("./mocha.css"),
+	gameboy: () => import("./gameboy.css"),
+	vhs: () => import("./vhs.css"),
+	vapor: () => import("./vapor.css"),
 };
 
 // Resolves when the theme sheet has applied, the import failed, or the

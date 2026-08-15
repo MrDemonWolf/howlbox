@@ -42,9 +42,10 @@ export function HbRoot({
 	children: ReactNode;
 }) {
 	useEffect(() => {
-		if (theme === "arcade") {
-			// Only arcade pays for its custom font; every other OBS theme stays
-			// on the system stack and skips the font CSS and network request.
+		if (theme === "arcade" || theme === "gameboy") {
+			// Only the pixel themes pay for the custom font; every other OBS
+			// theme stays on the system stack and skips the font CSS and
+			// network request.
 			void import("@fontsource/press-start-2p/latin-400.css").catch(
 				() => undefined,
 			);

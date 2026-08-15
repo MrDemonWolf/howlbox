@@ -30,6 +30,9 @@ export const THEME_FAMILY: Record<Theme, ThemeFamily> = {
 	arcade: "retro",
 	galaxy: "gamer",
 	mocha: "cozy",
+	gameboy: "retro",
+	vhs: "retro",
+	vapor: "retro",
 };
 
 // Per-variant picker metadata, typed off THEME_VARIANTS so a declared
@@ -54,6 +57,9 @@ export const VARIANT_LABEL: VariantMeta = {
 	arcade: {},
 	galaxy: {},
 	mocha: {},
+	gameboy: { pocket: "Pocket", virtual: "Virtual Boy" },
+	vhs: {},
+	vapor: {},
 };
 
 export const VARIANT_SWATCH: VariantMeta = {
@@ -72,6 +78,12 @@ export const VARIANT_SWATCH: VariantMeta = {
 	arcade: {},
 	galaxy: {},
 	mocha: {},
+	gameboy: {
+		pocket: "linear-gradient(135deg,#b8b8a8 60%,#20201a)",
+		virtual: "linear-gradient(135deg,#0a0000 55%,#ff2a2a)",
+	},
+	vhs: {},
+	vapor: {},
 };
 
 // swatch gradient per theme so pickers/gallery read at a glance
@@ -91,6 +103,9 @@ export const THEME_SWATCH: Record<Theme, string> = {
 	arcade: "linear-gradient(135deg,#140e2e,#ffd23f)",
 	galaxy: "linear-gradient(135deg,#582c8a,#0a0a24)",
 	mocha: "linear-gradient(135deg,#f3e8da,#8a5a3b)",
+	gameboy: "linear-gradient(135deg,#9bbc0f 60%,#0f380f)",
+	vhs: "linear-gradient(135deg,#101012 65%,#ff4040)",
+	vapor: "linear-gradient(135deg,#a4386e,#1e165c 60%,#64f0ff)",
 };
 
 // human labels for the gallery/pickers (enum values stay the URL contract)
@@ -110,6 +125,9 @@ export const THEME_LABEL: Record<Theme, string> = {
 	arcade: "Pixel Arcade",
 	galaxy: "Galaxy",
 	mocha: "Mocha",
+	gameboy: "Game Boy",
+	vhs: "VHS Tape",
+	vapor: "Vaporwave",
 };
 
 export const BG_LABEL: Record<BgMode, string> = {
