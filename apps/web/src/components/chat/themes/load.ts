@@ -1,0 +1,45 @@
+import type { Theme } from "@/lib/overlay/config";
+
+// Wolf is the .hb-root base in overlay.css itself, so it costs no extra
+// fetch. Keyed as a Record so a new THEMES entry fails to compile until
+// it has a loader entry, same as the label and swatch maps.
+const THEME_CSS: Record<Theme, (() => Promise<unknown>) | null> = {
+	wolf: null,
+	glass: () => import("./glass.css"),
+	terminal: () => import("./terminal.css"),
+	neon: () => import("./neon.css"),
+	dark: () => import("./dark.css"),
+	light: () => import("./light.css"),
+	contrast: () => import("./contrast.css"),
+	cozy: () => import("./cozy.css"),
+	nobox: () => import("./nobox.css"),
+	retro95: () => import("./retro95.css"),
+	xp: () => import("./xp.css"),
+	xbox: () => import("./xbox.css"),
+	arcade: () => import("./arcade.css"),
+	galaxy: () => import("./galaxy.css"),
+	mocha: () => import("./mocha.css"),
+};
+
+// Resolves when the theme sheet has applied, the import failed, or the
+// timeout fired, and never rejects: a missing or hung chunk must never
+// blank the overlay, it just renders on the wolf base variables. The
+// import is not cancelled on timeout, so a chunk that arrives late still
+// applies (brief wolf, then the chosen theme). No retry loop on purpose:
+// hidden OBS sources throttle timers, and the reconnect rules in
+// CLAUDE.md apply to stylesheets too.
+export function loadThemeCss(theme: Theme, timeoutMs = 2000): Promise<void> {
+	const importer = THEME_CSS[theme];
+	if (!importer) {
+		return Promise.resolve();
+	}
+	return new Promise((resolve) => {
+		const timer = setTimeout(resolve, timeoutMs);
+		importer()
+			.catch(() => undefined)
+			.then(() => {
+				clearTimeout(timer);
+				resolve();
+			});
+	});
+}

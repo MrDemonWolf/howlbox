@@ -7,8 +7,10 @@ import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import { assetScaleFor, type OverlayParams } from "@/lib/overlay/config";
 import { KNOWN_BOTS } from "@/lib/twitch/bots";
 
+// Base variables only. The theme chunk is loaded per theme name by
+// overlay-main (OBS path); the site previews import themes/index.css
+// themselves because they render many themes at once.
 import "@/components/chat/overlay.css";
-import "@/components/chat/themes/index.css";
 
 export function OverlayApp({ params }: { params: OverlayParams }) {
 	const hiddenLogins = params.hidebots
