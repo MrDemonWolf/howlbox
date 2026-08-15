@@ -1,0 +1,38 @@
+/* 8-bit arcade: hard sprite shadows, zero blur anywhere */
+.hb-root[data-theme="arcade"] {
+	--hb-font: "Press Start 2P", "Wallpoet", ui-monospace, monospace;
+	--hb-font-size: 0.8125rem;
+	--hb-radius: 0px;
+	--hb-text: #ffffff;
+	--hb-surface: linear-gradient(rgb(20 14 46 / 0.94), rgb(12 9 32 / 0.94));
+	--hb-surface-solid: #140e2e;
+	--hb-border: rgb(255 210 63 / 0.9);
+	--hb-shadow: 4px 4px 0 rgb(0 0 0 / 0.85), inset 0 0 0 2px rgb(38 28 82);
+	--hb-bubble-shadow: var(--hb-shadow);
+	--hb-shadow-off:
+		1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000,
+		-1px 1px 0 #000000, 2px 2px 0 #000000;
+	--hb-avatar-radius: 0;
+	/* arcade runs 8px type, so a 1.5em picture would tower over it */
+	--hb-avatar-size: 2em;
+	--hb-avatar-ring: 0 0 0 2px rgb(255 210 63 / 0.9);
+	--hb-event-accent: #ffd23f;
+}
+
+.hb-root[data-theme="arcade"] .hb-emote {
+	image-rendering: pixelated;
+}
+
+.hb-root[data-theme="arcade"] .hb-avatar {
+	image-rendering: pixelated;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="arcade"],
+	.hb-root[data-theme="arcade"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

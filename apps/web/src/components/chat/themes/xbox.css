@@ -1,0 +1,29 @@
+/* Xbox dashboard: charcoal glass with the signature green */
+.hb-root[data-theme="xbox"] {
+	--hb-radius: 10px;
+	--hb-text: #eaf5ea;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(27 32 27 / 0.9), rgb(12 15 12 / 0.86));
+	--hb-surface-solid: linear-gradient(135deg, #1b201b, #0c0f0c);
+	--hb-border: rgb(60 176 60 / 0.5);
+	--hb-shadow:
+		inset 0 1px 0 rgb(155 240 11 / 0.25), 0 0 16px rgb(16 124 16 / 0.28),
+		0 8px 24px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(16 124 16 / 0.35);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
+		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
+		0 0 5px rgb(16 124 16 / 0.4);
+	--hb-event-accent: #7ee87e;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="xbox"],
+	.hb-root[data-theme="xbox"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}
