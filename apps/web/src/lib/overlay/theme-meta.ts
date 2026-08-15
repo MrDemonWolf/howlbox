@@ -1,4 +1,78 @@
-import type { BgMode, Theme } from "@/lib/overlay/params";
+import type { BgMode, THEME_VARIANTS, Theme } from "@/lib/overlay/params";
+
+// The four families the pickers, wall and docs group by. Picker order
+// comes from FAMILY_ORDER, not the THEMES enum, so new enum values can
+// append (additive URL contract) while still displaying next to their
+// relatives.
+export const FAMILY_ORDER = ["clean", "gamer", "cozy", "retro"] as const;
+export type ThemeFamily = (typeof FAMILY_ORDER)[number];
+
+export const FAMILY_LABEL: Record<ThemeFamily, string> = {
+	clean: "Clean",
+	gamer: "Gamer",
+	cozy: "Cozy",
+	retro: "Retro",
+};
+
+export const THEME_FAMILY: Record<Theme, ThemeFamily> = {
+	wolf: "clean",
+	glass: "clean",
+	terminal: "retro",
+	neon: "gamer",
+	dark: "clean",
+	light: "clean",
+	contrast: "clean",
+	cozy: "cozy",
+	nobox: "clean",
+	retro95: "retro",
+	xp: "retro",
+	xbox: "gamer",
+	arcade: "retro",
+	galaxy: "gamer",
+	mocha: "cozy",
+};
+
+// Per-variant picker metadata, typed off THEME_VARIANTS so a declared
+// variant cannot ship without a label and swatch.
+type VariantMeta = {
+	[T in Theme]: Record<(typeof THEME_VARIANTS)[T][number], string>;
+};
+
+export const VARIANT_LABEL: VariantMeta = {
+	wolf: {},
+	glass: {},
+	terminal: {},
+	neon: {},
+	dark: {},
+	light: {},
+	contrast: {},
+	cozy: {},
+	nobox: {},
+	retro95: {},
+	xp: {},
+	xbox: {},
+	arcade: {},
+	galaxy: {},
+	mocha: {},
+};
+
+export const VARIANT_SWATCH: VariantMeta = {
+	wolf: {},
+	glass: {},
+	terminal: {},
+	neon: {},
+	dark: {},
+	light: {},
+	contrast: {},
+	cozy: {},
+	nobox: {},
+	retro95: {},
+	xp: {},
+	xbox: {},
+	arcade: {},
+	galaxy: {},
+	mocha: {},
+};
 
 // swatch gradient per theme so pickers/gallery read at a glance
 export const THEME_SWATCH: Record<Theme, string> = {

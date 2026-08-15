@@ -2,7 +2,11 @@ import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { isValidLogin, type Theme } from "@/lib/overlay/params";
+import {
+	isValidLogin,
+	normalizeVariant,
+	type Theme,
+} from "@/lib/overlay/params";
 import { BG_LABEL, THEME_LABEL } from "@/lib/overlay/theme-meta";
 import { buildOverlayUrl, parseOverlayUrl } from "@/lib/overlay/url";
 import { type ChatEventKind, EVENT_KINDS } from "@/lib/twitch/types";
@@ -16,9 +20,23 @@ import {
 import { ConfigOutput } from "./config-builder/output";
 import { ConfigSections } from "./config-builder/sections";
 
-export function ConfigBuilder({ initialTheme }: { initialTheme?: Theme }) {
+export function ConfigBuilder({
+	initialTheme,
+	initialVariant,
+}: {
+	initialTheme?: Theme;
+	initialVariant?: string;
+}) {
 	const [config, setConfig] = useState<Config>(() =>
-		initialTheme ? { ...DEFAULTS, theme: initialTheme } : DEFAULTS,
+		initialTheme
+			? {
+					...DEFAULTS,
+					theme: initialTheme,
+					// same fallback rule as the overlay: a variant the theme does
+					// not declare quietly becomes the default
+					variant: normalizeVariant(initialTheme, initialVariant),
+				}
+			: DEFAULTS,
 	);
 	const [importDraft, setImportDraft] = useState("");
 
