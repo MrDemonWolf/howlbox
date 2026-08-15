@@ -59,6 +59,16 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 					body: "A color variation of the selected theme: same fonts, radius, and layout, different palette. Each theme declares its own values, listed with the theme in the theme table below; most themes have none yet. A value the current theme does not declare falls back to the theme's default look, never a blank overlay, and the default serializes as no param at all.",
 				},
 				{
+					name: "layout",
+					values: "inline, stacked",
+					body: "Where the name sits. inline keeps badges, name and message on one flowing line. stacked puts the author header on its own line with the message below it, the block style most chat widgets call compact or blocky. Works with every theme and display mode. Default inline.",
+				},
+				{
+					name: "align",
+					values: "left, right",
+					body: "Which edge messages hug. right is for chat parked on the right side of the scene: rows, and bubbles in bubble mode, grow from the right edge and text is right-aligned. Default left.",
+				},
+				{
 					name: "bg",
 					values: "off, panel, bubble",
 					body: "Display mode. off draws bare text over gameplay with an outline stack for legibility, panel puts one themed backdrop behind the whole column, bubble gives each message its own surface. The panel backdrop only draws while messages exist, so a quiet channel shows nothing rather than an empty rectangle. A system reduced-transparency preference swaps every theme to its solid, opaque surface automatically. Default off.",
@@ -107,6 +117,11 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 					name: "fade",
 					values: "0 to 600, seconds",
 					body: "Auto-hide each message this many seconds after it appears. 0 keeps everything until max pushes it out. The countdown is a CSS animation, not a JS timer, because OBS throttles timers in hidden sources but keeps animation clocks running. Default 0.",
+				},
+				{
+					name: "group",
+					values: "true, false",
+					body: "Consecutive messages from the same chatter show the header once; the rest render as bare text, the way Discord collapses a run of messages. Event rows always keep their own line and break a run. If the first message of a run gets removed by moderation or fades out, the next one grows its header back. Default false.",
 				},
 				{
 					name: "badges",
@@ -261,12 +276,16 @@ function useActiveSection(ids: string[]) {
 const CSS_HOOKS = [
 	{
 		cls: "hb-root",
-		body: "The overlay wrapper. Carries data-theme, data-variant when a variant is selected, and the theme variables.",
+		body: "The overlay wrapper. Carries data-theme, the theme variables, and, when selected, data-variant, data-layout and data-align.",
 	},
 	{ cls: "hb-messages", body: "The scrolling message column." },
 	{
 		cls: "hb-message",
-		body: "One message row. A row whose body is nothing but emotes also carries data-emote-only, so hb-message[data-emote-only] targets exactly the rows emotescale grows.",
+		body: "One message row. A row whose body is nothing but emotes also carries data-emote-only, so hb-message[data-emote-only] targets exactly the rows emotescale grows. A group continuation row carries data-grouped.",
+	},
+	{
+		cls: "hb-head",
+		body: "The author header: timestamp, avatar, badges, pronouns and name as one unit. display:contents by default; layout=stacked turns it into its own line and group hides it on continuation rows.",
 	},
 	{ cls: "hb-name", body: "The chatter's display name." },
 	{ cls: "hb-text", body: "The message body." },
