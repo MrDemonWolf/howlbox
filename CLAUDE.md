@@ -233,30 +233,57 @@ preprocess, since the router re-serializes the validated value.
 
 ## Theme system
 
-Each theme is a `[data-theme="name"]` block in
-`components/chat/overlay.css` overriding: `--hb-font`,
+`wolf` is the base `.hb-root` block in `components/chat/overlay.css`;
+every other theme is its own chunk at `components/chat/themes/<name>.css`
+holding one `[data-theme="name"]` block that overrides: `--hb-font`,
 `--hb-font-size`, `--hb-radius`, `--hb-text`, `--hb-surface` (full
 background shorthand, can stack noise/gradients), `--hb-surface-solid`
 (reduced-transparency fallback, REQUIRED), `--hb-border`,
 `--hb-shadow`, `--hb-glow` (text glow in panel/bubble modes),
 `--hb-shadow-off` (bg=off legibility stack, must outline all four
-directions), optional `--hb-mask`. `wolf` is the base `.hb-root`
-default (no `[data-theme]` block); the other fourteen are override
-blocks. Adding a theme: CSS block + the `THEMES` enum in
-`lib/overlay/config.ts` + `THEME_SWATCH` and `THEME_LABEL` in
-`lib/overlay/theme-meta.ts` (both `Record<Theme, ...>`, so the
-compiler forces the new entry) + the README table. Every theme also needs a conservative solid reference in
-`THEME_SURFACE_REFERENCE` in `message-list.tsx`, so dynamic user colors
-reach AA contrast on panel and bubble surfaces.
+directions), optional `--hb-mask`, plus the avatar shape
+(`--hb-avatar-size`/`--hb-avatar-radius`/`--hb-avatar-ring`) and
+`--hb-event-accent` where the `.hb-root` circle-and-blue default is
+wrong. The OBS entry loads exactly one chunk: `overlay-main` awaits
+`themes/load.ts` `loadThemeCss(theme)` before first render. The loader
+never rejects and races a 2s timeout, so a missing chunk renders on the
+wolf base instead of blanking, and a late chunk still applies; no retry
+loops (hidden sources throttle timers). The site imports the
+`themes/index.css` aggregate (deliberately CSS `@import`, not JS, so the
+chunk module ids stay out of the site JS graph and rolldown cannot
+dedupe site CSS into the OBS path).
 
-`--hb-avatar-size`/`--hb-avatar-radius`/`--hb-avatar-ring` (profile
-picture shape) and `--hb-event-accent` (event line color) live in one
-grouped section AFTER all the theme blocks in `overlay.css`, not inside
-them, so the avatar shapes can be compared at a glance; source order
-lets them win at equal specificity. Both default on `.hb-root`, so a new
-theme inherits a working circle and accent and only needs an entry when
-it wants a square or a different highlight (nothing fails to compile
-here, unlike the `Record<Theme, ...>` maps).
+Each chunk ENDS with its own `@media (prefers-reduced-transparency:
+reduce)` block covering `.hb-root[data-theme="x"]` and
+`.hb-root[data-theme="x"][data-variant]`. This is load-bearing: chunks
+load AFTER the base sheet, so base's own override block would lose the
+specificity tie on document order. The base block stays as the safety
+net for wolf and failed chunks. `themes.test.ts` enforces chunk
+existence, the required vars, the override's presence and position, and
+that no `[data-theme` block drifts back into `overlay.css`.
+
+`?variant` selects a color variation of a theme:
+`[data-theme="x"][data-variant="y"]` blocks inside the theme's own
+chunk, listed in `THEME_VARIANTS` in `lib/overlay/config.ts` (the URL
+contract; both parsers validate through the shared `normalizeVariant`,
+unknown values fall back to the theme default and serialize as no
+param). A variant block overrides COLOR vars only (text, surfaces,
+border, shadows, glow, shadow-off, event accent, avatar ring), never
+fonts/radius/mask/avatar geometry, and if it touches `--hb-surface` it
+must also set `--hb-surface-solid`. `HbRoot` stamps `data-variant` only
+for a real selection, so the attribute's absence IS the default state;
+`data-variant` is part of the public OBS Custom CSS contract alongside
+the `hb-*` class names.
+
+Adding a theme: chunk file + `@import` line in `themes/index.css` +
+loader entry in `themes/load.ts` + the `THEMES` enum in
+`lib/overlay/config.ts` + `THEME_SWATCH` and `THEME_LABEL` in
+`lib/overlay/theme-meta.ts` + a conservative solid reference in
+`THEME_SURFACE_REFERENCE` in `message-list.tsx` (all `Record<Theme,
+...>`, so the compiler forces every entry) + the README table. Adding a
+variant: CSS block in the chunk + `THEME_VARIANTS` entry + a
+`VARIANT_SURFACE_REFERENCE` color in `message-list.tsx` (typed off
+`THEME_VARIANTS`, compiler-forced) + README/docs.
 
 `?emotescale` rides THREE vars, all defaulting on `.hb-root` in the same
 block as the avatar vars, and the split is load-bearing:

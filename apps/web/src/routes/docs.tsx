@@ -51,7 +51,12 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "theme",
 					values: THEMES.join(", "),
-					body: "One of the fifteen presets. Each theme sets its own font, radius, surface, border, shadow, and text glow through CSS variables, so themes are swappable without touching layout. Default wolf.",
+					body: "One of the fifteen presets. Each theme sets its own font, radius, surface, border, shadow, and text glow through CSS variables, so themes are swappable without touching layout. The overlay only downloads the CSS for the theme in the URL. Default wolf.",
+				},
+				{
+					name: "variant",
+					values: "theme-specific",
+					body: "A color variation of the selected theme: same fonts, radius, and layout, different palette. Each theme declares its own values, listed with the theme in the theme table below; most themes have none yet. A value the current theme does not declare falls back to the theme's default look, never a blank overlay, and the default serializes as no param at all.",
 				},
 				{
 					name: "bg",
@@ -256,7 +261,7 @@ function useActiveSection(ids: string[]) {
 const CSS_HOOKS = [
 	{
 		cls: "hb-root",
-		body: "The overlay wrapper. Carries data-theme and the theme variables.",
+		body: "The overlay wrapper. Carries data-theme, data-variant when a variant is selected, and the theme variables.",
 	},
 	{ cls: "hb-messages", body: "The scrolling message column." },
 	{
