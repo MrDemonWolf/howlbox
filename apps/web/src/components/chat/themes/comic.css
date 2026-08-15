@@ -1,0 +1,38 @@
+/* Comic: white panel with a halftone dot tile and a hard ink ring. No
+   speech tails: those would need a per-message pseudo-element, and the
+   hb-* classes carry no styles of their own. */
+.hb-root[data-theme="comic"] {
+	--hb-font: "Comic Sans MS", "Chalkboard SE", ui-rounded, sans-serif;
+	--hb-radius: 12px;
+	--hb-text: #101014;
+	--hb-surface:
+		radial-gradient(
+			circle at 2px 2px,
+			rgb(20 20 26 / 0.1) 1px,
+			transparent 1.5px
+		)
+		0 0 / 7px 7px repeat,
+		linear-gradient(rgb(255 255 255 / 0.95), rgb(244 244 240 / 0.94));
+	--hb-surface-solid: #f7f7f2;
+	--hb-border: rgb(16 16 20 / 0.9);
+	--hb-shadow: 0 0 0 1px rgb(16 16 20 / 0.9), 3px 3px 0 rgb(16 16 20 / 0.85);
+	--hb-bubble-shadow: var(--hb-shadow);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95),
+		-1px 1px 0 rgb(255 255 255 / 0.95), 1px 1px 0 rgb(255 255 255 / 0.95),
+		0 2px 5px rgb(255 255 255 / 0.8);
+	--hb-avatar-radius: 999px;
+	--hb-avatar-ring: 0 0 0 2px rgb(16 16 20 / 0.9);
+	/* deepened from comic red so the accent clears 4.5:1 on the panel */
+	--hb-event-accent: #c21e2a;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="comic"],
+	.hb-root[data-theme="comic"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

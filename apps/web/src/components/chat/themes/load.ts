@@ -26,6 +26,12 @@ const THEME_CSS: Record<Theme, (() => Promise<unknown>) | null> = {
 	hud: () => import("./hud.css"),
 	ember: () => import("./ember.css"),
 	aurora: () => import("./aurora.css"),
+	sakura: () => import("./sakura.css"),
+	forest: () => import("./forest.css"),
+	ocean: () => import("./ocean.css"),
+	frost: () => import("./frost.css"),
+	paper: () => import("./paper.css"),
+	comic: () => import("./comic.css"),
 };
 
 // Resolves when the theme sheet has applied, the import failed, or the

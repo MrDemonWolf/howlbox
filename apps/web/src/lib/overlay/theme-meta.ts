@@ -37,6 +37,12 @@ export const THEME_FAMILY: Record<Theme, ThemeFamily> = {
 	hud: "gamer",
 	ember: "gamer",
 	aurora: "gamer",
+	sakura: "cozy",
+	forest: "cozy",
+	ocean: "cozy",
+	frost: "cozy",
+	paper: "cozy",
+	comic: "cozy",
 };
 
 // Per-variant picker metadata, typed off THEME_VARIANTS so a declared
@@ -68,6 +74,12 @@ export const VARIANT_LABEL: VariantMeta = {
 	hud: {},
 	ember: { coal: "Coal" },
 	aurora: {},
+	sakura: {},
+	forest: {},
+	ocean: { tropic: "Tropic" },
+	frost: {},
+	paper: {},
+	comic: {},
 };
 
 export const VARIANT_SWATCH: VariantMeta = {
@@ -96,6 +108,12 @@ export const VARIANT_SWATCH: VariantMeta = {
 	hud: {},
 	ember: { coal: "linear-gradient(135deg,#0e0e10,#c9ccd4)" },
 	aurora: {},
+	sakura: {},
+	forest: {},
+	ocean: { tropic: "linear-gradient(135deg,#0a4a42,#52f0c8)" },
+	frost: {},
+	paper: {},
+	comic: {},
 };
 
 // swatch gradient per theme so pickers/gallery read at a glance
@@ -122,6 +140,12 @@ export const THEME_SWATCH: Record<Theme, string> = {
 	hud: "linear-gradient(135deg,#061420 60%,#7df9ff)",
 	ember: "linear-gradient(135deg,#120c08,#ff6018)",
 	aurora: "linear-gradient(135deg,#050a14,#40e8b4 70%,#7864ff)",
+	sakura: "linear-gradient(135deg,#fff5f9,#ffb7d0 70%,#b8305f)",
+	forest: "linear-gradient(135deg,#1b3120,#8fd07a)",
+	ocean: "linear-gradient(135deg,#083245,#46d4e8)",
+	frost: "linear-gradient(135deg,#f0f8ff,#7ab4e6)",
+	paper: "linear-gradient(135deg,#fdf1a7,#b4963c)",
+	comic: "linear-gradient(135deg,#ffffff 55%,#c21e2a)",
 };
 
 // human labels for the gallery/pickers (enum values stay the URL contract)
@@ -148,6 +172,12 @@ export const THEME_LABEL: Record<Theme, string> = {
 	hud: "Sci-fi HUD",
 	ember: "Ember",
 	aurora: "Aurora",
+	sakura: "Sakura",
+	forest: "Forest",
+	ocean: "Deep Sea",
+	frost: "Frost",
+	paper: "Sticky Note",
+	comic: "Comic",
 };
 
 export const BG_LABEL: Record<BgMode, string> = {

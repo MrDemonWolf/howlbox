@@ -29,6 +29,12 @@ const THEME_SURFACE_REFERENCE: Record<Theme, string> = {
 	hud: "#061420",
 	ember: "#241611",
 	aurora: "#0e2030",
+	sakura: "#ffe0ec",
+	forest: "#1b3120",
+	ocean: "#083245",
+	frost: "#d6e8f8",
+	paper: "#f9e88f",
+	comic: "#f7f7f2",
 };
 
 // Typed off THEME_VARIANTS, so declaring a variant without a surface
@@ -59,6 +65,12 @@ const VARIANT_SURFACE_REFERENCE: {
 	hud: {},
 	ember: { coal: "#1c1c20" },
 	aurora: {},
+	sakura: {},
+	forest: {},
+	ocean: { tropic: "#0a4a42" },
+	frost: {},
+	paper: {},
+	comic: {},
 };
 
 function surfaceColorFor(
