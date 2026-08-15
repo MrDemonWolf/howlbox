@@ -275,6 +275,18 @@ for a real selection, so the attribute's absence IS the default state;
 `data-variant` is part of the public OBS Custom CSS contract alongside
 the `hb-*` class names.
 
+`?layout` / `?align` / `?group` are the message-layout axis, orthogonal
+to themes: the row's author header (time, avatar, badges, pronouns,
+name) is wrapped in `hb-head`, `display: contents` by default so the
+inline flow is untouched. `layout=stacked` promotes it to its own line
+and hides `hb-sep`; `align=right` right-aligns the column; `group`
+hides the header on a row whose predecessor is the same chatter
+(recomputed from adjacency, so evictions regrow headers; event rows
+never group). All three are pure CSS keyed off `data-layout`/
+`data-align` on `hb-root` and `data-grouped` on the row, so
+`ChatMessageRow` stays memoized. `hb-head` and the three data
+attributes are part of the frozen OBS Custom CSS contract.
+
 Adding a theme: chunk file + `@import` line in `themes/index.css` +
 loader entry in `themes/load.ts` + the `THEMES` enum in
 `lib/overlay/config.ts` + `THEME_SWATCH` and `THEME_LABEL` in

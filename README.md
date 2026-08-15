@@ -112,6 +112,9 @@ the short version.
 | `channel`      | Twitch login name                        | Channel to join (required)                              |
 | `theme`        | `wolf`, `glass`, `terminal`, `neon`, `dark`, `light`, `contrast`, `cozy`, `nobox`, `retro95`, `xp`, `xbox`, `arcade`, `galaxy`, `mocha` | Color theme preset |
 | `variant`      | theme-specific | Color variation of the chosen theme; unknown values fall back to the theme default |
+| `layout`       | `inline`, `stacked` | Name inline with the message, or on its own line above it |
+| `align`        | `left`, `right` | Which edge messages hug |
+| `group`        | `true`, `false` | Consecutive messages from one chatter share a single header |
 | `bg`           | `off`, `panel`, `bubble`                 | Display mode (default `off`). `panel` draws its backdrop only while there are messages |
 | `size`         | percent, `50` to `300` (default `100`)   | Scales theme text, with a 12px rendered floor           |
 | `emotescale`   | `1` to `4`, half steps (default `1`)     | Grows emotes on messages that are nothing but emotes    |
