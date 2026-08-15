@@ -593,14 +593,22 @@ function DocsPage() {
 								the event line's color, themed individually per preset.
 							</p>
 							<p className="hb-text-2 mt-6 leading-relaxed">
-								The theme variables are overridable the same way. To keep a
-								theme but change one color:
+								The theme variables are overridable the same way. Every theme
+								declares its variables at{" "}
+								<code className="hb-code">.hb-root[data-theme]</code>{" "}
+								specificity, so use that selector for an override and it wins on
+								any theme, wolf included:
 							</p>
 							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
-									{".hb-root { --hb-text: #ffd6f2; }"}
+									{".hb-root[data-theme] { --hb-text: #ffd6f2; }"}
 								</code>
 							</pre>
+							<p className="hb-text-2 mt-4 leading-relaxed">
+								A bare <code className="hb-code">.hb-root</code> rule works only
+								for variables no theme block sets, like the --hb-emote-scale
+								hook; a theme's own declaration outranks it.
+							</p>
 							<p className="hb-text-2 mt-4 leading-relaxed">
 								One constraint worth knowing before you reach for it:{" "}
 								<code className="hb-code">backdrop-filter</code> cannot blur
