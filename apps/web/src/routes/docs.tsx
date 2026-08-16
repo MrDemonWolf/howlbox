@@ -626,21 +626,23 @@ function DocsPage() {
 								the event line's color, themed individually per preset.
 							</p>
 							<p className="hb-text-2 mt-6 leading-relaxed">
-								The theme variables are overridable the same way. Every theme
-								declares its variables at{" "}
-								<code className="hb-code">.hb-root[data-theme]</code>{" "}
-								specificity, so use that selector for an override and it wins on
-								any theme, wolf included:
+								The theme variables are overridable the same way. Match two
+								attributes so the rule outranks both a theme block and a variant
+								block, and it wins on every theme, wolf included:
 							</p>
 							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
-									{".hb-root[data-theme] { --hb-text: #ffd6f2; }"}
+									{".hb-root[data-bg][data-theme] { --hb-text: #ffd6f2; }"}
 								</code>
 							</pre>
 							<p className="hb-text-2 mt-4 leading-relaxed">
-								A bare <code className="hb-code">.hb-root</code> rule works only
-								for variables no theme block sets, like the --hb-emote-scale
-								hook; a theme's own declaration outranks it.
+								Fewer attributes lose. A bare{" "}
+								<code className="hb-code">.hb-root</code> rule only reaches
+								variables no theme block sets, like the --hb-emote-scale hook,
+								and a single-attribute rule still loses to any theme that
+								declares variants. <code className="hb-code">data-bg</code> is
+								always present, so the two-attribute form above is safe to paste
+								on any overlay.
 							</p>
 							<p className="hb-text-2 mt-4 leading-relaxed">
 								One constraint worth knowing before you reach for it:{" "}

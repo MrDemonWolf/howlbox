@@ -11,7 +11,7 @@
 		{
 			"name": "tunnel",
 			"runtimeExecutable": "cloudflared",
-			"runtimeArgs": ["tunnel", "--url", "http://localhost:3002"],
+			"runtimeArgs": ["tunnel", "--url", "http://localhost:3001"],
 			"dependsOn": "web"
 		}
 	]
