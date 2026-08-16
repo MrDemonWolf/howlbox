@@ -6,6 +6,12 @@
  * change maybe twice a year, and a hermetic deploy is worth more than
  * automating a job that rarely runs.
  *
+ * BUMP THE FILE NAME whenever the art changes, and update the matching
+ * ogImage entries in lib/seo/routes.ts plus the two fallback tags in
+ * index.html. X caches social images with no purge mechanism, so a card
+ * reused at the same URL keeps serving the old art to anyone who has
+ * seen it. The -v2 suffix is the 31-theme card; -v3 is the next one.
+ *
  *   bun run og
  *
  * Rendering goes through Satori (JSX -> SVG) and resvg (SVG -> PNG),
@@ -61,14 +67,14 @@ interface Card {
 
 const CARDS: Card[] = [
 	{
-		file: "og.png",
+		file: "og-v2.png",
 		headline: "The whole overlay is",
 		accent: "one URL",
 		chip: "/overlay?channel=you&theme=wolf&bg=bubble",
 		facts: ["31 themes", "7TV, BTTV, FFZ", "No account", "Self-hosted"],
 	},
 	{
-		file: "og-docs.png",
+		file: "og-docs-v2.png",
 		headline: "Every parameter,",
 		accent: "every hook",
 		chip: "/docs#param-badgeart",
@@ -80,7 +86,7 @@ const CARDS: Card[] = [
 		],
 	},
 	{
-		file: "og-config.png",
+		file: "og-config-v2.png",
 		headline: "Build your",
 		accent: "overlay URL",
 		chip: "/config",
