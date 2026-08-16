@@ -118,6 +118,11 @@ const DARK_TEXT_OUTLINE =
 const LIGHT_TEXT_OUTLINE =
 	"-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(0 0 0 / 0.95), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 1px 3px rgb(0 0 0 / 0.7)";
 
+// Below this luminance a name is outlined in white, above it in black.
+// Shared by the outline and the bg=off color correction so the two can
+// never disagree about which ring a given name gets.
+const OUTLINE_FLIP = 0.35;
+
 // A transparent page cannot know the gameplay color OBS will composite
 // behind it. Give each dynamic name the opposite-luminance outline.
 export function userColorOutline(color: string): string {
@@ -125,7 +130,26 @@ export function userColorOutline(color: string): string {
 	if (!rgb) {
 		return LIGHT_TEXT_OUTLINE;
 	}
-	return relativeLuminance(rgb) < 0.35 ? DARK_TEXT_OUTLINE : LIGHT_TEXT_OUTLINE;
+	return relativeLuminance(rgb) < OUTLINE_FLIP
+		? DARK_TEXT_OUTLINE
+		: LIGHT_TEXT_OUTLINE;
+}
+
+// bg=off has no surface to measure against, so readableUserColor cannot
+// correct anything and Twitch's darkest defaults used to render at full
+// darkness over dark gameplay. The outline ring is what the glyph
+// actually reads against there, so correct the color until it clears AA
+// against its own ring: a dark name wearing a white ring darkens further,
+// a light name wearing a black ring lightens. Correction never crosses
+// OUTLINE_FLIP, so the ring it was measured against stays the ring it
+// gets.
+export function outlinedUserColor(color: string): string {
+	const rgb = parseHex(color);
+	if (!rgb) {
+		return color;
+	}
+	const ring = relativeLuminance(rgb) < OUTLINE_FLIP ? "#ffffff" : "#000000";
+	return readableUserColor(color, ring);
 }
 
 export function fallbackColor(login: string): string {
