@@ -1,0 +1,35 @@
+/* Brutalist: opaque white card, thick black ring and a hard offset
+   shadow. The thickness is box-shadow rings because the panel and
+   bubble classes hardcode a 1px border. */
+.hb-root[data-theme="brutal"] {
+	--hb-radius: 0px;
+	--hb-text: #0a0a0a;
+	--hb-surface: rgb(255 255 255 / 0.97);
+	--hb-surface-solid: #ffffff;
+	--hb-border: #0a0a0a;
+	--hb-shadow: 0 0 0 2px #0a0a0a, 6px 6px 0 #0a0a0a;
+	--hb-bubble-shadow: var(--hb-shadow);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95), -1px 1px 0 rgb(
+			255 255 255 / 0.95
+		), 1px 1px 0 rgb(255 255 255 / 0.95), 0 -1px 0 rgb(255 255 255 / 0.95), 0 1px 0 rgb(
+			255 255 255 / 0.95
+		), -1px 0 0 rgb(255 255 255 / 0.95), 1px 0 0 rgb(255 255 255 / 0.95), 0 2px 5px rgb(
+			255 255 255 / 0.8
+		);
+	--hb-avatar-radius: 0;
+	--hb-avatar-ring: 0 0 0 2px #0a0a0a;
+	/* deepened from the poster orange so the accent clears 4.5:1 on white */
+	--hb-event-accent: #c53210;
+	font-weight: 600;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="brutal"],
+	.hb-root[data-theme="brutal"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

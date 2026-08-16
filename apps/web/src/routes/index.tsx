@@ -1,63 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-	ArrowRight,
-	Check,
-	Minus,
-	MonitorPlay,
-	Palette,
-	ShieldCheck,
-	Smile,
-	Timer,
-	Zap,
-} from "lucide-react";
+import { ArrowRight, Check, Minus, Timer, Zap } from "lucide-react";
+import { useState } from "react";
 
-import { DemoChat } from "@/components/landing/demo-chat";
 import { OverlayPreview } from "@/components/landing/overlay-preview";
 import {
 	Band,
+	GITHUB_URL,
 	MONO,
 	OBSSteps,
 	SectionHead,
 	SiteShell,
 } from "@/components/landing/site-chrome";
 import { ThemeWall } from "@/components/landing/theme-wall";
-import type { BgMode } from "@/lib/overlay/params";
+import { type BgMode, THEMES } from "@/lib/overlay/params";
 
 export const Route = createFileRoute("/")({
 	component: LandingPage,
 });
 
-const GITHUB_URL = "https://github.com/mrdemonwolf/howlbox";
-
-const TRUST = ["MIT licensed", "No account", "Runs on your host"];
-
 // fact band: the numbers a self-hosting streamer actually shops on
 const STATS = [
-	{ value: "15", label: "themes" },
+	{ value: String(THEMES.length), label: "themes" },
 	{ value: "3", label: "display modes" },
 	{ value: "4", label: "emote sources, merged per channel" },
-	{ value: "0", label: "accounts, servers, or fees" },
 ];
 
-const AUDIENCES = [
-	{
-		icon: Palette,
-		title: "You want chat to match your scene",
-		body: "Fifteen finished looks: wolf glass, Win95, Windows XP, Xbox, CRT terminal, synthwave, pixel arcade, kawaii pastel. Swap one with a query param.",
-	},
-	{
-		icon: MonitorPlay,
-		title: "You want the knobs",
-		body: "Every element carries a stable hb-* class, so the OBS Custom CSS field reaches anything the parameters miss. Theme variables are overridable the same way, so you can keep a preset and change one color.",
-	},
-	{
-		icon: ShieldCheck,
-		title: "You do not want a third party",
-		body: "Static files, no backend. Serve them from GitHub Pages, a home server, or a folder on the streaming box.",
-	},
-];
-
-const SUPPORT = [
+// The two OBS-behavior facts with no other home on the page; they hang
+// under the setup steps because that is where an OBS user is reading.
+const OBS_NOTES = [
 	{
 		icon: Timer,
 		title: "Moderation lands first",
@@ -67,11 +37,6 @@ const SUPPORT = [
 		icon: Zap,
 		title: "Built for a browser source",
 		body: "Transparent on the first paint, before React runs. No blur filters anywhere, which matters on CPU-rendered setups. Reconnects fire on visibility and network events rather than a timer, because OBS throttles timers in hidden sources.",
-	},
-	{
-		icon: Smile,
-		title: "Emotes from four places",
-		body: "Twitch, 7TV (including zero-width overlays), BTTV, and FrankerFaceZ, resolved per channel and cached in your browser.",
 	},
 ];
 
@@ -109,30 +74,24 @@ const COMPARISON: { row: string; cells: (boolean | string)[] }[] = [
 	{ row: "Cost", cells: ["Free", "Free tier or paid", "Free"] },
 ];
 
+const PRIVACY = [
+	"Your configuration lives in the URL, not in a database.",
+	"Emote and badge art is fetched straight from 7TV, BTTV, FFZ, and ivr.fi, and cached in your own browser.",
+	"No analytics, no telemetry, no cookies set by HowlBox.",
+];
+
 const FAQ = [
 	{
-		q: "Do I need to log in or connect my Twitch account?",
-		a: "No. HowlBox reads chat over anonymous Twitch IRC, the same way a logged-out viewer does. There is no OAuth step, no token to expire mid-stream, and nothing stored on a server.",
-	},
-	{
 		q: "What can it not do?",
-		a: "Anything Twitch gates behind a token. It cannot send messages, time anyone out, read your mod queue, or see subs, follows, and bits, because those arrive over EventSub and EventSub needs an authenticated app. It also has no chat history: IRC gives you messages from the moment you connect, so an empty channel is an empty overlay.",
-	},
-	{
-		q: "Where is my configuration saved?",
-		a: "In the URL itself. Every option is a query parameter, so the link in your OBS browser source is your entire setup. Copy it to another machine and you have the same overlay.",
+		a: "Anything Twitch gates behind a token. It cannot send messages, time anyone out, read your mod queue, or see follows, because those arrive over EventSub and EventSub needs an authenticated app. It also has no chat history: IRC gives you messages from the moment you connect, so an empty channel is an empty overlay.",
 	},
 	{
 		q: "Can I edit an overlay I already set up?",
 		a: "Yes. Paste the existing URL into the box at the top of the configurator and every control loads with your current settings, ready to change.",
 	},
 	{
-		q: "Does the panel sit on my stream when chat is quiet?",
-		a: "No. The panel backdrop only draws while there are messages to hold, so a silent channel shows nothing at all instead of an empty themed rectangle.",
-	},
-	{
 		q: "Can I host it myself?",
-		a: "That is the point. It is a static client-only site with no backend. Serve the build from GitHub Pages, a home server, or any static host. There is still no HowlBox server: your browser talks to Twitch for chat, and to the emote, badge, avatar, and pronoun providers for art, each only when that feature is on. The privacy policy lists them.",
+		a: "Yes. Serve the build from GitHub Pages, a home server, or any static host. Your browser talks to Twitch for chat, and to the emote, badge, avatar, and pronoun providers for art, each only when that feature is on. The privacy policy lists them.",
 	},
 ];
 
@@ -157,6 +116,54 @@ function ComparisonCell({ value }: { value: boolean | string }) {
 		);
 	}
 	return <span className="hb-text-2 text-sm">{value}</span>;
+}
+
+// One preview, three buttons: the section's whole claim is that a single
+// parameter switches the mode, so switching it live IS the demo. One
+// mounted MessageList instead of the three animated previews this used
+// to render.
+function ModeSwitcher() {
+	const [bg, setBg] = useState<BgMode>("bubble");
+	const active = MODES.find((mode) => mode.bg === bg) ?? MODES[2];
+
+	return (
+		<div className="mt-14 grid items-start gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+			<OverlayPreview
+				animate={false}
+				bg={bg}
+				className="h-96"
+				fadeSeconds={0}
+				showBadges={false}
+				showTimestamps={false}
+				theme="wolf"
+			/>
+			<fieldset className="flex flex-col gap-3">
+				<legend className="sr-only">Display mode</legend>
+				{MODES.map((mode) => (
+					<button
+						aria-pressed={mode.bg === bg}
+						className={`hb-card p-5 text-left transition-colors ${
+							mode.bg === bg
+								? "border-[color:var(--site-brand)]"
+								: "hover:border-[color:var(--site-brand)]"
+						}`}
+						key={mode.bg}
+						onClick={() => setBg(mode.bg)}
+						type="button"
+					>
+						<h3 className="font-semibold text-base">
+							{mode.title}{" "}
+							<code className="hb-text-2 font-mono text-xs">?bg={mode.bg}</code>
+						</h3>
+						<p className="hb-text-2 mt-1 leading-relaxed">{mode.body}</p>
+					</button>
+				))}
+				<p className="sr-only" role="status">
+					Showing the {active.title} mode preview
+				</p>
+			</fieldset>
+		</div>
+	);
 }
 
 function LandingPage() {
@@ -217,25 +224,23 @@ function LandingPage() {
 								Read the source
 							</a>
 						</div>
-
-						<div className="hb-reveal flex flex-wrap gap-2 [animation-delay:460ms]">
-							{TRUST.map((item) => (
-								<span className="hb-pill" key={item}>
-									<span className="size-1.5 rounded-full bg-[color:var(--site-brand)]" />
-									{item}
-								</span>
-							))}
-						</div>
 					</div>
 
 					<div className="hb-reveal min-w-0 [animation-delay:260ms]">
-						<DemoChat />
+						<OverlayPreview
+							animate
+							bg="bubble"
+							fadeSeconds={0}
+							showBadges={false}
+							showTimestamps={false}
+							theme="wolf"
+						/>
 					</div>
 				</div>
 
 				{/* fact strip, hairline-separated inside the hero band */}
 				<div className="mx-auto max-w-6xl px-6 pb-16">
-					<dl className="hb-hairline grid grid-cols-2 gap-8 border-t pt-10 lg:grid-cols-4">
+					<dl className="hb-hairline grid grid-cols-3 gap-8 border-t pt-10">
 						{STATS.map((stat) => (
 							<div key={stat.label}>
 								<dd className="hb-display order-first text-4xl">
@@ -248,44 +253,13 @@ function LandingPage() {
 				</div>
 			</section>
 
-			{/* 01 who it's for */}
-			<Band id="audiences" tone="surface">
+			{/* 01 themes */}
+			<Band id="themes" tone="surface">
 				<SectionHead
 					align="center"
 					index="01"
-					kicker="Who it's for"
-					sub="Three reasons people pick a self-hosted overlay over a hosted one."
-					title="Three people this is for"
-				/>
-				<div className="mt-14 grid gap-4 lg:grid-cols-3">
-					{AUDIENCES.map((item) => (
-						<div className="hb-card p-6" key={item.title}>
-							<item.icon className="size-5 text-[color:var(--site-brand-text)]" />
-							<h3 className="mt-4 mb-2 font-semibold text-lg">{item.title}</h3>
-							<p className="hb-text-2 leading-relaxed">{item.body}</p>
-						</div>
-					))}
-				</div>
-				<div className="hb-hairline mt-10 grid gap-8 border-t pt-10 sm:grid-cols-3">
-					{SUPPORT.map((item) => (
-						<div key={item.title}>
-							<item.icon className="size-4 text-[color:var(--site-brand-text)]" />
-							<h3 className="mt-3 mb-1.5 font-semibold text-base">
-								{item.title}
-							</h3>
-							<p className="hb-text-2 leading-relaxed">{item.body}</p>
-						</div>
-					))}
-				</div>
-			</Band>
-
-			{/* 02 themes */}
-			<Band id="themes" tone="base">
-				<SectionHead
-					align="center"
-					index="02"
-					kicker="Fifteen themes"
-					sub="Rendered live, not screenshotted. Click one to open the builder with it selected."
+					kicker="Thirty-one themes"
+					sub="Grouped the way the wall below is: Clean, Gamer, Cozy, and Retro. Nine themes carry color variants. Each tile renders the theme's real chat surface; click one to open the builder with it selected."
 					title="Every theme is one query param"
 				/>
 				<div className="mt-14">
@@ -293,46 +267,23 @@ function LandingPage() {
 				</div>
 			</Band>
 
-			{/* 03 display modes */}
-			<Band id="modes" tone="surface">
+			{/* 02 display modes */}
+			<Band id="modes" tone="base">
 				<SectionHead
 					align="center"
-					index="03"
+					index="02"
 					kicker="Display modes"
 					sub="The same chat, three ways to sit on your scene. One parameter switches between them."
 					title="Text, panel, or bubble"
 				/>
-				<div className="mt-14 grid gap-6 lg:grid-cols-3">
-					{MODES.map((mode) => (
-						<div className="flex flex-col gap-3" key={mode.bg}>
-							<OverlayPreview
-								animate
-								bg={mode.bg}
-								className="h-80"
-								fadeSeconds={0}
-								showBadges={false}
-								showTimestamps={false}
-								theme="wolf"
-							/>
-							<div>
-								<h3 className="font-semibold text-base">
-									{mode.title}{" "}
-									<code className="hb-text-2 font-mono text-xs">
-										?bg={mode.bg}
-									</code>
-								</h3>
-								<p className="hb-text-2 mt-1 leading-relaxed">{mode.body}</p>
-							</div>
-						</div>
-					))}
-				</div>
+				<ModeSwitcher />
 			</Band>
 
-			{/* 04 comparison */}
-			<Band id="compare" tone="base">
+			{/* 03 comparison */}
+			<Band id="compare" tone="surface">
 				<SectionHead
 					align="center"
-					index="04"
+					index="03"
 					kicker="How it compares"
 					sub="Against a hosted overlay service, and against the chat dock OBS already ships."
 					title="What you trade away"
@@ -379,24 +330,31 @@ function LandingPage() {
 				</div>
 			</Band>
 
-			{/* 05 setup */}
-			<OBSSteps index="05" tone="surface" />
+			{/* 04 setup, with the OBS-behavior notes hung underneath */}
+			<OBSSteps index="04" tone="base">
+				<div className="hb-hairline mt-10 grid gap-8 border-t pt-10 sm:grid-cols-2">
+					{OBS_NOTES.map((item) => (
+						<div key={item.title}>
+							<item.icon className="size-4 text-[color:var(--site-brand-text)]" />
+							<h3 className="mt-3 mb-1.5 font-semibold text-base">
+								{item.title}
+							</h3>
+							<p className="hb-text-2 leading-relaxed">{item.body}</p>
+						</div>
+					))}
+				</div>
+			</OBSSteps>
 
-			{/* 06 privacy */}
-			<Band id="privacy" tone="base">
+			{/* 05 privacy */}
+			<Band id="privacy" tone="surface">
 				<SectionHead
-					index="06"
+					index="05"
 					kicker="Privacy"
-					sub="Four things worth knowing before you paste a URL into your scene."
+					sub="Three things worth knowing before you paste a URL into your scene."
 					title="Nothing to leak, because nothing is stored"
 				/>
-				<ul className="hb-text-2 mt-10 grid gap-4 sm:grid-cols-2">
-					{[
-						"Chat is read over anonymous Twitch IRC. No OAuth, no token, no account.",
-						"Your configuration lives in the URL, not in a database.",
-						"Emote and badge art is fetched straight from 7TV, BTTV, FFZ, and ivr.fi, and cached in your own browser.",
-						"No analytics, no telemetry, no cookies set by HowlBox.",
-					].map((item) => (
+				<ul className="hb-text-2 mt-10 grid gap-4 sm:grid-cols-3">
+					{PRIVACY.map((item) => (
 						<li className="hb-card flex gap-3 p-5 leading-relaxed" key={item}>
 							<Check
 								aria-hidden
@@ -411,12 +369,12 @@ function LandingPage() {
 				</Link>
 			</Band>
 
-			{/* 07 faq */}
-			<Band tone="surface">
+			{/* 06 faq */}
+			<Band id="faq" tone="base">
 				<div className="mx-auto max-w-3xl">
 					<SectionHead
 						align="center"
-						index="07"
+						index="06"
 						kicker="Questions"
 						title="The things people ask first"
 					/>
@@ -442,7 +400,7 @@ function LandingPage() {
 			</Band>
 
 			{/* cta */}
-			<Band tone="base">
+			<Band id="get-started" tone="surface">
 				<div className="hb-card flex flex-col items-center gap-6 px-6 py-20 text-center">
 					{/* the brand line lands here, at the end, rather than standing
 					    in for the headline the page actually needs up top */}

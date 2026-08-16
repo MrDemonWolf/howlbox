@@ -6,6 +6,9 @@ import {
 
 export const BG_MODES = ["off", "panel", "bubble"] as const;
 export const MEDIA_MODES = ["animated", "static"] as const;
+// stacked puts badges and name on their own line above the message
+export const LAYOUTS = ["inline", "stacked"] as const;
+export const ALIGNS = ["left", "right"] as const;
 export const THEMES = [
 	"wolf",
 	"glass",
@@ -22,17 +25,93 @@ export const THEMES = [
 	"arcade",
 	"galaxy",
 	"mocha",
+	"gameboy",
+	"vhs",
+	"vapor",
+	"cyber",
+	"hud",
+	"ember",
+	"aurora",
+	"sakura",
+	"forest",
+	"ocean",
+	"frost",
+	"paper",
+	"comic",
+	"luxe",
+	"brutal",
+	"holo",
 ] as const;
 
 export type BgMode = (typeof BG_MODES)[number];
 export type MediaMode = (typeof MEDIA_MODES)[number];
+export type Layout = (typeof LAYOUTS)[number];
+export type Align = (typeof ALIGNS)[number];
 export type Theme = (typeof THEMES)[number];
 export type AssetScale = 1 | 2 | 3;
+
+// Color variations per theme, selected by ?variant. The lists are the
+// URL contract: a variant outside its theme's list falls back to the
+// theme default, which serializes as no param at all. A variant is a
+// color-only override block in the theme's own themes/<name>.css chunk.
+export const THEME_VARIANTS = {
+	wolf: [],
+	glass: [],
+	terminal: ["amber", "ice"],
+	neon: ["cyan", "lime"],
+	dark: [],
+	light: [],
+	contrast: [],
+	cozy: ["mint", "peach"],
+	nobox: [],
+	retro95: [],
+	xp: [],
+	xbox: [],
+	arcade: [],
+	galaxy: ["nebula"],
+	mocha: [],
+	gameboy: ["pocket", "virtual"],
+	vhs: [],
+	vapor: [],
+	cyber: ["gold"],
+	hud: [],
+	ember: ["coal"],
+	aurora: [],
+	sakura: [],
+	forest: [],
+	ocean: ["tropic"],
+	frost: [],
+	paper: [],
+	comic: [],
+	luxe: ["silver", "rose"],
+	brutal: [],
+	holo: [],
+} as const satisfies Record<Theme, readonly string[]>;
+
+// "" means the theme default. Both parsers (Zod schema and the direct
+// OBS parser) run raw input through this one function, so their outputs
+// cannot drift. Scalars stringify the way the router decoder would;
+// arrays and objects fall through to the default.
+export function normalizeVariant(theme: Theme, raw: unknown): string {
+	const value =
+		typeof raw === "number" || typeof raw === "boolean" || raw === null
+			? String(raw)
+			: raw;
+	if (typeof value !== "string") {
+		return "";
+	}
+	const allowed: readonly string[] = THEME_VARIANTS[theme];
+	return allowed.includes(value) ? value : "";
+}
 
 export interface OverlayParams {
 	channel?: string;
 	bg: BgMode;
 	theme: Theme;
+	variant: string;
+	layout: Layout;
+	align: Align;
+	group: boolean;
 	size: number;
 	emotescale: number;
 	max: number;
@@ -71,6 +150,10 @@ export function assetScaleFor(size: number, emotescale = 1): AssetScale {
 export const OVERLAY_DEFAULTS = {
 	bg: "off",
 	theme: "wolf",
+	variant: "",
+	layout: "inline",
+	align: "left",
+	group: false,
 	size: 100,
 	emotescale: 1,
 	max: 50,
@@ -91,6 +174,10 @@ export const OVERLAY_DEFAULTS = {
 } satisfies {
 	bg: BgMode;
 	theme: Theme;
+	variant: string;
+	layout: Layout;
+	align: Align;
+	group: boolean;
 	size: number;
 	emotescale: number;
 	max: number;

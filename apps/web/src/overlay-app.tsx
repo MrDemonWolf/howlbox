@@ -7,6 +7,9 @@ import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import { assetScaleFor, type OverlayParams } from "@/lib/overlay/config";
 import { KNOWN_BOTS } from "@/lib/twitch/bots";
 
+// Base variables only. The theme chunk is loaded per theme name by
+// overlay-main (OBS path); the site previews import themes/index.css
+// themselves because they render many themes at once.
 import "@/components/chat/overlay.css";
 
 export function OverlayApp({ params }: { params: OverlayParams }) {
@@ -65,9 +68,12 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 
 	return (
 		<ChatOverlay
+			align={params.align}
 			animate={params.animate}
 			bg={params.bg}
 			emoteScale={params.emotescale}
+			group={params.group}
+			layout={params.layout}
 			fadeSeconds={params.fade}
 			messages={messages}
 			onMessageExpired={removeMessage}
@@ -78,6 +84,7 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 			size={params.size}
 			status={status}
 			theme={params.theme}
+			variant={params.variant}
 		/>
 	);
 }

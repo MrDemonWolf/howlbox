@@ -38,7 +38,7 @@ export const SEO_ROUTES: SeoRoute[] = [
 		path: "",
 		title: "HowlBox: Twitch chat overlay for OBS, no account",
 		description:
-			"A self-hosted Twitch chat overlay for OBS browser sources. Fifteen themes, 7TV, BTTV and FFZ emotes, and the whole configuration rides in the URL. No login, no API keys, no server.",
+			"A self-hosted Twitch chat overlay for OBS browser sources. Thirty-one themes, 7TV, BTTV and FFZ emotes, and the whole configuration rides in the URL. No login, no API keys, no server.",
 		ogImage: "og.png",
 		index: true,
 	},
@@ -107,7 +107,7 @@ export const STRUCTURED_DATA = {
 	name: "HowlBox",
 	url: SITE_URL,
 	description:
-		"A free, self-hosted, client-only Twitch chat overlay for OBS browser sources. Fifteen themes, 7TV, BTTV and FrankerFaceZ emotes, no login and no API keys.",
+		"A free, self-hosted, client-only Twitch chat overlay for OBS browser sources. Thirty-one themes, 7TV, BTTV and FrankerFaceZ emotes, no login and no API keys.",
 	applicationCategory: "MultimediaApplication",
 	operatingSystem: "Any web browser, or an OBS browser source",
 	browserRequirements: "Chromium 127 or newer, which ships with OBS 31",

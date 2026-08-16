@@ -38,6 +38,8 @@ jobs:
         env:
           # project pages serve at /<repo>/; custom domain would be /
           BASE_PATH: /howlbox/
+          # baked into the footer so a deployed page names its commit
+          COMMIT_SHA: ${{ github.sha }}
 
       # 404.html, robots.txt, sitemap.xml and the per-route index.html
       # files are emitted by the seo plugin during the build.

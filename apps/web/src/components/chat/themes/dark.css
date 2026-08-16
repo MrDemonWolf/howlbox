@@ -1,0 +1,29 @@
+/* neutral dark */
+.hb-root[data-theme="dark"] {
+	--hb-text: #f4f4f5;
+	--hb-surface:
+		var(--hb-noise), linear-gradient(rgb(28 28 32 / 0.85), rgb(20 20 24 / 0.82));
+	--hb-surface-solid: #1a1a1e;
+	--hb-border: rgb(255 255 255 / 0.14);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 0.1), 0 6px 24px rgb(0 0 0 / 0.4);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 2px 5px rgb(
+			0 0 0 / 0.65
+		);
+	--hb-event-accent: #a4c8ff;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="dark"],
+	.hb-root[data-theme="dark"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

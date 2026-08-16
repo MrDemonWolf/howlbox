@@ -10,10 +10,12 @@ import {
 } from "@/components/landing/site-chrome";
 import { THEMES } from "@/lib/overlay/params";
 
-// ?theme=neon from a theme-wall tile preselects that theme; anything
-// else falls back to no preselection, same spirit as the overlay params
+// ?theme=neon from a theme-wall tile preselects that theme, and a
+// variant dot adds ?variant; anything else falls back to no
+// preselection, same spirit as the overlay params
 const configSearchSchema = z.object({
 	theme: z.enum(THEMES).optional().catch(undefined),
+	variant: z.string().optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/config")({
@@ -31,7 +33,7 @@ export const Route = createFileRoute("/config")({
 });
 
 function ConfigPage() {
-	const { theme } = Route.useSearch();
+	const { theme, variant } = Route.useSearch();
 
 	return (
 		<SiteShell>
@@ -51,7 +53,7 @@ function ConfigPage() {
 			</section>
 
 			<section className="hb-bg-base mx-auto max-w-6xl px-6 pb-20">
-				<ConfigBuilder initialTheme={theme} />
+				<ConfigBuilder initialTheme={theme} initialVariant={variant} />
 			</section>
 
 			<OBSSteps index="01" tone="surface" />

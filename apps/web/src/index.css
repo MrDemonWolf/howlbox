@@ -309,22 +309,6 @@ html:not(.hb-overlay).dark .hb-btn-primary:hover {
    Per-theme variables stay in components/chat/overlay.css: they are the
    OBS Custom CSS contract, not utilities. ---- */
 
-/* landing demo-chat entrance; transform/opacity only */
-@keyframes hb-demo-in {
-	from {
-		opacity: 0;
-		transform: translateY(8px);
-	}
-}
-
-@utility hb-demo-in {
-	animation: hb-demo-in 300ms ease-out;
-
-	@media (prefers-reduced-motion: reduce) {
-		animation: none;
-	}
-}
-
 /* staggered page-load reveal; stagger via [animation-delay:*] utilities */
 @keyframes hb-reveal {
 	from {

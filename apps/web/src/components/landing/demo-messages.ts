@@ -136,7 +136,7 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		color: "#8A2BE2",
 		badges: [],
 		renderBadges: [{ kind: "text", text: "she/they" }],
-		parts: [text("15 themes is wild "), emote("LUL", "425618")],
+		parts: [text("31 themes is wild "), emote("LUL", "425618")],
 		isAction: false,
 		isPrivileged: false,
 		isSubscriber: true,

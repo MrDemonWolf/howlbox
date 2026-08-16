@@ -3,7 +3,13 @@
 // schema. Kept apart from the components so the state math is readable
 // and testable on its own.
 
-import type { BgMode, MediaMode, Theme } from "@/lib/overlay/params";
+import type {
+	Align,
+	BgMode,
+	Layout,
+	MediaMode,
+	Theme,
+} from "@/lib/overlay/params";
 import {
 	normalizeLoginList,
 	OVERLAY_DEFAULTS,
@@ -14,6 +20,10 @@ import type { AvatarMode, ChatEventKind } from "@/lib/twitch/types";
 export interface Config {
 	channel: string;
 	theme: Theme;
+	variant: string;
+	layout: Layout;
+	align: Align;
+	group: boolean;
 	bg: BgMode;
 	size: number;
 	emotescale: number;
@@ -42,6 +52,10 @@ export interface Config {
 export const DEFAULTS: Config = {
 	channel: "",
 	theme: OVERLAY_DEFAULTS.theme,
+	variant: OVERLAY_DEFAULTS.variant,
+	layout: OVERLAY_DEFAULTS.layout,
+	align: OVERLAY_DEFAULTS.align,
+	group: OVERLAY_DEFAULTS.group,
 	bg: OVERLAY_DEFAULTS.bg,
 	size: OVERLAY_DEFAULTS.size,
 	emotescale: OVERLAY_DEFAULTS.emotescale,
@@ -141,6 +155,10 @@ export function configToOverlay(config: Config, cleanChannel: string) {
 	return {
 		channel: cleanChannel,
 		theme: config.theme,
+		variant: config.variant,
+		layout: config.layout,
+		align: config.align,
+		group: config.group,
 		bg: config.bg,
 		size: config.size,
 		emotescale: config.emotescale,
@@ -171,6 +189,10 @@ export function parsedToConfig(parsed: OverlayParams): Config {
 	return {
 		channel: parsed.channel ?? "",
 		theme: parsed.theme,
+		variant: parsed.variant,
+		layout: parsed.layout,
+		align: parsed.align,
+		group: parsed.group,
 		bg: parsed.bg,
 		size: parsed.size,
 		emotescale: parsed.emotescale,

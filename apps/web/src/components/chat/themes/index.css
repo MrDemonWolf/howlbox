@@ -1,0 +1,36 @@
+/* Site aggregate: the landing wall, demo and config previews render many
+   themes at once, so they import every chunk in one go. Deliberately CSS
+   imports, not a TS module: the text inlines into the site bundle without
+   putting the chunk module ids into the JS graph, so the overlay's dynamic
+   import of a single theme can never dedupe against site chunks. The OBS
+   entry never imports this file. */
+@import "./glass.css";
+@import "./terminal.css";
+@import "./neon.css";
+@import "./dark.css";
+@import "./light.css";
+@import "./contrast.css";
+@import "./cozy.css";
+@import "./nobox.css";
+@import "./retro95.css";
+@import "./xp.css";
+@import "./xbox.css";
+@import "./arcade.css";
+@import "./galaxy.css";
+@import "./mocha.css";
+@import "./gameboy.css";
+@import "./vhs.css";
+@import "./vapor.css";
+@import "./cyber.css";
+@import "./hud.css";
+@import "./ember.css";
+@import "./aurora.css";
+@import "./sakura.css";
+@import "./forest.css";
+@import "./ocean.css";
+@import "./frost.css";
+@import "./paper.css";
+@import "./comic.css";
+@import "./luxe.css";
+@import "./brutal.css";
+@import "./holo.css";

@@ -1,0 +1,30 @@
+/* Forest: deep moss glass, pale sage text (~11:1, AAA) */
+.hb-root[data-theme="forest"] {
+	--hb-text: #e8f3e2;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(24 44 30 / 0.88), rgb(12 24 16 / 0.88));
+	--hb-surface-solid: linear-gradient(135deg, #1b3120, #0c1810);
+	--hb-border: rgb(122 190 110 / 0.4);
+	--hb-shadow:
+		inset 0 1px 0 rgb(170 220 150 / 0.25), 0 6px 22px rgb(0 0 0 / 0.45);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 2px 5px rgb(
+			0 0 0 / 0.65
+		);
+	--hb-event-accent: #8fd07a;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="forest"],
+	.hb-root[data-theme="forest"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}
