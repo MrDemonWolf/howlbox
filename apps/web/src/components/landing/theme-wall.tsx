@@ -62,7 +62,7 @@ function ThemeTile({ theme }: { theme: Theme }) {
 	const variants: readonly string[] = THEME_VARIANTS[theme];
 	return (
 		// content-visibility skips rendering below-fold tiles until they
-		// scroll near, which keeps a 30-tile wall cheap with no observer code
+		// scroll near, which keeps a 31-tile wall cheap with no observer code
 		<div className="[contain-intrinsic-size:auto_16rem] [content-visibility:auto]">
 			<Link
 				className="hb-card group flex flex-col overflow-hidden transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"

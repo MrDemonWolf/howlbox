@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { PawMark } from "@/components/landing/paw-mark";
 
-const GITHUB_URL = "https://github.com/mrdemonwolf/howlbox";
+export const GITHUB_URL = "https://github.com/mrdemonwolf/howlbox";
 
 // the "machine voice": kickers, param names and URLs speak in uppercase
 // mono. It is the through-line of a product whose whole config is one
@@ -230,9 +230,13 @@ const SETUP_STEPS = [
 export function OBSSteps({
 	index = "06",
 	tone = "base",
+	children,
 }: {
 	index?: string;
 	tone?: "base" | "surface";
+	// extra content a page can hang under the footnote (the landing
+	// appends its OBS-behavior card strip here)
+	children?: React.ReactNode;
 }) {
 	return (
 		<Band id="setup" tone={tone}>
@@ -240,7 +244,7 @@ export function OBSSteps({
 				align="center"
 				index={index}
 				kicker="Setup"
-				sub="Four steps, no account, nothing to install. The URL is the whole product."
+				sub="Four steps in OBS, nothing to install."
 				title="Into OBS in four steps"
 			/>
 			<ol className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -259,9 +263,11 @@ export function OBSSteps({
 			</ol>
 			<p className="hb-text-2 mt-6 text-center text-sm">
 				Power users: every node carries a stable{" "}
-				<code className="font-mono">hb-*</code> class for the OBS Custom CSS
-				field.
+				<code className="font-mono">hb-*</code> class, and the theme variables
+				are overridable too, so the OBS Custom CSS field reaches anything the
+				parameters miss.
 			</p>
+			{children}
 		</Band>
 	);
 }
