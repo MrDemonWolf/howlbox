@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { readableUserColor, userColorOutline } from "./colors";
+import {
+	outlinedUserColor,
+	readableUserColor,
+	userColorOutline,
+} from "./colors";
 
 function rgb(hex: string): [number, number, number] {
 	const value = hex.replace("#", "");
@@ -85,6 +89,55 @@ describe("readableUserColor", () => {
 	test("leaves invalid or surface-free colors unchanged", () => {
 		expect(readableUserColor("currentColor", "#000000")).toBe("currentColor");
 		expect(readableUserColor("#2E8B57")).toBe("#2E8B57");
+	});
+});
+
+// Twitch's fifteen default name colors, the ones a chatter who never
+// picked one gets assigned.
+const TWITCH_DEFAULTS = [
+	"#FF0000",
+	"#0000FF",
+	"#00FF7F",
+	"#B22222",
+	"#FF7F50",
+	"#9ACD32",
+	"#FF4500",
+	"#2E8B57",
+	"#DAA520",
+	"#D2691E",
+	"#5F9EA0",
+	"#1E90FF",
+	"#FF69B4",
+	"#8A2BE2",
+	"#00FF00",
+];
+
+describe("outlinedUserColor", () => {
+	// bg=off has no surface, so the ring is what the glyph reads against.
+	// Seven of the fifteen defaults failed this before the correction
+	// existed; hot pink on its white ring measured 2.65:1.
+	test("every Twitch default clears AA against its own outline ring", () => {
+		for (const color of TWITCH_DEFAULTS) {
+			const corrected = outlinedUserColor(color);
+			const ring = userColorOutline(corrected).includes("255 255 255")
+				? "#ffffff"
+				: "#000000";
+			expect(contrast(corrected, ring)).toBeGreaterThanOrEqual(4.5);
+		}
+	});
+
+	// If correcting a color pushed it across the light/dark threshold it
+	// would be measured against one ring and then handed the other.
+	test("correction never moves a name onto the opposite ring", () => {
+		for (const color of TWITCH_DEFAULTS) {
+			expect(userColorOutline(outlinedUserColor(color))).toBe(
+				userColorOutline(color),
+			);
+		}
+	});
+
+	test("leaves invalid values alone", () => {
+		expect(outlinedUserColor("currentColor")).toBe("currentColor");
 	});
 });
 
