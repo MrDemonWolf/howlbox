@@ -328,6 +328,18 @@ export function SiteFooter() {
 						>
 							Terms
 						</Link>
+						{__COMMIT_HASH__ === "dev" ? (
+							<span className={`${MONO} text-xs opacity-70`}>dev</span>
+						) : (
+							<a
+								className={`${MONO} text-xs opacity-70 transition-colors hover:text-[color:var(--site-txt-1)]`}
+								href={`${GITHUB_URL}/commit/${__COMMIT_HASH__}`}
+								rel="noreferrer"
+								target="_blank"
+							>
+								{__COMMIT_HASH__.slice(0, 7)}
+							</a>
+						)}
 					</nav>
 				</div>
 			</div>
