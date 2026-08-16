@@ -123,6 +123,16 @@ const LIGHT_TEXT_OUTLINE =
 // never disagree about which ring a given name gets.
 const OUTLINE_FLIP = 0.35;
 
+// Alpha the outline rings above are painted at. Composited over a
+// backdrop we cannot see, a white ring is never lighter than 0.95 white
+// over black, and a black ring is never darker than 0.95 black over
+// white, so those two greys are the honest measurement targets.
+const OUTLINE_ALPHA = 0.95;
+const greyHex = (value: number) =>
+	`#${Math.round(value).toString(16).padStart(2, "0").repeat(3)}`;
+const WORST_CASE_LIGHT_RING = greyHex(255 * OUTLINE_ALPHA);
+const WORST_CASE_DARK_RING = greyHex(255 * (1 - OUTLINE_ALPHA));
+
 // A transparent page cannot know the gameplay color OBS will composite
 // behind it. Give each dynamic name the opposite-luminance outline.
 export function userColorOutline(color: string): string {
@@ -148,7 +158,12 @@ export function outlinedUserColor(color: string): string {
 	if (!rgb) {
 		return color;
 	}
-	const ring = relativeLuminance(rgb) < OUTLINE_FLIP ? "#ffffff" : "#000000";
+	// Measured against the ring's worst-case composite rather than pure
+	// white or black, which would overstate the contrast a viewer gets.
+	const ring =
+		relativeLuminance(rgb) < OUTLINE_FLIP
+			? WORST_CASE_LIGHT_RING
+			: WORST_CASE_DARK_RING;
 	return readableUserColor(color, ring);
 }
 
