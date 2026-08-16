@@ -35,8 +35,11 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",
+		"@fontsource/inter": "^5.3.0",
 		"@howlbox/config": "workspace:*",
+		"@resvg/resvg-js": "^2.6.2",
 		"@types/node": "catalog:",
+		"satori": "^0.29.0",
 		"turbo": "^2.10.2",
 		"typescript": "catalog:"
 	},
