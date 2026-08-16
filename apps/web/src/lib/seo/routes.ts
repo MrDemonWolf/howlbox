@@ -39,7 +39,7 @@ export const SEO_ROUTES: SeoRoute[] = [
 		title: "HowlBox: Twitch chat overlay for OBS, no account",
 		description:
 			"A self-hosted Twitch chat overlay for OBS browser sources. Thirty-one themes, 7TV, BTTV and FFZ emotes, and the whole configuration rides in the URL. No login, no API keys, no server.",
-		ogImage: "og.png",
+		ogImage: "og-v2.png",
 		index: true,
 	},
 	{
@@ -47,7 +47,7 @@ export const SEO_ROUTES: SeoRoute[] = [
 		title: "Overlay URL parameters and CSS hooks - HowlBox",
 		description:
 			"Every HowlBox URL parameter with its own anchor, both custom badge art formats, the hb-* class contract for the OBS Custom CSS field, troubleshooting, and what anonymous chat cannot do.",
-		ogImage: "og-docs.png",
+		ogImage: "og-docs-v2.png",
 		index: true,
 	},
 	{
@@ -55,7 +55,7 @@ export const SEO_ROUTES: SeoRoute[] = [
 		title: "Build your overlay URL - HowlBox",
 		description:
 			"Pick a theme and a display mode, watch the real overlay render over an OBS transparency checker, and copy the URL. Paste an existing overlay URL to load its settings back in.",
-		ogImage: "og-config.png",
+		ogImage: "og-config-v2.png",
 		index: true,
 	},
 	{
@@ -63,7 +63,7 @@ export const SEO_ROUTES: SeoRoute[] = [
 		title: "Privacy policy - HowlBox",
 		description:
 			"HowlBox stores nothing and runs no server. What the browser fetches, what stays in local storage, and which third-party services a running overlay talks to.",
-		ogImage: "og.png",
+		ogImage: "og-v2.png",
 		index: true,
 	},
 	{
@@ -71,7 +71,7 @@ export const SEO_ROUTES: SeoRoute[] = [
 		title: "Terms of service - HowlBox",
 		description:
 			"Terms for using HowlBox, an independent open-source Twitch chat overlay published by MrDemonWolf, Inc.",
-		ogImage: "og.png",
+		ogImage: "og-v2.png",
 		index: true,
 	},
 	{
@@ -80,7 +80,7 @@ export const SEO_ROUTES: SeoRoute[] = [
 		path: "overlay",
 		title: "HowlBox overlay",
 		description: "The OBS browser source view.",
-		ogImage: "og.png",
+		ogImage: "og-v2.png",
 		index: false,
 	},
 ];
