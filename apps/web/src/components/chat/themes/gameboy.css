@@ -22,9 +22,13 @@
 	--hb-shadow: 3px 3px 0 rgb(15 56 15 / 0.55), inset 0 0 0 2px #306230;
 	--hb-bubble-shadow: var(--hb-shadow);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(155 188 15 / 0.95), 1px -1px 0 rgb(155 188 15 / 0.95),
-		-1px 1px 0 rgb(155 188 15 / 0.95), 1px 1px 0 rgb(155 188 15 / 0.95),
-		0 2px 5px rgb(155 188 15 / 0.6);
+		-1px -1px 0 rgb(155 188 15 / 0.95), 1px -1px 0 rgb(155 188 15 / 0.95), -1px 1px 0 rgb(
+			155 188 15 / 0.95
+		), 1px 1px 0 rgb(155 188 15 / 0.95), 0 -1px 0 rgb(155 188 15 / 0.95), 0 1px 0 rgb(
+			155 188 15 / 0.95
+		), -1px 0 0 rgb(155 188 15 / 0.95), 1px 0 0 rgb(155 188 15 / 0.95), 0 2px 5px rgb(
+			155 188 15 / 0.6
+		);
 	--hb-avatar-radius: 0;
 	--hb-avatar-ring: 0 0 0 2px #306230;
 	/* darker than the LCD mid-green: #306230 measured 3.3:1 on the panel */
@@ -58,9 +62,13 @@
 	--hb-border: rgb(32 32 26 / 0.7);
 	--hb-shadow: 3px 3px 0 rgb(32 32 26 / 0.45), inset 0 0 0 2px #6a6a5c;
 	--hb-shadow-off:
-		-1px -1px 0 rgb(184 184 168 / 0.95), 1px -1px 0 rgb(184 184 168 / 0.95),
-		-1px 1px 0 rgb(184 184 168 / 0.95), 1px 1px 0 rgb(184 184 168 / 0.95),
-		0 2px 5px rgb(184 184 168 / 0.6);
+		-1px -1px 0 rgb(184 184 168 / 0.95), 1px -1px 0 rgb(184 184 168 / 0.95), -1px 1px 0 rgb(
+			184 184 168 / 0.95
+		), 1px 1px 0 rgb(184 184 168 / 0.95), 0 -1px 0 rgb(184 184 168 / 0.95), 0 1px 0 rgb(
+			184 184 168 / 0.95
+		), -1px 0 0 rgb(184 184 168 / 0.95), 1px 0 0 rgb(184 184 168 / 0.95), 0 2px 5px rgb(
+			184 184 168 / 0.6
+		);
 	--hb-avatar-ring: 0 0 0 2px #6a6a5c;
 	--hb-event-accent: #3d3d33;
 }
@@ -85,9 +93,13 @@
 	--hb-shadow: 3px 3px 0 rgb(90 0 0 / 0.7), inset 0 0 0 2px #3a0000;
 	--hb-glow: 0 0 6px rgb(255 42 42 / 0.5);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 2px 5px rgb(0 0 0 / 0.7), 0 0 6px rgb(255 42 42 / 0.5);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 2px 5px rgb(
+			0 0 0 / 0.7
+		), 0 0 6px rgb(255 42 42 / 0.5);
 	--hb-avatar-ring: 0 0 0 2px #3a0000;
 	--hb-event-accent: #ff2a2a;
 }

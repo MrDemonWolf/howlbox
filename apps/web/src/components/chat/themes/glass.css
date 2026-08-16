@@ -23,9 +23,13 @@
 	/* same stack the base declares; stated here so the chunk carries the
 	   full contract on its own */
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 2px 5px rgb(0 0 0 / 0.65);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 2px 5px rgb(
+			0 0 0 / 0.65
+		);
 	--hb-event-accent: #9fe0ff;
 }
 

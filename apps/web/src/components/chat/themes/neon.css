@@ -11,9 +11,13 @@
 		0 8px 28px rgb(8 3 22 / 0.55);
 	--hb-glow: 0 0 8px rgb(64 232 255 / 0.3);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 0 6px rgb(255 45 180 / 0.4);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			255 45 180 / 0.4
+		);
 	/* lighter than the border pink: #ff5ccd sat at the AA edge on the
 	   panel's lighter endpoint */
 	--hb-event-accent: #ff7ad6;
@@ -32,9 +36,13 @@
 		0 8px 28px rgb(3 8 22 / 0.55);
 	--hb-glow: 0 0 8px rgb(64 232 255 / 0.35);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 0 6px rgb(45 200 255 / 0.4);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			45 200 255 / 0.4
+		);
 	--hb-event-accent: #40e8ff;
 }
 
@@ -51,9 +59,13 @@
 		0 8px 28px rgb(3 22 8 / 0.55);
 	--hb-glow: 0 0 8px rgb(180 255 57 / 0.3);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 0 6px rgb(150 255 45 / 0.4);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			150 255 45 / 0.4
+		);
 	--hb-event-accent: #b4ff39;
 }
 

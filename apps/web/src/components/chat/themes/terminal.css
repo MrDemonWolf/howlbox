@@ -17,9 +17,13 @@
 		inset 0 0 24px rgb(74 246 128 / 0.07), 0 4px 16px rgb(0 0 0 / 0.5);
 	--hb-glow: 0 0 6px rgb(74 246 128 / 0.4);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 0 5px rgb(74 246 128 / 0.35);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 5px rgb(
+			74 246 128 / 0.35
+		);
 	--hb-avatar-radius: 0;
 	--hb-event-accent: #7dffa4;
 }
@@ -40,9 +44,13 @@
 		inset 0 0 24px rgb(255 176 82 / 0.07), 0 4px 16px rgb(0 0 0 / 0.5);
 	--hb-glow: 0 0 6px rgb(255 176 82 / 0.4);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 0 5px rgb(255 176 82 / 0.35);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 5px rgb(
+			255 176 82 / 0.35
+		);
 	--hb-event-accent: #ffb052;
 }
 
@@ -62,9 +70,13 @@
 		inset 0 0 24px rgb(130 220 245 / 0.07), 0 4px 16px rgb(0 0 0 / 0.5);
 	--hb-glow: 0 0 6px rgb(130 220 245 / 0.4);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 0 5px rgb(130 220 245 / 0.35);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 5px rgb(
+			130 220 245 / 0.35
+		);
 	--hb-event-accent: #7adcf5;
 }
 

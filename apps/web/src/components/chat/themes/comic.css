@@ -18,9 +18,13 @@
 	--hb-shadow: 0 0 0 1px rgb(16 16 20 / 0.9), 3px 3px 0 rgb(16 16 20 / 0.85);
 	--hb-bubble-shadow: var(--hb-shadow);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95),
-		-1px 1px 0 rgb(255 255 255 / 0.95), 1px 1px 0 rgb(255 255 255 / 0.95),
-		0 2px 5px rgb(255 255 255 / 0.8);
+		-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95), -1px 1px 0 rgb(
+			255 255 255 / 0.95
+		), 1px 1px 0 rgb(255 255 255 / 0.95), 0 -1px 0 rgb(255 255 255 / 0.95), 0 1px 0 rgb(
+			255 255 255 / 0.95
+		), -1px 0 0 rgb(255 255 255 / 0.95), 1px 0 0 rgb(255 255 255 / 0.95), 0 2px 5px rgb(
+			255 255 255 / 0.8
+		);
 	--hb-avatar-radius: 999px;
 	--hb-avatar-ring: 0 0 0 2px rgb(16 16 20 / 0.9);
 	/* deepened from comic red so the accent clears 4.5:1 on the panel */

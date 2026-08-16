@@ -13,9 +13,13 @@
 	--hb-border: rgb(180 150 60 / 0.4);
 	--hb-shadow: 0 3px 10px rgb(60 50 20 / 0.3);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(255 250 220 / 0.95), 1px -1px 0 rgb(255 250 220 / 0.95),
-		-1px 1px 0 rgb(255 250 220 / 0.95), 1px 1px 0 rgb(255 250 220 / 0.95),
-		0 2px 5px rgb(255 250 220 / 0.8);
+		-1px -1px 0 rgb(255 250 220 / 0.95), 1px -1px 0 rgb(255 250 220 / 0.95), -1px 1px 0 rgb(
+			255 250 220 / 0.95
+		), 1px 1px 0 rgb(255 250 220 / 0.95), 0 -1px 0 rgb(255 250 220 / 0.95), 0 1px 0 rgb(
+			255 250 220 / 0.95
+		), -1px 0 0 rgb(255 250 220 / 0.95), 1px 0 0 rgb(255 250 220 / 0.95), 0 2px 5px rgb(
+			255 250 220 / 0.8
+		);
 	--hb-avatar-radius: 4px;
 	/* darkened from the ink brown so the accent clears 4.5:1 on the note */
 	--hb-event-accent: #6b540f;

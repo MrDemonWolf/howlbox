@@ -49,9 +49,13 @@
 		inset 0 1px 0 rgb(255 255 255 / 0.18), 0 2px 7px rgb(0 0 0 / 0.28);
 	--hb-glow: none;
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 2px 5px rgb(0 0 0 / 0.65);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 2px 5px rgb(
+			0 0 0 / 0.65
+		);
 
 	/* profile pictures (?avatars) and event rows (?events). A theme chunk
 	   overrides the radius and accent where it wants a different shape or
@@ -81,6 +85,14 @@
    multi-layer ambient shadow. */
 .hb-root[data-bg="bubble"] {
 	--hb-bubble-surface: var(--hb-surface-solid);
+}
+
+/* bg=off draws bare text over whatever the game is doing. A regular
+   stroke plus a 1px outline reads thin there; a medium weight gives the
+   outline a thicker core to wrap. Panel and bubble modes keep each
+   theme's own weight. */
+.hb-root[data-bg="off"] .hb-messages {
+	font-weight: 600;
 }
 
 /* Emotes carry a small negative block margin so a 1.6em image does not
