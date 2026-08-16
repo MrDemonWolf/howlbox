@@ -46,9 +46,12 @@ const TEXT_BADGE_CLASSES =
 	"hb-pronoun -my-0.5 mr-1 inline-flex h-[1.15em] items-center rounded-[0.35em] border border-(--hb-border) px-[0.35em] align-middle text-[0.8em] leading-none";
 
 // profile picture: shape and ring come from the theme, so retro themes
-// get a square and the soft ones get a circle
+// get a square and the soft ones get a circle. Width must be set in CSS
+// alongside height: the img's width="70" attribute otherwise supplies a
+// used width, and aspect-ratio is ignored once both axes are determined,
+// which stretched every avatar to 70px wide at line height.
 const AVATAR_CLASSES =
-	"hb-avatar -my-0.5 mr-1 inline-block aspect-square h-(--hb-avatar-size) rounded-(--hb-avatar-radius) object-cover align-middle [box-shadow:var(--hb-avatar-ring)]";
+	"hb-avatar -my-0.5 mr-1 inline-block size-(--hb-avatar-size) rounded-(--hb-avatar-radius) object-cover align-middle [box-shadow:var(--hb-avatar-ring)]";
 
 // The system line on an event row (sub, raid, cheer, first message).
 // No trailing margin: the line is always followed either by the ": "
