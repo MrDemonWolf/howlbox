@@ -319,6 +319,10 @@ describe("params", () => {
 		const config = {
 			channel: "mrdemonwolf",
 			theme: "wolf",
+			variant: "",
+			layout: "inline" as const,
+			align: "left" as const,
+			group: false,
 			bg: "off",
 			size: 100,
 			emotescale: 1,
@@ -351,6 +355,10 @@ describe("params", () => {
 		const query = overlayQuery({
 			channel: "mrdemonwolf",
 			theme: "wolf",
+			variant: "",
+			layout: "inline" as const,
+			align: "left" as const,
+			group: false,
 			bg: "off",
 			size: 100,
 			emotescale: 1,
@@ -384,6 +392,10 @@ describe("params", () => {
 		const query = overlayQuery({
 			channel: "mrdemonwolf",
 			theme: "wolf",
+			variant: "",
+			layout: "inline" as const,
+			align: "left" as const,
+			group: false,
 			bg: "off",
 			size: 100,
 			emotescale: 1,

@@ -1,0 +1,43 @@
+/* Aurora: polar navy with two static borealis glows anchored off the
+   top edge (no animation; the light is painted, not moving) */
+.hb-root[data-theme="aurora"] {
+	--hb-text: #eafcf4;
+	--hb-surface:
+		var(--hb-noise),
+		radial-gradient(
+			140% 120% at 20% -10%,
+			rgb(64 232 180 / 0.35),
+			transparent 55%
+		),
+		radial-gradient(
+			120% 120% at 85% -20%,
+			rgb(120 100 255 / 0.3),
+			transparent 50%
+		),
+		linear-gradient(rgb(8 16 30 / 0.86), rgb(5 10 20 / 0.88));
+	--hb-surface-solid: linear-gradient(135deg, #0e2030, #050a14);
+	--hb-border: rgb(94 240 190 / 0.35);
+	--hb-shadow:
+		inset 0 1px 0 rgb(94 240 190 / 0.25), 0 0 18px rgb(64 232 180 / 0.15),
+		0 8px 26px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(94 240 190 / 0.25);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			64 232 180 / 0.35
+		);
+	--hb-event-accent: #5ef0be;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="aurora"],
+	.hb-root[data-theme="aurora"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

@@ -1,0 +1,30 @@
+/* no box: the S0N0S/esports pure-text style, zero surface */
+.hb-root[data-theme="nobox"] {
+	--hb-radius: 0px;
+	--hb-text: #ffffff;
+	--hb-surface: none;
+	--hb-surface-solid: rgb(16 19 24);
+	--hb-border: transparent;
+	--hb-shadow: none;
+	--hb-bubble-shadow: none;
+	--hb-glow:
+		0 0 1px rgb(0 0 0 / 0.9), 1px 1px 0 #000000, -1px -1px 0 #000000,
+		1px -1px 0 #000000, -1px 1px 0 #000000, 0 2px 6px rgb(0 0 0 / 0.6);
+	--hb-shadow-off:
+		0 0 1px rgb(0 0 0 / 0.9), 1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 0 -1px 0 #000000, 0 1px 0 #000000, -1px 0 0 #000000, 1px 0 0 #000000, 0 2px 6px rgb(
+			0 0 0 / 0.6
+		);
+	--hb-mask: linear-gradient(to bottom, transparent, black 18%);
+	--hb-event-accent: #ffd166;
+	font-weight: 600;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="nobox"],
+	.hb-root[data-theme="nobox"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

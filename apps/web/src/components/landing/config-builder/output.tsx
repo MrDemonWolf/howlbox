@@ -98,9 +98,13 @@ export function ConfigOutput({
 				showBadges={config.badges}
 				showPronouns={config.pronouns}
 				showTimestamps={config.timestamps}
+				align={config.align}
 				emoteScale={config.emotescale}
+				group={config.group}
+				layout={config.layout}
 				size={config.size}
 				theme={config.theme}
+				variant={config.variant}
 			/>
 
 			{/* terminal-style readout: the whole config, as one URL */}

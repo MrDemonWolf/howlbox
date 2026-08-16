@@ -1,0 +1,33 @@
+/* cozy coffee, paper and warm browns */
+.hb-root[data-theme="mocha"] {
+	--hb-font: "Iowan Old Style", Palatino, Georgia, serif;
+	--hb-radius: 12px;
+	--hb-text: #3d2f26;
+	--hb-surface:
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(243 232 218 / 0.94), rgb(226 208 189 / 0.9));
+	--hb-surface-solid: #efe2d1;
+	--hb-border: rgb(122 90 68 / 0.35);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 250 240 / 0.9), 0 5px 16px rgb(90 62 40 / 0.28);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(255 248 238 / 0.95), 1px -1px 0 rgb(255 248 238 / 0.95), -1px 1px 0 rgb(
+			255 248 238 / 0.95
+		), 1px 1px 0 rgb(255 248 238 / 0.95), 0 -1px 0 rgb(255 248 238 / 0.95), 0 1px 0 rgb(
+			255 248 238 / 0.95
+		), -1px 0 0 rgb(255 248 238 / 0.95), 1px 0 0 rgb(255 248 238 / 0.95), 0 2px 5px rgb(
+			255 248 238 / 0.8
+		);
+	--hb-avatar-radius: 4px;
+	--hb-event-accent: #875027;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="mocha"],
+	.hb-root[data-theme="mocha"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

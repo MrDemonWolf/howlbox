@@ -72,6 +72,26 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		);
 	});
 
+	test("bad layout and align values fall back to their defaults", () => {
+		const parsed = overlayParamsSchema.parse({
+			layout: "sideways",
+			align: "center",
+			group: "maybe",
+		});
+		expect(parsed.layout).toBe(OVERLAY_DEFAULTS.layout);
+		expect(parsed.align).toBe(OVERLAY_DEFAULTS.align);
+		expect(parsed.group).toBe(OVERLAY_DEFAULTS.group);
+	});
+
+	test("a variant outside its theme's list falls back to the default", () => {
+		expect(
+			overlayParamsSchema.parse({ theme: "neon", variant: "notreal" }).variant,
+		).toBe(OVERLAY_DEFAULTS.variant);
+		expect(overlayParamsSchema.parse({ variant: "frost" }).variant).toBe(
+			OVERLAY_DEFAULTS.variant,
+		);
+	});
+
 	test("out-of-range scalars clamp to their fallbacks", () => {
 		const parsed = overlayParamsSchema.parse({
 			max: 9999,

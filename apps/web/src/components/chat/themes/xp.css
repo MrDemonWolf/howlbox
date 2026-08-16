@@ -1,0 +1,35 @@
+/* Windows XP Luna: warm window face, royal blue chrome. Radius stays
+   macOS-slight (8px), not a pill. */
+.hb-root[data-theme="xp"] {
+	--hb-font: Tahoma, "Segoe UI", "MS Sans Serif", sans-serif;
+	--hb-radius: 8px;
+	--hb-text: #1a1a1a;
+	--hb-surface:
+		linear-gradient(rgb(255 255 255 / 0.6), rgb(255 255 255 / 0) 45%),
+		linear-gradient(135deg, rgb(245 243 228 / 0.96), rgb(229 226 206 / 0.94));
+	--hb-surface-solid: linear-gradient(135deg, #f5f3e4, #e5e2ce);
+	--hb-border: rgb(8 85 221 / 0.6);
+	--hb-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 0.95), 0 0 0 1px rgb(70 130 231 / 0.25),
+		0 4px 14px rgb(10 36 106 / 0.3);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95), -1px 1px 0 rgb(
+			255 255 255 / 0.95
+		), 1px 1px 0 rgb(255 255 255 / 0.95), 0 -1px 0 rgb(255 255 255 / 0.95), 0 1px 0 rgb(
+			255 255 255 / 0.95
+		), -1px 0 0 rgb(255 255 255 / 0.95), 1px 0 0 rgb(255 255 255 / 0.95), 0 2px 5px rgb(
+			255 255 255 / 0.8
+		);
+	--hb-avatar-radius: 3px;
+	--hb-event-accent: #0855dd;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="xp"],
+	.hb-root[data-theme="xp"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

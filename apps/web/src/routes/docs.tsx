@@ -3,8 +3,9 @@ import { Link2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { BackLink, MONO, SiteShell } from "@/components/landing/site-chrome";
+import { ThemeExplorer } from "@/components/landing/theme-explorer";
 import { pickActiveSection } from "@/lib/docs/active-section";
-import { THEMES } from "@/lib/overlay/params";
+import { THEME_VARIANTS, THEMES } from "@/lib/overlay/params";
 import { THEME_LABEL } from "@/lib/overlay/theme-meta";
 
 export const Route = createFileRoute("/docs")({
@@ -51,7 +52,22 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "theme",
 					values: THEMES.join(", "),
-					body: "One of the fifteen presets. Each theme sets its own font, radius, surface, border, shadow, and text glow through CSS variables, so themes are swappable without touching layout. Default wolf.",
+					body: "One of the thirty-one presets. Each theme sets its own font, radius, surface, border, shadow, and text glow through CSS variables, so themes are swappable without touching layout. The overlay only downloads the CSS for the theme in the URL. Default wolf.",
+				},
+				{
+					name: "variant",
+					values: "theme-specific",
+					body: "A color variation of the selected theme: same fonts, radius, and layout, different palette. Each theme declares its own values, listed with the theme in the theme table below; most themes have none yet. A value the current theme does not declare falls back to the theme's default look, never a blank overlay, and the default serializes as no param at all.",
+				},
+				{
+					name: "layout",
+					values: "inline, stacked",
+					body: "Where the name sits. inline keeps badges, name and message on one flowing line. stacked puts the author header on its own line with the message below it, the block style most chat widgets call compact or blocky. Works with every theme and display mode. Default inline.",
+				},
+				{
+					name: "align",
+					values: "left, right",
+					body: "Which edge messages hug. right is for chat parked on the right side of the scene: rows, and bubbles in bubble mode, grow from the right edge and text is right-aligned. Default left.",
 				},
 				{
 					name: "bg",
@@ -102,6 +118,11 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 					name: "fade",
 					values: "0 to 600, seconds",
 					body: "Auto-hide each message this many seconds after it appears. 0 keeps everything until max pushes it out. The countdown is a CSS animation, not a JS timer, because OBS throttles timers in hidden sources but keeps animation clocks running. Default 0.",
+				},
+				{
+					name: "group",
+					values: "true, false",
+					body: "Consecutive messages from the same chatter show the header once; the rest render as bare text, the way Discord collapses a run of messages. Event rows always keep their own line and break a run. If the first message of a run gets removed by moderation or fades out, the next one grows its header back. Default false.",
 				},
 				{
 					name: "badges",
@@ -256,12 +277,16 @@ function useActiveSection(ids: string[]) {
 const CSS_HOOKS = [
 	{
 		cls: "hb-root",
-		body: "The overlay wrapper. Carries data-theme and the theme variables.",
+		body: "The overlay wrapper. Carries data-theme, the theme variables, and, when selected, data-variant, data-layout and data-align.",
 	},
 	{ cls: "hb-messages", body: "The scrolling message column." },
 	{
 		cls: "hb-message",
-		body: "One message row. A row whose body is nothing but emotes also carries data-emote-only, so hb-message[data-emote-only] targets exactly the rows emotescale grows.",
+		body: "One message row. A row whose body is nothing but emotes also carries data-emote-only, so hb-message[data-emote-only] targets exactly the rows emotescale grows. A group continuation row carries data-grouped.",
+	},
+	{
+		cls: "hb-head",
+		body: "The author header: timestamp, avatar, badges, pronouns and name as one unit. display:contents by default; layout=stacked turns it into its own line and group hides it on continuation rows.",
 	},
 	{ cls: "hb-name", body: "The chatter's display name." },
 	{ cls: "hb-text", body: "The message body." },
@@ -473,16 +498,24 @@ function DocsPage() {
 						<section className="scroll-mt-24" id="themes">
 							<h2 className="hb-display text-2xl">Theme values</h2>
 							<p className="hb-text-2 mt-3 leading-relaxed">
-								The value on the left is what goes in the URL. Every theme is
-								previewed on{" "}
+								Pick a theme to render it live below, in any display mode. Only
+								the selected theme draws, so this list stays cheap no matter how
+								long it gets, and the query string under the preview is the one
+								to paste into OBS. The{" "}
 								<Link
 									className="text-[color:var(--site-brand-text)] underline underline-offset-2"
 									hash="themes"
 									to="/"
 								>
-									the theme wall
-								</Link>
-								.
+									theme wall
+								</Link>{" "}
+								shows them all side by side instead.
+							</p>
+							<div className="mt-6">
+								<ThemeExplorer />
+							</div>
+							<p className="hb-text-2 mt-8 leading-relaxed">
+								The value on the left is what goes in the URL.
 							</p>
 							<ul className="mt-6 grid gap-2 sm:grid-cols-2">
 								{THEMES.map((theme) => (
@@ -491,8 +524,13 @@ function DocsPage() {
 										key={theme}
 									>
 										<code className="hb-code">{theme}</code>
-										<span className="hb-text-2 text-sm">
+										<span className="hb-text-2 text-right text-sm">
 											{THEME_LABEL[theme]}
+											{THEME_VARIANTS[theme].length > 0 && (
+												<span className="block text-xs opacity-70">
+													variant: {THEME_VARIANTS[theme].join(", ")}
+												</span>
+											)}
 										</span>
 									</li>
 								))}
@@ -588,14 +626,24 @@ function DocsPage() {
 								the event line's color, themed individually per preset.
 							</p>
 							<p className="hb-text-2 mt-6 leading-relaxed">
-								The theme variables are overridable the same way. To keep a
-								theme but change one color:
+								The theme variables are overridable the same way. Match two
+								attributes so the rule outranks both a theme block and a variant
+								block, and it wins on every theme, wolf included:
 							</p>
 							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
-									{".hb-root { --hb-text: #ffd6f2; }"}
+									{".hb-root[data-bg][data-theme] { --hb-text: #ffd6f2; }"}
 								</code>
 							</pre>
+							<p className="hb-text-2 mt-4 leading-relaxed">
+								Fewer attributes lose. A bare{" "}
+								<code className="hb-code">.hb-root</code> rule only reaches
+								variables no theme block sets, like the --hb-emote-scale hook,
+								and a single-attribute rule still loses to any theme that
+								declares variants. <code className="hb-code">data-bg</code> is
+								always present, so the two-attribute form above is safe to paste
+								on any overlay.
+							</p>
 							<p className="hb-text-2 mt-4 leading-relaxed">
 								One constraint worth knowing before you reach for it:{" "}
 								<code className="hb-code">backdrop-filter</code> cannot blur

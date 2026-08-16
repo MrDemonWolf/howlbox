@@ -1,12 +1,15 @@
 import { AVATAR_MODES } from "@/lib/twitch/types";
 
 import {
+	ALIGNS,
 	BG_MODES,
 	FALSY_TOKENS,
+	LAYOUTS,
 	LOGIN_RE,
 	MEDIA_MODES,
 	normalizeEventList,
 	normalizeLoginList,
+	normalizeVariant,
 	OVERLAY_DEFAULTS,
 	type OverlayParams,
 	THEMES,
@@ -139,11 +142,18 @@ export function parseOverlaySearch(search: URLSearchParams): OverlayParams {
 		OVERLAY_DEFAULTS.refresh,
 	);
 	const refresh = rawRefresh > 0 && rawRefresh < 5 ? 5 : rawRefresh;
+	// variant validates against the resolved theme's own list, so the
+	// theme has to be settled first
+	const theme = oneOf(THEMES, decoded.theme, OVERLAY_DEFAULTS.theme);
 
 	return {
 		channel,
 		bg: oneOf(BG_MODES, decoded.bg, OVERLAY_DEFAULTS.bg),
-		theme: oneOf(THEMES, decoded.theme, OVERLAY_DEFAULTS.theme),
+		theme,
+		variant: normalizeVariant(theme, decoded.variant),
+		layout: oneOf(LAYOUTS, decoded.layout, OVERLAY_DEFAULTS.layout),
+		align: oneOf(ALIGNS, decoded.align, OVERLAY_DEFAULTS.align),
+		group: boolOffByDefault(decoded.group),
 		size: integer(decoded.size, 50, 300, OVERLAY_DEFAULTS.size),
 		emotescale: halfStep(decoded.emotescale, 1, 4, OVERLAY_DEFAULTS.emotescale),
 		max: integer(decoded.max, 1, 200, OVERLAY_DEFAULTS.max),

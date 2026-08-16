@@ -4,7 +4,13 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { HbRoot } from "@/components/chat/hb-root";
 import { MessageList } from "@/components/chat/message-list";
 import { useDemoStream } from "@/components/landing/demo-messages";
-import type { BgMode, MediaMode, Theme } from "@/lib/overlay/params";
+import type {
+	Align,
+	BgMode,
+	Layout,
+	MediaMode,
+	Theme,
+} from "@/lib/overlay/params";
 import type {
 	AvatarMode,
 	ChatEventKind,
@@ -12,6 +18,7 @@ import type {
 } from "@/lib/twitch/types";
 
 import "@/components/chat/overlay.css";
+import "@/components/chat/themes/index.css";
 
 export const OBS_WIDTH = 480;
 export const OBS_HEIGHT = 800;
@@ -19,6 +26,10 @@ export const OBS_DIMENSIONS = `${OBS_WIDTH} × ${OBS_HEIGHT}`;
 
 interface OverlayPreviewProps {
 	theme: Theme;
+	variant?: string;
+	layout?: Layout;
+	align?: Align;
+	group?: boolean;
 	bg: BgMode;
 	showBadges: boolean;
 	showPronouns?: boolean;
@@ -96,6 +107,10 @@ function staticMedia(message: ChatMessageView): ChatMessageView {
 // over a gameplay stand-in, so bg=off transparency reads honestly.
 export function OverlayPreview({
 	theme,
+	variant = "",
+	layout = "inline",
+	align = "left",
+	group = false,
 	bg,
 	showBadges,
 	showPronouns = false,
@@ -143,16 +158,20 @@ export function OverlayPreview({
 				)}
 			/>
 			<HbRoot
+				align={align}
 				bg={bg}
 				className="absolute inset-0"
 				emoteScale={emoteScale}
+				layout={layout}
 				size={size}
 				theme={theme}
+				variant={variant}
 			>
 				<MessageList
 					animate={animate}
 					bg={bg}
 					fadeSeconds={fadeSeconds}
+					group={group}
 					messages={previewMessages}
 					onMessageExpired={removeMessage}
 					showAvatars={
@@ -162,6 +181,7 @@ export function OverlayPreview({
 					showPronouns={showPronouns}
 					showTimestamps={showTimestamps}
 					theme={theme}
+					variant={variant}
 				/>
 			</HbRoot>
 		</>

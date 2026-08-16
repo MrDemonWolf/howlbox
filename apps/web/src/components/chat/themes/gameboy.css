@@ -1,0 +1,115 @@
+/* DMG Game Boy: four-shade green LCD with a crossed pixel grid. Text on
+   surface measures ~6:1, above AA. Reuses the gated Press Start 2P. */
+.hb-root[data-theme="gameboy"] {
+	--hb-font: "Press Start 2P", "Wallpoet", ui-monospace, monospace;
+	--hb-font-size: 0.8125rem;
+	--hb-radius: 4px;
+	--hb-text: #0f380f;
+	--hb-surface:
+		repeating-linear-gradient(
+			0deg,
+			rgb(15 56 15 / 0.06) 0 1px,
+			transparent 1px 3px
+		),
+		repeating-linear-gradient(
+			90deg,
+			rgb(15 56 15 / 0.06) 0 1px,
+			transparent 1px 3px
+		),
+		#9bbc0f;
+	--hb-surface-solid: #9bbc0f;
+	--hb-border: rgb(15 56 15 / 0.8);
+	--hb-shadow: 3px 3px 0 rgb(15 56 15 / 0.55), inset 0 0 0 2px #306230;
+	--hb-bubble-shadow: var(--hb-shadow);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(155 188 15 / 0.95), 1px -1px 0 rgb(155 188 15 / 0.95), -1px 1px 0 rgb(
+			155 188 15 / 0.95
+		), 1px 1px 0 rgb(155 188 15 / 0.95), 0 -1px 0 rgb(155 188 15 / 0.95), 0 1px 0 rgb(
+			155 188 15 / 0.95
+		), -1px 0 0 rgb(155 188 15 / 0.95), 1px 0 0 rgb(155 188 15 / 0.95), 0 2px 5px rgb(
+			155 188 15 / 0.6
+		);
+	--hb-avatar-radius: 0;
+	--hb-avatar-ring: 0 0 0 2px #306230;
+	/* darker than the LCD mid-green: #306230 measured 3.3:1 on the panel */
+	--hb-event-accent: #1e401e;
+}
+
+.hb-root[data-theme="gameboy"] .hb-emote {
+	image-rendering: pixelated;
+}
+
+.hb-root[data-theme="gameboy"] .hb-avatar {
+	image-rendering: pixelated;
+}
+
+/* Game Boy Pocket: the grey-green MGB screen */
+.hb-root[data-theme="gameboy"][data-variant="pocket"] {
+	--hb-text: #20201a;
+	--hb-surface:
+		repeating-linear-gradient(
+			0deg,
+			rgb(32 32 26 / 0.06) 0 1px,
+			transparent 1px 3px
+		),
+		repeating-linear-gradient(
+			90deg,
+			rgb(32 32 26 / 0.06) 0 1px,
+			transparent 1px 3px
+		),
+		#b8b8a8;
+	--hb-surface-solid: #b8b8a8;
+	--hb-border: rgb(32 32 26 / 0.7);
+	--hb-shadow: 3px 3px 0 rgb(32 32 26 / 0.45), inset 0 0 0 2px #6a6a5c;
+	--hb-shadow-off:
+		-1px -1px 0 rgb(184 184 168 / 0.95), 1px -1px 0 rgb(184 184 168 / 0.95), -1px 1px 0 rgb(
+			184 184 168 / 0.95
+		), 1px 1px 0 rgb(184 184 168 / 0.95), 0 -1px 0 rgb(184 184 168 / 0.95), 0 1px 0 rgb(
+			184 184 168 / 0.95
+		), -1px 0 0 rgb(184 184 168 / 0.95), 1px 0 0 rgb(184 184 168 / 0.95), 0 2px 5px rgb(
+			184 184 168 / 0.6
+		);
+	--hb-avatar-ring: 0 0 0 2px #6a6a5c;
+	--hb-event-accent: #3d3d33;
+}
+
+/* Virtual Boy: red on black */
+.hb-root[data-theme="gameboy"][data-variant="virtual"] {
+	--hb-text: #ff2a2a;
+	--hb-surface:
+		repeating-linear-gradient(
+			0deg,
+			rgb(255 42 42 / 0.08) 0 1px,
+			transparent 1px 3px
+		),
+		repeating-linear-gradient(
+			90deg,
+			rgb(255 42 42 / 0.08) 0 1px,
+			transparent 1px 3px
+		),
+		#0a0000;
+	--hb-surface-solid: #0a0000;
+	--hb-border: rgb(255 42 42 / 0.6);
+	--hb-shadow: 3px 3px 0 rgb(90 0 0 / 0.7), inset 0 0 0 2px #3a0000;
+	--hb-glow: 0 0 6px rgb(255 42 42 / 0.5);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 2px 5px rgb(
+			0 0 0 / 0.7
+		), 0 0 6px rgb(255 42 42 / 0.5);
+	--hb-avatar-ring: 0 0 0 2px #3a0000;
+	--hb-event-accent: #ff2a2a;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="gameboy"],
+	.hb-root[data-theme="gameboy"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

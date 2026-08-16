@@ -7,6 +7,12 @@
 			"runtimeArgs": ["run", "dev:web"],
 			"port": 3001,
 			"autoPort": true
+		},
+		{
+			"name": "tunnel",
+			"runtimeExecutable": "cloudflared",
+			"runtimeArgs": ["tunnel", "--url", "http://localhost:3001"],
+			"dependsOn": "web"
 		}
 	]
 }

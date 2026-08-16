@@ -23,6 +23,21 @@ const CASES = [
 	"emotescale=2.3",
 	"emotescale=9&max=10",
 	"emotescale=true&emotescale=1.5",
+	// variant validates against the resolved theme's list, so both
+	// parsers must agree on the theme-then-variant order and on every
+	// malformed shape falling back to the theme default
+	"theme=glass&variant=frost",
+	"variant=frost",
+	"theme=glass&variant=bogus",
+	"theme=glass&variant=a&variant=b",
+	"variant=%5B%22frost%22%5D",
+	"variant=123&theme=terminal",
+	// layout, align and group must fall back identically in both parsers,
+	// including bare-flag group and malformed shapes
+	"layout=stacked&align=right&group",
+	"layout=sideways&align=center&group=maybe",
+	"layout=stacked&layout=inline&group=1",
+	"layout=%5B%22stacked%22%5D&align=true",
 ] as const;
 
 describe("parseOverlaySearch", () => {

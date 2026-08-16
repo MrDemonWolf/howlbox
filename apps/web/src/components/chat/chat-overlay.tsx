@@ -9,6 +9,10 @@ interface ChatOverlayProps {
 	status: ConnectionStatus;
 	bg: OverlayParams["bg"];
 	theme: OverlayParams["theme"];
+	variant: OverlayParams["variant"];
+	layout: OverlayParams["layout"];
+	align: OverlayParams["align"];
+	group: OverlayParams["group"];
 	showBadges: boolean;
 	showPronouns: boolean;
 	showTimestamps: boolean;
@@ -31,6 +35,10 @@ export function ChatOverlay({
 	status,
 	bg,
 	theme,
+	variant,
+	layout,
+	align,
+	group,
 	showBadges,
 	showPronouns,
 	showTimestamps,
@@ -43,11 +51,14 @@ export function ChatOverlay({
 }: ChatOverlayProps) {
 	return (
 		<HbRoot
+			align={align}
 			bg={bg}
 			className="fixed inset-0"
 			emoteScale={emoteScale}
+			layout={layout}
 			size={size}
 			theme={theme}
+			variant={variant}
 		>
 			{status !== "connected" && (
 				<div
@@ -61,6 +72,7 @@ export function ChatOverlay({
 				animate={animate}
 				bg={bg}
 				fadeSeconds={fadeSeconds}
+				group={group}
 				messages={messages}
 				onMessageExpired={onMessageExpired}
 				showAvatars={showAvatars}
@@ -68,6 +80,7 @@ export function ChatOverlay({
 				showPronouns={showPronouns}
 				showTimestamps={showTimestamps}
 				theme={theme}
+				variant={variant}
 			/>
 		</HbRoot>
 	);

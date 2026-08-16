@@ -1,0 +1,62 @@
+/* Cyberpunk: near-black panel, teal hairline, magenta ambient bloom and
+   a hard-stop gradient corner tick. The tick is a background layer, not
+   a clip-path: clipping would sever the border and shadow at the notch. */
+.hb-root[data-theme="cyber"] {
+	--hb-radius: 2px;
+	--hb-text: #f5f9ff;
+	--hb-surface:
+		linear-gradient(225deg, rgb(252 227 3 / 0.9) 0 50%, transparent 50%) top
+		right / 14px 14px no-repeat,
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(16 20 24 / 0.92), rgb(8 10 14 / 0.9));
+	--hb-surface-solid: #0c1014;
+	--hb-border: rgb(3 223 252 / 0.5);
+	--hb-shadow:
+		inset 0 1px 0 rgb(3 223 252 / 0.3), 0 0 16px rgb(252 3 200 / 0.2),
+		0 8px 24px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(3 223 252 / 0.35);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			3 223 252 / 0.4
+		);
+	--hb-avatar-radius: 0;
+	--hb-event-accent: #fce303;
+}
+
+/* Gold: the yellow leads and the teal becomes the accent */
+.hb-root[data-theme="cyber"][data-variant="gold"] {
+	--hb-surface:
+		linear-gradient(225deg, rgb(3 223 252 / 0.9) 0 50%, transparent 50%) top
+		right / 14px 14px no-repeat,
+		var(--hb-noise),
+		linear-gradient(135deg, rgb(22 19 10 / 0.92), rgb(12 10 6 / 0.9));
+	--hb-surface-solid: #14110a;
+	--hb-border: rgb(252 227 3 / 0.5);
+	--hb-shadow:
+		inset 0 1px 0 rgb(252 227 3 / 0.3), 0 0 16px rgb(252 180 3 / 0.2),
+		0 8px 24px rgb(0 0 0 / 0.5);
+	--hb-glow: 0 0 6px rgb(252 227 3 / 0.35);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			252 227 3 / 0.4
+		);
+	--hb-event-accent: #03dffc;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="cyber"],
+	.hb-root[data-theme="cyber"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

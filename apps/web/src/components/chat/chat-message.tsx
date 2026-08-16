@@ -16,6 +16,11 @@ interface ChatMessageRowProps {
 	showAvatars: boolean;
 	animate: boolean;
 	fadeSeconds: number;
+	// ?group continuation row: same chatter as the row above, so the
+	// header hides and only the text renders (the CSS keys off
+	// data-grouped). Recomputed from adjacency by MessageList, so a row
+	// whose predecessor gets evicted regrows its header.
+	grouped?: boolean;
 	onExpire?: (id: string) => void;
 }
 
@@ -41,9 +46,12 @@ const TEXT_BADGE_CLASSES =
 	"hb-pronoun -my-0.5 mr-1 inline-flex h-[1.15em] items-center rounded-[0.35em] border border-(--hb-border) px-[0.35em] align-middle text-[0.8em] leading-none";
 
 // profile picture: shape and ring come from the theme, so retro themes
-// get a square and the soft ones get a circle
+// get a square and the soft ones get a circle. Width must be set in CSS
+// alongside height: the img's width="70" attribute otherwise supplies a
+// used width, and aspect-ratio is ignored once both axes are determined,
+// which stretched every avatar to 70px wide at line height.
 const AVATAR_CLASSES =
-	"hb-avatar -my-0.5 mr-1 inline-block aspect-square h-(--hb-avatar-size) rounded-(--hb-avatar-radius) object-cover align-middle [box-shadow:var(--hb-avatar-ring)]";
+	"hb-avatar -my-0.5 mr-1 inline-block size-(--hb-avatar-size) rounded-(--hb-avatar-radius) object-cover align-middle [box-shadow:var(--hb-avatar-ring)]";
 
 // The system line on an event row (sub, raid, cheer, first message).
 // No trailing margin: the line is always followed either by the ": "
@@ -66,6 +74,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 	showAvatars,
 	animate,
 	fadeSeconds,
+	grouped = false,
 	onExpire,
 }: ChatMessageRowProps) {
 	// image badges follow the badges toggle, text/pronoun badges follow
@@ -150,6 +159,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 			className={className}
 			data-emote-only={emoteOnly ? "" : undefined}
 			data-event={message.event?.kind}
+			data-grouped={grouped ? "" : undefined}
 			style={style}
 			onAnimationEnd={
 				onExpire && fadeSeconds > 0
@@ -164,47 +174,54 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 					: undefined
 			}
 		>
-			{showTimestamps && (
-				<span className="hb-time mr-1 align-middle text-[0.78em] opacity-60">
-					{formatTime(message.timestamp)}
-				</span>
-			)}
-			{showAvatar && (
-				<img
-					alt=""
-					className={AVATAR_CLASSES}
-					decoding="async"
-					height={70}
-					loading="lazy"
-					referrerPolicy="no-referrer"
-					src={message.avatarUrl}
-					width={70}
-				/>
-			)}
-			{badges.map((badge, index) =>
-				badge.kind === "image" ? (
+			{/* The author header as one addressable unit. display:contents
+			    keeps it invisible to layout, so the default inline flow is
+			    unchanged; ?layout=stacked turns it into its own line and
+			    ?group hides it on continuation rows, both purely in CSS
+			    (see overlay.css). hb-head is public OBS Custom CSS API. */}
+			<span className="hb-head contents">
+				{showTimestamps && (
+					<span className="hb-time mr-1 align-middle text-[0.78em] opacity-60">
+						{formatTime(message.timestamp)}
+					</span>
+				)}
+				{showAvatar && (
 					<img
 						alt=""
-						className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
+						className={AVATAR_CLASSES}
 						decoding="async"
-						key={`${message.id}-badge-${index}`}
+						height={70}
+						loading="lazy"
 						referrerPolicy="no-referrer"
-						src={badge.url}
+						src={message.avatarUrl}
+						width={70}
 					/>
-				) : (
-					<span
-						className={TEXT_BADGE_CLASSES}
-						key={`${message.id}-badge-${index}`}
-					>
-						{badge.text}
+				)}
+				{badges.map((badge, index) =>
+					badge.kind === "image" ? (
+						<img
+							alt=""
+							className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
+							decoding="async"
+							key={`${message.id}-badge-${index}`}
+							referrerPolicy="no-referrer"
+							src={badge.url}
+						/>
+					) : (
+						<span
+							className={TEXT_BADGE_CLASSES}
+							key={`${message.id}-badge-${index}`}
+						>
+							{badge.text}
+						</span>
+					),
+				)}
+				{!standalone && (
+					<span className="hb-name font-semibold" style={nameStyle}>
+						{message.displayName}
 					</span>
-				),
-			)}
-			{!standalone && (
-				<span className="hb-name font-semibold" style={nameStyle}>
-					{message.displayName}
-				</span>
-			)}
+				)}
+			</span>
 			{message.event?.cheermoteUrl && (
 				<img
 					alt=""

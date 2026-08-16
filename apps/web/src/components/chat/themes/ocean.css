@@ -1,0 +1,65 @@
+/* Deep Sea: teal depths with a light shaft falling from the surface */
+.hb-root[data-theme="ocean"] {
+	--hb-radius: 16px;
+	--hb-text: #e2f6fa;
+	--hb-surface:
+		var(--hb-noise),
+		radial-gradient(
+			130% 120% at 50% -20%,
+			rgb(24 130 150 / 0.4),
+			transparent 55%
+		),
+		linear-gradient(rgb(6 34 48 / 0.88), rgb(3 18 30 / 0.9));
+	--hb-surface-solid: linear-gradient(#083245, #04141f);
+	--hb-border: rgb(64 200 224 / 0.4);
+	--hb-shadow:
+		inset 0 1px 0 rgb(130 225 240 / 0.3), 0 0 16px rgb(24 130 150 / 0.2),
+		0 8px 26px rgb(0 6 12 / 0.55);
+	--hb-glow: 0 0 6px rgb(64 200 224 / 0.25);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			64 200 224 / 0.35
+		);
+	--hb-event-accent: #46d4e8;
+}
+
+/* Tropic: shallow reef water, turquoise instead of abyss teal */
+.hb-root[data-theme="ocean"][data-variant="tropic"] {
+	--hb-surface:
+		var(--hb-noise),
+		radial-gradient(
+			130% 120% at 50% -20%,
+			rgb(40 190 170 / 0.32),
+			transparent 55%
+		),
+		linear-gradient(rgb(6 46 44 / 0.9), rgb(3 24 26 / 0.92));
+	--hb-surface-solid: linear-gradient(#083a34, #04201f);
+	--hb-border: rgb(80 240 200 / 0.5);
+	--hb-shadow:
+		inset 0 1px 0 rgb(150 245 220 / 0.3), 0 0 16px rgb(40 190 170 / 0.22),
+		0 8px 26px rgb(0 10 10 / 0.55);
+	--hb-glow: 0 0 6px rgb(80 240 200 / 0.3);
+	--hb-shadow-off:
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			80 240 200 / 0.4
+		);
+	--hb-event-accent: #52f0c8;
+}
+
+/* Solid fallback. Keep this block last in the file: it ties the theme and
+   variant blocks above on specificity and wins on within-file order. */
+@media (prefers-reduced-transparency: reduce) {
+	.hb-root[data-theme="ocean"],
+	.hb-root[data-theme="ocean"][data-variant] {
+		--hb-surface: var(--hb-surface-solid);
+		--hb-bubble-surface: var(--hb-surface-solid);
+	}
+}

@@ -8,8 +8,24 @@ import { cn } from "@howlbox/ui/lib/utils";
 import { ChevronDown, ClipboardPaste } from "lucide-react";
 import type React from "react";
 
-import { BG_MODES, MEDIA_MODES, THEMES } from "@/lib/overlay/params";
-import { BG_LABEL, THEME_LABEL, THEME_SWATCH } from "@/lib/overlay/theme-meta";
+import {
+	ALIGNS,
+	BG_MODES,
+	LAYOUTS,
+	MEDIA_MODES,
+	THEME_VARIANTS,
+	THEMES,
+} from "@/lib/overlay/params";
+import {
+	BG_LABEL,
+	FAMILY_LABEL,
+	FAMILY_ORDER,
+	THEME_FAMILY,
+	THEME_LABEL,
+	THEME_SWATCH,
+	VARIANT_LABEL,
+	VARIANT_SWATCH,
+} from "@/lib/overlay/theme-meta";
 import { type ChatEventKind, EVENT_KINDS } from "@/lib/twitch/types";
 
 import { Field, Fieldset, NumberField, Toggle } from "./fields";
@@ -136,26 +152,131 @@ export function ConfigSections({
 				</Field>
 
 				<Field label="Theme">
-					<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-						{THEMES.map((t) => (
+					<div className="flex flex-col gap-3">
+						{FAMILY_ORDER.map((family) => (
+							<div key={family}>
+								<p className="mb-1.5 font-medium text-[0.65rem] text-[color:var(--site-txt-2)] uppercase tracking-[0.12em]">
+									{FAMILY_LABEL[family]}
+								</p>
+								<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+									{THEMES.filter((t) => THEME_FAMILY[t] === family).map((t) => (
+										<button
+											aria-pressed={t === config.theme}
+											className={cn(
+												"flex min-h-11 items-center gap-2 rounded-[0.7rem] border px-3 text-left text-sm transition-colors",
+												t === config.theme
+													? "border-[color:var(--site-brand)] bg-[color:var(--site-brand-tint)] text-[color:var(--site-txt-1)]"
+													: "hb-hairline-strong text-[color:var(--site-txt-2)] hover:border-[color:var(--site-brand)] hover:text-[color:var(--site-txt-1)]",
+											)}
+											key={t}
+											onClick={() => {
+												set("theme", t);
+												// a variant belongs to one theme; switching to a
+												// theme that does not declare it resets to default
+												const variants: readonly string[] = THEME_VARIANTS[t];
+												if (!variants.includes(config.variant)) {
+													set("variant", "");
+												}
+											}}
+											type="button"
+										>
+											<span
+												aria-hidden="true"
+												className="hb-hairline size-4 shrink-0 rounded-full border"
+												style={{ background: THEME_SWATCH[t] }}
+											/>
+											<span className="truncate">{THEME_LABEL[t]}</span>
+										</button>
+									))}
+								</div>
+							</div>
+						))}
+					</div>
+				</Field>
+
+				{THEME_VARIANTS[config.theme].length > 0 && (
+					<Field
+						hint="Same layout and fonts, different palette."
+						label="Variant"
+					>
+						<div className="flex flex-wrap gap-2">
 							<button
-								aria-pressed={t === config.theme}
+								aria-pressed={config.variant === ""}
 								className={cn(
-									"flex min-h-11 items-center gap-2 rounded-[0.7rem] border px-3 text-left text-sm transition-colors",
-									t === config.theme
-										? "border-[color:var(--site-brand)] bg-[color:var(--site-brand-tint)] text-[color:var(--site-txt-1)]"
-										: "hb-hairline-strong text-[color:var(--site-txt-2)] hover:border-[color:var(--site-brand)] hover:text-[color:var(--site-txt-1)]",
+									"hb-btn hb-btn-sm hb-btn-secondary",
+									config.variant === "" && "hb-btn-selected",
 								)}
-								key={t}
-								onClick={() => set("theme", t)}
+								onClick={() => set("variant", "")}
 								type="button"
 							>
-								<span
-									aria-hidden="true"
-									className="hb-hairline size-4 shrink-0 rounded-full border"
-									style={{ background: THEME_SWATCH[t] }}
-								/>
-								<span className="truncate">{THEME_LABEL[t]}</span>
+								Default
+							</button>
+							{(THEME_VARIANTS[config.theme] as readonly string[]).map((v) => (
+								<button
+									aria-pressed={config.variant === v}
+									className={cn(
+										"hb-btn hb-btn-sm hb-btn-secondary flex items-center gap-1.5",
+										config.variant === v && "hb-btn-selected",
+									)}
+									key={v}
+									onClick={() => set("variant", v)}
+									type="button"
+								>
+									<span
+										aria-hidden="true"
+										className="hb-hairline size-3 shrink-0 rounded-full border"
+										style={{
+											background: (
+												VARIANT_SWATCH[config.theme] as Record<string, string>
+											)[v],
+										}}
+									/>
+									{(VARIANT_LABEL[config.theme] as Record<string, string>)[v]}
+								</button>
+							))}
+						</div>
+					</Field>
+				)}
+
+				<Field
+					hint="On top puts badges and name on their own line above the message."
+					label="Name position"
+				>
+					<div className="flex flex-wrap gap-2">
+						{LAYOUTS.map((mode) => (
+							<button
+								aria-pressed={config.layout === mode}
+								className={cn(
+									"hb-btn hb-btn-sm hb-btn-secondary",
+									config.layout === mode && "hb-btn-selected",
+								)}
+								key={mode}
+								onClick={() => set("layout", mode)}
+								type="button"
+							>
+								{mode === "inline" ? "Inline" : "On top"}
+							</button>
+						))}
+					</div>
+				</Field>
+
+				<Field
+					hint="Right hugs messages to the right edge, for chat parked on that side of the scene."
+					label="Alignment"
+				>
+					<div className="flex flex-wrap gap-2">
+						{ALIGNS.map((side) => (
+							<button
+								aria-pressed={config.align === side}
+								className={cn(
+									"hb-btn hb-btn-sm hb-btn-secondary",
+									config.align === side && "hb-btn-selected",
+								)}
+								key={side}
+								onClick={() => set("align", side)}
+								type="button"
+							>
+								{side === "left" ? "Left" : "Right"}
 							</button>
 						))}
 					</div>
@@ -334,6 +455,13 @@ export function ConfigSections({
 						value={config.fade}
 					/>
 				</div>
+				<Toggle
+					checked={config.group}
+					hint="Consecutive messages from one chatter show the name once."
+					id="cfg-group"
+					label="Group repeat chatters"
+					onChange={(v) => set("group", v)}
+				/>
 			</Fieldset>
 
 			<Fieldset title="Events">
