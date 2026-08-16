@@ -111,10 +111,12 @@ export function readableUserColor(
 	return toHex(mixToward(rgb, target, low / 255));
 }
 
+// Eight directions, not four: diagonals alone leave gaps at the cardinal
+// points of every glyph, which reads as a broken outline over busy video.
 const DARK_TEXT_OUTLINE =
-	"-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95), -1px 1px 0 rgb(255 255 255 / 0.95), 1px 1px 0 rgb(255 255 255 / 0.95), 0 1px 3px rgb(0 0 0 / 0.5)";
+	"-1px -1px 0 rgb(255 255 255 / 0.95), 1px -1px 0 rgb(255 255 255 / 0.95), -1px 1px 0 rgb(255 255 255 / 0.95), 1px 1px 0 rgb(255 255 255 / 0.95), 0 -1px 0 rgb(255 255 255 / 0.95), 0 1px 0 rgb(255 255 255 / 0.95), -1px 0 0 rgb(255 255 255 / 0.95), 1px 0 0 rgb(255 255 255 / 0.95), 0 1px 3px rgb(0 0 0 / 0.5)";
 const LIGHT_TEXT_OUTLINE =
-	"-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95), 0 1px 3px rgb(0 0 0 / 0.7)";
+	"-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(0 0 0 / 0.95), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 1px 3px rgb(0 0 0 / 0.7)";
 
 // A transparent page cannot know the gameplay color OBS will composite
 // behind it. Give each dynamic name the opposite-luminance outline.

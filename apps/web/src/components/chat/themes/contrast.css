@@ -9,8 +9,9 @@
 	--hb-bubble-shadow: none;
 	--hb-glow: none;
 	--hb-shadow-off:
-		-1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000,
-		1px 1px 0 #000000, 0 2px 5px rgb(0 0 0 / 0.75);
+		-1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000, 0 -1px 0 #000000, 0 1px 0 #000000, -1px 0 0 #000000, 1px 0 0 #000000, 0 2px 5px rgb(
+			0 0 0 / 0.75
+		);
 	--hb-avatar-radius: 0;
 	--hb-avatar-ring: 0 0 0 2px #ffffff;
 	--hb-event-accent: #ffff00;

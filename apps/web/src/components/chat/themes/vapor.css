@@ -19,9 +19,13 @@
 		0 8px 26px rgb(12 6 30 / 0.55);
 	--hb-glow: 0 0 8px rgb(255 130 200 / 0.35);
 	--hb-shadow-off:
-		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95),
-		-1px 1px 0 rgb(0 0 0 / 0.95), 1px 1px 0 rgb(0 0 0 / 0.95),
-		0 0 6px rgb(255 90 200 / 0.4);
+		-1px -1px 0 rgb(0 0 0 / 0.95), 1px -1px 0 rgb(0 0 0 / 0.95), -1px 1px 0 rgb(
+			0 0 0 / 0.95
+		), 1px 1px 0 rgb(0 0 0 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.95), 0 1px 0 rgb(
+			0 0 0 / 0.95
+		), -1px 0 0 rgb(0 0 0 / 0.95), 1px 0 0 rgb(0 0 0 / 0.95), 0 0 6px rgb(
+			255 90 200 / 0.4
+		);
 	--hb-event-accent: #64f0ff;
 }
 

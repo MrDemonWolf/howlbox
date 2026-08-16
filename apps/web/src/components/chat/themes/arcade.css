@@ -10,8 +10,7 @@
 	--hb-shadow: 4px 4px 0 rgb(0 0 0 / 0.85), inset 0 0 0 2px rgb(38 28 82);
 	--hb-bubble-shadow: var(--hb-shadow);
 	--hb-shadow-off:
-		1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000,
-		-1px 1px 0 #000000, 2px 2px 0 #000000;
+		1px 1px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 0 -1px 0 #000000, 0 1px 0 #000000, -1px 0 0 #000000, 1px 0 0 #000000, 2px 2px 0 #000000;
 	--hb-avatar-radius: 0;
 	/* arcade runs 8px type, so a 1.5em picture would tower over it */
 	--hb-avatar-size: 2em;
