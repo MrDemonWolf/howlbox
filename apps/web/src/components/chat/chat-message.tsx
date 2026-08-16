@@ -2,7 +2,11 @@ import { type CSSProperties, memo } from "react";
 
 import { emoteOnlyCount, groupParts } from "@/lib/emotes/resolve";
 import type { OverlayParams } from "@/lib/overlay/params";
-import { readableUserColor, userColorOutline } from "@/lib/twitch/colors";
+import {
+	outlinedUserColor,
+	readableUserColor,
+	userColorOutline,
+} from "@/lib/twitch/colors";
 import { isStandaloneEvent } from "@/lib/twitch/events";
 import type { ChatMessageView } from "@/lib/twitch/types";
 
@@ -88,7 +92,12 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 		bg === "off"
 			? "[text-shadow:var(--hb-shadow-off)]"
 			: "[text-shadow:var(--hb-glow)]";
-	const color = readableUserColor(message.color, surfaceColor);
+	// bg=off corrects against the outline ring (the only thing behind the
+	// glyph we control); panel and bubble correct against the theme surface
+	const color =
+		bg === "off"
+			? outlinedUserColor(message.color)
+			: readableUserColor(message.color, surfaceColor);
 	const nameStyle = {
 		color,
 		...(bg === "off" ? { textShadow: userColorOutline(color) } : {}),
