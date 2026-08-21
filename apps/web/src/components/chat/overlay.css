@@ -78,6 +78,15 @@
 	--hb-emote-boost: 1;
 	--hb-emote-jumbo: 1;
 	--hb-emote-align: middle;
+
+	/* ?scroll=ticker lane. Height is sized for the worst emotescale case:
+	   a jumbo row is 1 + (boost - 1) / N, which is at most the boost
+	   itself, so a lane sized for N=1 never clips the art, and it is the
+	   Custom CSS hook. --hb-ticker-w is not: it is the lane width the
+	   renderer measures and writes per row, and the 0 here only keeps the
+	   keyframe valid on a row that was never scheduled. */
+	--hb-ticker-height: calc(1.6em * var(--hb-emote-boost, 1) + 0.7em);
+	--hb-ticker-w: 0px;
 }
 
 /* Bubble mode can repeat a surface up to 200 times. Use each theme's
@@ -111,6 +120,56 @@
 	   descender leading under every jumbo row, which is height an overlay
 	   cannot spare. */
 	vertical-align: var(--hb-emote-align, middle);
+}
+
+/* ?scroll=ticker: the message column becomes one horizontal lane and
+   each message is an absolutely positioned run that starts past the
+   right clip edge. The animation shorthand (duration and delay) is
+   written per row by MessageList; everything else is here so it stays
+   overridable from OBS Custom CSS. */
+.hb-root[data-scroll="ticker"] .hb-messages {
+	display: block;
+	position: relative;
+	/* min-h-0 leaves the flex item shrinkable, so the height has to be
+	   pinned rather than merely declared */
+	flex: 0 0 auto;
+	height: var(--hb-ticker-height);
+	padding: 0;
+	/* a theme mask is a top fade sized for a tall column (nobox); on a
+	   one-line lane it eats the top of every glyph */
+	mask-image: none;
+}
+
+.hb-root[data-scroll="ticker"] .hb-message {
+	position: absolute;
+	top: 50%;
+	left: 100%;
+	/* the keyframe declares no from, so this IS the start state: without
+	   it every run would slide down half its height as it starts */
+	transform: translateY(-50%);
+	white-space: nowrap;
+	/* bg=bubble ships w-fit max-w-full: with nowrap that measures the
+	   whole lane instead of the content, and every duration comes out
+	   wrong */
+	width: max-content;
+	max-width: none;
+}
+
+/* Emote, cheermote and badge art carries no intrinsic size until it
+   loads, so a row measures short and collides with the one ahead of it.
+   Reserving a square is exact for badges and cheermotes and a floor for
+   emotes; the intrinsic ratio still wins for wider art, so nothing is
+   distorted.
+   ponytail: a wide 7TV emote still under-measures until it loads, which
+   the gap absorbs. If that ever shows, defer scheduling in
+   attachTicker until every img in the row reports complete. */
+.hb-root[data-scroll="ticker"] .hb-emote,
+.hb-root[data-scroll="ticker"] .hb-cheermote {
+	min-width: calc(1.6em * var(--hb-emote-scale, 1) * var(--hb-emote-jumbo, 1));
+}
+
+.hb-root[data-scroll="ticker"] .hb-badge {
+	min-width: 1.15em;
 }
 
 /* ?layout=stacked: the hb-head wrapper is display:contents by default
@@ -147,6 +206,16 @@
 	}
 }
 
+/* The ticker run: own width plus the whole lane, so a message enters at
+   the right clip edge and leaves past the left one. ?align=left plays
+   this same run in reverse, which walks the message the other way for
+   the price of one keyword in the shorthand. */
+@keyframes hb-ticker {
+	to {
+		transform: translateX(calc(-100% - var(--hb-ticker-w))) translateY(-50%);
+	}
+}
+
 @keyframes hb-fade-out {
 	to {
 		opacity: 0;
@@ -154,6 +223,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	/* biome-ignore lint/style/noDescendingSpecificity: the ticker rules
+	   above are more specific but set no animation-duration, and ticker
+	   mode is turned off outright under this preference (overlay-app),
+	   so the two can never meet on one element */
 	.hb-message {
 		/* biome-ignore lint/complexity/noImportantStyles: must override the
 		   per-message inline `animation` set by ChatMessageRow */
