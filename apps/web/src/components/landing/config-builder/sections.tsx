@@ -13,6 +13,7 @@ import {
 	BG_MODES,
 	LAYOUTS,
 	MEDIA_MODES,
+	SCROLL_MODES,
 	THEME_VARIANTS,
 	THEMES,
 } from "@/lib/overlay/params";
@@ -35,6 +36,8 @@ import {
 	EMOTE_SCALE_PRESETS,
 	EVENT_TOGGLES,
 	FIELD,
+	REFRESH_PRESETS,
+	SCROLL_SPEED_PRESETS,
 	type SetConfig,
 	SIZE_PRESETS,
 } from "./form-model";
@@ -261,7 +264,7 @@ export function ConfigSections({
 				</Field>
 
 				<Field
-					hint="Right hugs messages to the right edge, for chat parked on that side of the scene."
+					hint="Right hugs messages to the right edge, for chat parked on that side of the scene. In ticker mode it picks the direction instead: right sends messages right to left, left sends them the way you read."
 					label="Alignment"
 				>
 					<div className="flex flex-wrap gap-2">
@@ -282,10 +285,56 @@ export function ConfigSections({
 					</div>
 				</Field>
 
-				{/* text size: presets for the common answer, slider for the rest */}
+				<Field
+					hint="Ticker lays chat out as one horizontal lane, for a strip under the gameplay. A lane fits roughly one message every few seconds, so on a busy channel it shows a sample of recent chat rather than all of it. Alignment sets which way it travels."
+					label="Motion"
+				>
+					<div className="flex flex-wrap gap-2">
+						{SCROLL_MODES.map((mode) => (
+							<button
+								aria-pressed={config.scroll === mode}
+								className={cn(
+									"hb-btn hb-btn-sm hb-btn-secondary",
+									config.scroll === mode && "hb-btn-selected",
+								)}
+								key={mode}
+								onClick={() => set("scroll", mode)}
+								type="button"
+							>
+								{mode === "off" ? "Stacked" : "Ticker"}
+							</button>
+						))}
+					</div>
+				</Field>
+
+				{config.scroll === "ticker" && (
+					<Field
+						hint="How fast the lane moves. 1x crosses a 1920px source in about 16 seconds; 5x does it in three. Faster also means more messages get through."
+						label={`Ticker speed (${config.scrollspeed}x)`}
+					>
+						<div className="flex flex-wrap gap-2">
+							{SCROLL_SPEED_PRESETS.map((value) => (
+								<button
+									aria-pressed={config.scrollspeed === value}
+									className={cn(
+										"hb-btn hb-btn-sm hb-btn-secondary min-w-11",
+										config.scrollspeed === value && "hb-btn-selected",
+									)}
+									key={value}
+									onClick={() => set("scrollspeed", value)}
+									type="button"
+								>
+									{value}x
+								</button>
+							))}
+						</div>
+					</Field>
+				)}
+
+				{/* named stops only; the form has no free slider, so these
+				    cover the whole 50-300 range the schema accepts */}
 				<Field
 					hint="Scales the theme's own text size, so a theme that ships smaller type stays proportionally smaller."
-					htmlFor="cfg-size"
 					label={`Text size (${config.size}%)`}
 				>
 					<div className="flex flex-wrap gap-2">
@@ -304,23 +353,12 @@ export function ConfigSections({
 							</button>
 						))}
 					</div>
-					<input
-						className="mt-1 h-11 w-full accent-[color:var(--site-brand)]"
-						id="cfg-size"
-						max={300}
-						min={50}
-						onChange={(e) => set("size", Number(e.target.value))}
-						step={5}
-						type="range"
-						value={config.size}
-					/>
 				</Field>
 
-				{/* emote multiplier: same preset-plus-slider shape as text size
-				    right above, so the two size knobs read as a pair */}
+				{/* emote multiplier: same stop-button shape as text size right
+				    above, so the two size knobs read as a pair */}
 				<Field
 					hint="Only messages that are nothing but emotes grow. One word alongside the emote and the message stays at normal size. Cheermote art follows the same multiplier."
-					htmlFor="cfg-emotescale"
 					label={`Emote size (${config.emotescale}x)`}
 				>
 					<div className="flex flex-wrap gap-2">
@@ -339,16 +377,6 @@ export function ConfigSections({
 							</button>
 						))}
 					</div>
-					<input
-						className="mt-1 h-11 w-full accent-[color:var(--site-brand)]"
-						id="cfg-emotescale"
-						max={4}
-						min={1}
-						onChange={(e) => set("emotescale", Number(e.target.value))}
-						step={0.5}
-						type="range"
-						value={config.emotescale}
-					/>
 				</Field>
 
 				<Field
@@ -616,26 +644,28 @@ export function ConfigSections({
 
 					<div className="hb-hairline border-t pt-4">
 						<Field
-							hint="Pulls new 7TV, BTTV, FFZ, and badge art mid-stream so fresh emotes show up without reloading OBS. Off, or every 5 minutes up to 24 hours; a gentle interval keeps the smaller emote APIs happy."
-							htmlFor="cfg-refresh"
+							hint="Pulls new 7TV, BTTV, FFZ, and badge art mid-stream so fresh emotes show up without reloading OBS. A gentle interval keeps the smaller emote APIs happy."
 							label={`Refresh emotes (${config.refresh === 0 ? "off" : `every ${config.refresh} min`})`}
 						>
-							{/* Slider ceiling matches the schema's 1440-minute max, so
-							    an imported refresh never has to be misrepresented or
-							    silently truncated on touch. */}
-							<input
-								className="mt-1 h-11 w-full accent-[color:var(--site-brand)]"
-								id="cfg-refresh"
-								max={1440}
-								min={0}
-								onChange={(e) => set("refresh", Number(e.target.value))}
-								step={5}
-								type="range"
-								value={config.refresh}
-							/>
-							<div className="flex justify-between text-[0.7rem] text-[color:var(--site-txt-2)]">
-								<span>Off</span>
-								<span>24 h</span>
+							{/* The top stop matches the schema's 1440-minute max, so an
+							    imported refresh never has to be misrepresented. An
+							    imported value that is not a stop still shows in the
+							    label above and survives untouched. */}
+							<div className="flex flex-wrap gap-2">
+								{REFRESH_PRESETS.map((preset) => (
+									<button
+										aria-pressed={config.refresh === preset.value}
+										className={cn(
+											"hb-btn hb-btn-sm hb-btn-secondary",
+											config.refresh === preset.value && "hb-btn-selected",
+										)}
+										key={preset.label}
+										onClick={() => set("refresh", preset.value)}
+										type="button"
+									>
+										{preset.label}
+									</button>
+								))}
 							</div>
 						</Field>
 					</div>

@@ -9,6 +9,7 @@ import type {
 	BgMode,
 	Layout,
 	MediaMode,
+	ScrollMode,
 	Theme,
 } from "@/lib/overlay/params";
 import type {
@@ -29,6 +30,8 @@ interface OverlayPreviewProps {
 	variant?: string;
 	layout?: Layout;
 	align?: Align;
+	scroll?: ScrollMode;
+	scrollSpeed?: number;
 	group?: boolean;
 	bg: BgMode;
 	showBadges: boolean;
@@ -110,6 +113,8 @@ export function OverlayPreview({
 	variant = "",
 	layout = "inline",
 	align = "left",
+	scroll = "off",
+	scrollSpeed = 1,
 	group = false,
 	bg,
 	showBadges,
@@ -163,17 +168,20 @@ export function OverlayPreview({
 				className="absolute inset-0"
 				emoteScale={emoteScale}
 				layout={layout}
+				scroll={scroll}
 				size={size}
 				theme={theme}
 				variant={variant}
 			>
 				<MessageList
+					align={align}
 					animate={animate}
 					bg={bg}
 					fadeSeconds={fadeSeconds}
 					group={group}
 					messages={previewMessages}
 					onMessageExpired={removeMessage}
+					scrollSpeed={scrollSpeed}
 					showAvatars={
 						avatarMode === undefined ? showAvatars : avatarMode !== "off"
 					}
@@ -181,6 +189,7 @@ export function OverlayPreview({
 					showPronouns={showPronouns}
 					showTimestamps={showTimestamps}
 					theme={theme}
+					ticker={scroll === "ticker"}
 					variant={variant}
 				/>
 			</HbRoot>

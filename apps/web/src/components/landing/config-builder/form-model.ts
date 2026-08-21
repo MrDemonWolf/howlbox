@@ -8,6 +8,7 @@ import type {
 	BgMode,
 	Layout,
 	MediaMode,
+	ScrollMode,
 	Theme,
 } from "@/lib/overlay/params";
 import {
@@ -23,6 +24,8 @@ export interface Config {
 	variant: string;
 	layout: Layout;
 	align: Align;
+	scroll: ScrollMode;
+	scrollspeed: number;
 	group: boolean;
 	bg: BgMode;
 	size: number;
@@ -55,6 +58,8 @@ export const DEFAULTS: Config = {
 	variant: OVERLAY_DEFAULTS.variant,
 	layout: OVERLAY_DEFAULTS.layout,
 	align: OVERLAY_DEFAULTS.align,
+	scroll: OVERLAY_DEFAULTS.scroll,
+	scrollspeed: OVERLAY_DEFAULTS.scrollspeed,
 	group: OVERLAY_DEFAULTS.group,
 	bg: OVERLAY_DEFAULTS.bg,
 	size: OVERLAY_DEFAULTS.size,
@@ -116,23 +121,46 @@ export const AVATAR_OPTIONS: { value: AvatarMode; label: string }[] = [
 // (tailwind-merge lets these win over the primitive's own classes).
 export const FIELD = "h-11 rounded-[0.7rem] px-3 text-sm";
 
-// Named text-size stops. The slider still allows anything in range;
-// these are the one-click answers for "make it bigger".
+// Named text-size stops. These ARE the control: the form offers no free
+// slider, so between them they have to cover the schema's 50-300 range
+// end to end, not just the comfortable middle.
 export const SIZE_PRESETS = [
-	{ label: "S", value: 85 },
+	{ label: "S", value: 75 },
 	{ label: "M", value: 100 },
 	{ label: "L", value: 125 },
 	{ label: "XL", value: 160 },
+	{ label: "2XL", value: 220 },
+	{ label: "3XL", value: 300 },
 ];
 
-// Emote multiplier stops. 1x is off; the slider covers the halves in
-// between. Past 4x a single emote is taller than three lines of chat.
+// Emote multiplier stops: every half step the schema accepts, since
+// these buttons are the only way to set it. Past 4x a single emote is
+// taller than three lines of chat, which is why the range stops there.
 export const EMOTE_SCALE_PRESETS = [
 	{ label: "1x", value: 1 },
 	{ label: "1.5x", value: 1.5 },
 	{ label: "2x", value: 2 },
+	{ label: "2.5x", value: 2.5 },
 	{ label: "3x", value: 3 },
+	{ label: "3.5x", value: 3.5 },
 	{ label: "4x", value: 4 },
+];
+
+// Ticker speed stops. Whole steps only: the lane is either readable or
+// it is not, and half a step is not a difference anyone can see.
+export const SCROLL_SPEED_PRESETS = [1, 2, 3, 4, 5];
+
+// Art refresh intervals. The schema takes any minute count up to 1440
+// and rounds 1-4 up to 5; these are the intervals worth offering, and
+// they reach both ends of it.
+export const REFRESH_PRESETS = [
+	{ label: "Off", value: 0 },
+	{ label: "5 min", value: 5 },
+	{ label: "15 min", value: 15 },
+	{ label: "30 min", value: 30 },
+	{ label: "1 h", value: 60 },
+	{ label: "6 h", value: 360 },
+	{ label: "24 h", value: 1440 },
 ];
 
 // Clamp a typed number into [min, max]. A valid in-range 0 must survive
@@ -158,6 +186,8 @@ export function configToOverlay(config: Config, cleanChannel: string) {
 		variant: config.variant,
 		layout: config.layout,
 		align: config.align,
+		scroll: config.scroll,
+		scrollspeed: config.scrollspeed,
 		group: config.group,
 		bg: config.bg,
 		size: config.size,
@@ -192,6 +222,8 @@ export function parsedToConfig(parsed: OverlayParams): Config {
 		variant: parsed.variant,
 		layout: parsed.layout,
 		align: parsed.align,
+		scroll: parsed.scroll,
+		scrollspeed: parsed.scrollspeed,
 		group: parsed.group,
 		bg: parsed.bg,
 		size: parsed.size,
