@@ -102,7 +102,12 @@ export function ConfigSections({
 				    overwrite aria-describedby); the input points at both the
 				    hint and, when invalid, the error itself. */}
 				<div className="grid gap-2">
-					<Label htmlFor="cfg-channel">Twitch channel</Label>
+					<Label htmlFor="cfg-channel">
+						Twitch channel{" "}
+						<span className="font-normal text-[color:var(--site-txt-2)] text-xs">
+							(required)
+						</span>
+					</Label>
 					<Input
 						aria-describedby={cn(
 							"cfg-channel-hint",
@@ -114,6 +119,7 @@ export function ConfigSections({
 						id="cfg-channel"
 						onChange={(e) => set("channel", e.target.value)}
 						placeholder="your_channel"
+						required
 						value={config.channel}
 					/>
 					<p
@@ -263,9 +269,16 @@ export function ConfigSections({
 					</div>
 				</Field>
 
+				{/* Same ?align param, two jobs: an edge to hug when messages
+				    stack, a direction of travel in a ticker lane. Label the
+				    one in force rather than making the reader hold both. */}
 				<Field
-					hint="Right hugs messages to the right edge, for chat parked on that side of the scene. In ticker mode it picks the direction instead: right sends messages right to left, left sends them the way you read."
-					label="Alignment"
+					hint={
+						config.scroll === "ticker"
+							? "Which way the lane travels. Right to left is the usual ticker direction; left to right runs the same lane the way you read."
+							: "Right hugs messages to the right edge, for chat parked on that side of the scene."
+					}
+					label={config.scroll === "ticker" ? "Direction" : "Alignment"}
 				>
 					<div className="flex flex-wrap gap-2">
 						{ALIGNS.map((side) => (
@@ -279,14 +292,20 @@ export function ConfigSections({
 								onClick={() => set("align", side)}
 								type="button"
 							>
-								{side === "left" ? "Left" : "Right"}
+								{config.scroll === "ticker"
+									? side === "left"
+										? "Left to right"
+										: "Right to left"
+									: side === "left"
+										? "Left"
+										: "Right"}
 							</button>
 						))}
 					</div>
 				</Field>
 
 				<Field
-					hint="Ticker lays chat out as one horizontal lane, for a strip under the gameplay. A lane fits roughly one message every few seconds, so on a busy channel it shows a sample of recent chat rather than all of it. Alignment sets which way it travels."
+					hint="Ticker lays chat out as one horizontal lane, for a strip under the gameplay. A lane fits roughly one message every few seconds, so on a busy channel it shows a sample of recent chat rather than all of it."
 					label="Motion"
 				>
 					<div className="flex flex-wrap gap-2">
