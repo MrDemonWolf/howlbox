@@ -67,7 +67,17 @@ const GROUPS: { id: string; title: string; blurb: string; params: Param[] }[] =
 				{
 					name: "align",
 					values: "left, right",
-					body: "Which edge messages hug. right is for chat parked on the right side of the scene: rows, and bubbles in bubble mode, grow from the right edge and text is right-aligned. Default left.",
+					body: "Which edge messages hug. right is for chat parked on the right side of the scene: rows, and bubbles in bubble mode, grow from the right edge and text is right-aligned. Under scroll=ticker there is no edge to hug, so this picks the lane's direction instead: right sends messages right to left, the way a news ticker runs, and left sends them the way you read. Default left.",
+				},
+				{
+					name: "scroll",
+					values: "off, ticker",
+					body: "How the messages are laid out over time. off is the stack: rows pile up from the bottom edge and the oldest scroll off the top. ticker turns the column into a single horizontal lane sliding right to left, for a strip under the gameplay rather than a column beside it. A lane can only carry so much: one message occupies it for the whole time it takes to cross, so it fits roughly one message every eight seconds at 1x and one every two at 5x. On a channel sending more than that, anything that cannot start within six seconds is dropped rather than queued, so what you see is a sample of recent chat instead of a backlog running minutes behind. Raise scrollspeed, narrow the source, or use max to trade differently. layout is ignored while a ticker is on, because a lane is one line by definition; align is not ignored, it picks which way the lane travels. A system reduced-motion preference turns the ticker off entirely and falls back to the stack. Default off.",
+				},
+				{
+					name: "scrollspeed",
+					values: "1 to 5, whole steps",
+					body: "How fast the ticker lane moves, as a multiplier on the base speed of 50 pixels per second. 1x is deliberately a crawl: a message takes about forty-five seconds to cross a 1920-wide source, slow enough to read a long one end to end. Every step climbs from there, and 5x crosses in about nine. Faster is not only faster: because each message holds the lane for less time, a higher speed also lets more of chat through. Ignored unless scroll is ticker. Default 1.",
 				},
 				{
 					name: "bg",
@@ -277,9 +287,12 @@ function useActiveSection(ids: string[]) {
 const CSS_HOOKS = [
 	{
 		cls: "hb-root",
-		body: "The overlay wrapper. Carries data-theme, the theme variables, and, when selected, data-variant, data-layout and data-align.",
+		body: "The overlay wrapper. Carries data-theme, the theme variables, and, when selected, data-variant, data-layout, data-align and data-scroll.",
 	},
-	{ cls: "hb-messages", body: "The scrolling message column." },
+	{
+		cls: "hb-messages",
+		body: "The message column. Under scroll=ticker it becomes the horizontal lane instead: one line tall, sized by --hb-ticker-height, with each row absolutely positioned and animated across it. --hb-ticker-w holds the lane width measured for that row and is what the hb-ticker keyframe travels by; it is written per row rather than on the lane, so resizing the source mid-stream cannot retarget a message already in flight.",
+	},
 	{
 		cls: "hb-message",
 		body: "One message row. A row whose body is nothing but emotes also carries data-emote-only, so hb-message[data-emote-only] targets exactly the rows emotescale grows. A group continuation row carries data-grouped.",
