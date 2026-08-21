@@ -3,7 +3,7 @@
 // manual-copy fallback live here because they own the URL readout node.
 
 import { cn } from "@howlbox/ui/lib/utils";
-import { Copy, ExternalLink, RotateCcw } from "lucide-react";
+import { AlertCircle, Copy, ExternalLink, RotateCcw } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
 
@@ -160,12 +160,33 @@ export function ConfigOutput({
 					<RotateCcw className="size-4" /> Reset
 				</button>
 			</div>
+			{/* Copy and Open are disabled without a channel, and a disabled
+			    button explains nothing on its own. Say what is missing, in
+			    error styling, next to the control it blocks. The button
+			    focuses the field so the fix is one click from here. */}
 			{!channelReady && (
-				<p className="text-[color:var(--site-txt-2)] text-xs">
-					{channelInvalid
-						? "That is not a valid Twitch channel name. Use 1 to 25 letters, numbers or underscores."
-						: "Enter your channel above to copy or open the overlay."}
-				</p>
+				<div
+					className="hb-hairline flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-[color:var(--site-danger,#e5484d)]/40 px-3 py-2 text-[color:var(--site-danger,#e5484d)] text-xs"
+					role="alert"
+				>
+					<AlertCircle aria-hidden="true" className="size-3.5 shrink-0" />
+					<span>
+						{channelInvalid
+							? "That is not a valid Twitch channel name. Use 1 to 25 letters, numbers or underscores."
+							: "Twitch channel is required before you can copy or open the overlay."}
+					</span>
+					<button
+						className="underline underline-offset-2"
+						onClick={() => {
+							const field = document.getElementById("cfg-channel");
+							field?.scrollIntoView({ block: "center" });
+							field?.focus();
+						}}
+						type="button"
+					>
+						Go to the field
+					</button>
+				</div>
 			)}
 		</div>
 	);

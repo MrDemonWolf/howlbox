@@ -12,7 +12,18 @@ import {
 	SiteShell,
 } from "@/components/landing/site-chrome";
 import { ThemeWall } from "@/components/landing/theme-wall";
-import { type BgMode, THEMES } from "@/lib/overlay/params";
+import {
+	type BgMode,
+	THEME_VARIANTS,
+	THEMES,
+	type Theme,
+} from "@/lib/overlay/params";
+import {
+	FAMILY_LABEL,
+	THEME_FAMILY,
+	THEME_LABEL,
+	VARIANT_LABEL,
+} from "@/lib/overlay/theme-meta";
 
 export const Route = createFileRoute("/")({
 	component: LandingPage,
@@ -116,6 +127,70 @@ function ComparisonCell({ value }: { value: boolean | string }) {
 		);
 	}
 	return <span className="hb-text-2 text-sm">{value}</span>;
+}
+
+// The wall is the picker, so the section owns the selection and one live
+// preview above it. Clicking a tile fills that preview instead of leaving
+// the page; the trip to the builder stays a deliberate second click.
+function ThemePicker() {
+	const [theme, setTheme] = useState<Theme>("wolf");
+	const [variant, setVariant] = useState("");
+
+	const query = [`theme=${theme}`, variant ? `variant=${variant}` : ""]
+		.filter(Boolean)
+		.join("&");
+
+	return (
+		<div className="mt-14 flex flex-col gap-10">
+			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+				<OverlayPreview
+					animate
+					bg="bubble"
+					className="h-80"
+					fadeSeconds={0}
+					showBadges
+					showTimestamps={false}
+					theme={theme}
+					variant={variant}
+				/>
+				<div className="flex flex-col gap-3">
+					<h3 className="hb-display text-2xl">
+						{THEME_LABEL[theme]}
+						{variant &&
+							` / ${(VARIANT_LABEL[theme] as Record<string, string>)[variant]}`}
+					</h3>
+					<p className="hb-text-2 text-sm leading-relaxed">
+						{FAMILY_LABEL[THEME_FAMILY[theme]]} family.{" "}
+						{THEME_VARIANTS[theme].length > 0
+							? `${THEME_VARIANTS[theme].length} color variants, on the chips under the tile.`
+							: "No color variants; the theme is its own palette."}
+					</p>
+					<code className="hb-code block w-fit max-w-full overflow-x-auto text-xs">
+						?channel=you&amp;{query}
+					</code>
+					<div>
+						<Link
+							className="hb-btn hb-btn-primary group"
+							search={variant ? { theme, variant } : { theme }}
+							to="/config"
+						>
+							Open in builder
+							<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+						</Link>
+					</div>
+				</div>
+			</div>
+
+			<ThemeWall
+				onSelect={(nextTheme, nextVariant) => {
+					setTheme(nextTheme);
+					setVariant(nextVariant);
+				}}
+				selected={theme}
+				selectedVariant={variant}
+			/>
+		</div>
+	);
 }
 
 // One preview, three buttons: the section's whole claim is that a single
@@ -259,12 +334,10 @@ function LandingPage() {
 					align="center"
 					index="01"
 					kicker="Thirty-one themes"
-					sub="Grouped the way the wall below is: Clean, Gamer, Cozy, and Retro. Nine themes carry color variants. Each tile renders the theme's real chat surface; click one to open the builder with it selected."
+					sub="Grouped the way the wall below is: Clean, Gamer, Cozy, and Retro. Nine themes carry color variants. Each tile renders the theme's real chat surface; click one and it fills the preview here, with its URL. The builder is one button from there."
 					title="Every theme is one query param"
 				/>
-				<div className="mt-14">
-					<ThemeWall />
-				</div>
+				<ThemePicker />
 			</Band>
 
 			{/* 02 display modes */}
