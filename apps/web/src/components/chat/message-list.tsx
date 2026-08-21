@@ -1,4 +1,12 @@
-import type { BgMode, THEME_VARIANTS, Theme } from "@/lib/overlay/params";
+import { useCallback, useRef } from "react";
+
+import type {
+	Align,
+	BgMode,
+	THEME_VARIANTS,
+	Theme,
+} from "@/lib/overlay/params";
+import { planTickerRun, tickerPxPerSec } from "@/lib/overlay/ticker";
 import type { ChatMessageView } from "@/lib/twitch/types";
 
 import { ChatMessageRow } from "./chat-message";
@@ -111,6 +119,13 @@ interface MessageListProps {
 	showAvatars?: boolean;
 	animate: boolean;
 	fadeSeconds: number;
+	// ?scroll=ticker: one horizontal lane instead of the vertical stack
+	ticker?: boolean;
+	// ?scrollspeed multiplier, 1x to 5x
+	scrollSpeed?: number;
+	// ?align picks the lane's direction: right sends messages right to
+	// left, left sends them the way you read
+	align?: Align;
 	onMessageExpired?: (id: string) => void;
 }
 
@@ -130,9 +145,75 @@ export function MessageList({
 	showAvatars = false,
 	animate,
 	fadeSeconds,
+	ticker = false,
+	scrollSpeed = 1,
+	align = "left",
 	onMessageExpired,
 }: MessageListProps) {
 	const surfaceColor = surfaceColorFor(theme, variant, bg);
+	const laneRef = useRef<HTMLDivElement>(null);
+	// where the lane is clear again. Lives in this closure rather than in
+	// a prop, so the only thing crossing into the memoized row is the
+	// stable callback below.
+	const freeAtRef = useRef(0);
+	// read inside the callback instead of closed over, so changing the
+	// speed never changes the callback identity
+	const speedRef = useRef(scrollSpeed);
+	speedRef.current = scrollSpeed;
+	const expireRef = useRef(onMessageExpired);
+	expireRef.current = onMessageExpired;
+	// left to right is the same run played backwards, so the direction
+	// costs one keyword rather than a second keyframe
+	const reverseRef = useRef(align === "left");
+	reverseRef.current = align === "left";
+
+	// Measure and schedule one run, once, when the row mounts. This is
+	// the only place in the overlay that writes to a DOM node React owns:
+	// the row never puts `animation` in its style prop in ticker mode, so
+	// React has nothing to clear on a re-render.
+	const handleTickerMount = useCallback((node: HTMLDivElement, id: string) => {
+		const lane = laneRef.current;
+		if (!lane || node.dataset.hbTicker !== undefined) {
+			return;
+		}
+		node.dataset.hbTicker = "";
+		// re-read every time: the bg=panel chrome appears with the first
+		// message and changes the lane width by 24px
+		const containerWidth = lane.clientWidth;
+		// The clock animation-delay is measured against. It must be this
+		// one and not performance.now(): a hidden document freezes the
+		// document timeline, so the cursor freezes with the animations
+		// instead of racing ahead of them and dumping a whole backlog on
+		// screen the moment OBS shows the source again. Note the reading
+		// is legitimately 0 while hidden, so this cannot be a truthiness
+		// check.
+		const timeline = document.timeline.currentTime;
+		const run = planTickerRun({
+			now: typeof timeline === "number" ? timeline : performance.now(),
+			freeAt: freeAtRef.current,
+			ownWidth: node.offsetWidth,
+			containerWidth,
+			pxPerSec: tickerPxPerSec(speedRef.current),
+		});
+		// null is the backlog case. Drop the message now rather than
+		// parking it: a run takes 10-20s while a busy channel refills
+		// ?max in about three, so a queue of never-scheduled rows would
+		// push the ones actually in flight out of the list and leave the
+		// lane empty. Only messages that are flying hold a slot.
+		if (!run) {
+			expireRef.current?.(id);
+			return;
+		}
+		freeAtRef.current = run.nextFreeAt;
+		// The travel distance belongs to the row, not the lane: a later
+		// row re-measures after the panel chrome appears or the source is
+		// resized, and a shared variable would hand that new distance to
+		// every row already in flight while their durations stayed, which
+		// reads as a speed jump mid-run.
+		node.style.setProperty("--hb-ticker-w", `${containerWidth}px`);
+		const direction = reverseRef.current ? "reverse" : "normal";
+		node.style.animation = `hb-ticker ${run.durationMs}ms linear ${run.delayMs}ms 1 ${direction} forwards`;
+	}, []);
 	// An empty panel is a themed rectangle sitting on the stream with
 	// nothing in it. Drop the panel chrome until there is chat to hold,
 	// so a quiet channel reads as no overlay rather than a dead box.
@@ -148,7 +229,7 @@ export function MessageList({
 		.join(" ");
 
 	return (
-		<div className={className}>
+		<div className={className} ref={laneRef}>
 			{messages.map((message, index) => {
 				// Adjacency is recomputed every render, so a continuation row
 				// whose predecessor gets evicted (delay buffer, fade, max)
@@ -175,6 +256,8 @@ export function MessageList({
 						showPronouns={showPronouns}
 						showTimestamps={showTimestamps}
 						surfaceColor={surfaceColor}
+						onTickerMount={ticker ? handleTickerMount : undefined}
+						ticker={ticker}
 					/>
 				);
 			})}

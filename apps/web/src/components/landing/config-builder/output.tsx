@@ -102,6 +102,8 @@ export function ConfigOutput({
 				emoteScale={config.emotescale}
 				group={config.group}
 				layout={config.layout}
+				scroll={config.scroll}
+				scrollSpeed={config.scrollspeed}
 				size={config.size}
 				theme={config.theme}
 				variant={config.variant}

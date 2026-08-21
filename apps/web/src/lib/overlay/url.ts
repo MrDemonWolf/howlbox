@@ -6,6 +6,7 @@ import {
 	OVERLAY_DEFAULTS,
 	OVERLAY_PARAM_KEYS,
 	overlayParamsSchema,
+	type ScrollMode,
 	type Theme,
 } from "@/lib/overlay/params";
 import {
@@ -20,6 +21,8 @@ export interface OverlayConfig {
 	variant: string;
 	layout: Layout;
 	align: Align;
+	scroll: ScrollMode;
+	scrollspeed: number;
 	group: boolean;
 	bg: BgMode;
 	size: number;
@@ -62,6 +65,12 @@ export function overlayQuery(config: OverlayConfig): string {
 	}
 	if (config.align !== OVERLAY_DEFAULTS.align) {
 		qs.set("align", config.align);
+	}
+	if (config.scroll !== OVERLAY_DEFAULTS.scroll) {
+		qs.set("scroll", config.scroll);
+	}
+	if (config.scrollspeed !== OVERLAY_DEFAULTS.scrollspeed) {
+		qs.set("scrollspeed", String(config.scrollspeed));
 	}
 	if (config.group) {
 		qs.set("group", "true");

@@ -12,6 +12,7 @@ import {
 	normalizeEventList,
 	normalizeLoginList,
 	normalizeVariant,
+	SCROLL_MODES,
 	THEMES,
 	TRUTHY_TOKENS,
 } from "./config";
@@ -23,6 +24,7 @@ export type {
 	Layout,
 	MediaMode,
 	OverlayParams,
+	ScrollMode,
 	Theme,
 } from "./config";
 export {
@@ -36,6 +38,7 @@ export {
 	normalizeLoginList,
 	normalizeVariant,
 	OVERLAY_DEFAULTS,
+	SCROLL_MODES,
 	THEME_VARIANTS,
 	THEMES,
 } from "./config";
@@ -122,6 +125,12 @@ const overlayParamsShape = z.object({
 	// stacked = badges and name on their own line above the message
 	layout: z.enum(LAYOUTS).catch("inline"),
 	align: z.enum(ALIGNS).catch("left"),
+	// ticker lays the column out as one horizontal lane instead
+	scroll: z.enum(SCROLL_MODES).catch("off"),
+	// how fast that lane moves, 1x to 5x of the base px/sec
+	scrollspeed: z
+		.preprocess(numberish, z.coerce.number().int().min(1).max(5))
+		.catch(1),
 	// Discord-style: consecutive rows from one chatter share one header
 	group: boolParam,
 	// text scale as a percentage of the theme's own --hb-font-size, so a

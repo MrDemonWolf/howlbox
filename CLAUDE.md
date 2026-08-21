@@ -188,13 +188,15 @@ over an adjective.
 
 Schema lives in `lib/overlay/params.ts`. Full param reference is the
 Usage table in `README.md`; keep both in sync. Defaults:
-`bg=off`, `theme=wolf`, `max=50`, `delay=0`, `fade=0`, `refresh=0`,
+`bg=off`, `theme=wolf`, `scroll=off`, `scrollspeed=1`, `max=50`,
+`delay=0`, `fade=0`, `refresh=0`,
 `avatars=off`, `media=animated`, `emotescale=1`, `events` empty,
 `badgeart`/`badgegist` empty, `badges`
 and `animate` on, all other flags off (`pronouns` too - opt-in, since
 it is a per-user pronouns.alejo.io lookup; `avatars` for the same
 reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
-0-600s, `refresh` 0 or 1-1440min (1-4 round up to 5), `emotescale` 1-4
+0-600s, `refresh` 0 or 1-1440min (1-4 round up to 5),
+`scrollspeed` 1-5 whole steps, `emotescale` 1-4
 in half steps. That
 last one is the only non-integer param: it snaps to the nearest half
 step rather than rejecting, in BOTH `params.ts` and `parse-search.ts`,
@@ -226,7 +228,8 @@ preprocess, since the router re-serializes the validated value.
   field. Never rename them. That now includes `hb-avatar`,
   `hb-event-line` and `hb-cheermote`, plus the `data-event="<kind>"`
   attribute on `hb-message` (so `hb-message[data-event="raid"]` can be
-  styled on its own).
+  styled on its own), and `data-scroll` on `hb-root` alongside
+  `data-layout` / `data-align` / `data-variant`.
 - OBS shows no error UI for browser sources; the overlay renders its
   own status pill (connecting / disconnected / could not join).
 - Target Chromium 127 (OBS 31+). devicePixelRatio is always 1.
@@ -274,6 +277,44 @@ must also set `--hb-surface-solid`. `HbRoot` stamps `data-variant` only
 for a real selection, so the attribute's absence IS the default state;
 `data-variant` is part of the public OBS Custom CSS contract alongside
 the `hb-*` class names.
+
+`?scroll=ticker` is the fourth layout axis: `.hb-messages` becomes a
+one-line horizontal lane (`position: relative`, pinned to
+`--hb-ticker-height`) and every `.hb-message` is absolute at `left: 100%`,
+carried across by the `hb-ticker` keyframe. Travel is
+`calc(-100% - var(--hb-ticker-w))`, the lane width written once per
+measurement, so it stays a Custom CSS hook. Duration and delay are the
+only per-row values: `MessageList` measures `offsetWidth` in a stable
+`useCallback` ref (NOT a hook in the memoized row) and writes
+`node.style.animation` directly, the one place the overlay writes to a DOM
+node React owns. That is safe only because the row omits `animation` from
+its style prop in ticker mode, so React never clears it. The scheduling
+math is `lib/overlay/ticker.ts` (`bun test`).
+
+Two rules there are load-bearing. The clock MUST be
+`document.timeline.currentTime`, not `performance.now()`: a hidden
+document freezes the timeline, so the cursor freezes with the animations
+instead of racing ahead and dumping a backlog the moment OBS shows the
+source. Its reading is legitimately `0` while hidden, so the fallback
+cannot be a truthiness check. And a lane carries roughly 0.12 messages/sec
+at 1x against a channel sending 10-40, so anything that cannot start
+within `TICKER_HORIZON_MS` is expired immediately rather than queued.
+Parking it instead looks harmless and is not: a run lasts 10-20s while a
+busy channel refills `?max` in about three, so unscheduled rows push the
+in-flight ones out of the list and the lane goes permanently blank. Only
+messages actually flying may hold a slot.
+
+Ticker mode drops `data-layout` in `HbRoot` rather than unwinding
+`layout=stacked` in CSS, because a `[data-scroll][data-layout]` override
+would then outrank the `?group` rule. `?align` has no edge to hug on a
+block container, so in ticker mode it picks the direction instead: `right`
+is right to left and `left` is the same run with `animation-direction:
+reverse`, which is why the direction rides the inline shorthand rather
+than a CSS rule. A reduced-motion preference turns
+the mode off outright in `overlay-app.tsx`; do not build a slow-ticker
+variant. Emote, cheermote and badge art measures 0 before it loads, so
+ticker mode reserves a square `min-width` on each: without it a
+four-badge row under-measures by ~74px and collides with its neighbour.
 
 `?layout` / `?align` / `?group` are the message-layout axis, orthogonal
 to themes: the row's author header (time, avatar, badges, pronouns,

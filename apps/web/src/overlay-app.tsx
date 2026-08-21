@@ -19,6 +19,11 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 	const reducedMotion = useReducedMotion();
 	const assetScale = assetScaleFor(params.size, params.emotescale);
 	const staticMedia = params.media === "static" || reducedMotion;
+	// A ticker is continuous motion by definition, so a reduced-motion
+	// preference turns it off rather than getting its own slower variant.
+	// It falls back to the normal stack, which in a strip-sized source
+	// shows the last message or two.
+	const scroll = reducedMotion ? "off" : params.scroll;
 	const mediaPreferences = { assetScale, staticMedia };
 	const emotesRef = useEmoteMap(
 		params.channel,
@@ -77,6 +82,8 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 			fadeSeconds={params.fade}
 			messages={messages}
 			onMessageExpired={removeMessage}
+			scroll={scroll}
+			scrollSpeed={params.scrollspeed}
 			showAvatars={params.avatars !== "off"}
 			showBadges={params.badges}
 			showPronouns={params.pronouns}

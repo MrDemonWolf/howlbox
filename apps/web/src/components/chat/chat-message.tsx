@@ -1,4 +1,4 @@
-import { type CSSProperties, memo } from "react";
+import { type CSSProperties, memo, useCallback } from "react";
 
 import { emoteOnlyCount, groupParts } from "@/lib/emotes/resolve";
 import type { OverlayParams } from "@/lib/overlay/params";
@@ -25,6 +25,12 @@ interface ChatMessageRowProps {
 	// data-grouped). Recomputed from adjacency by MessageList, so a row
 	// whose predecessor gets evicted regrows its header.
 	grouped?: boolean;
+	// ?scroll=ticker: the row is one run across the lane, so it takes its
+	// animation from MessageList instead of the entrance/fade string
+	ticker?: boolean;
+	// stable across renders, so the row stays memoized; the row hands its
+	// own id back rather than the list stamping one on the DOM
+	onTickerMount?: (node: HTMLDivElement, id: string) => void;
 	onExpire?: (id: string) => void;
 }
 
@@ -79,8 +85,18 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 	animate,
 	fadeSeconds,
 	grouped = false,
+	ticker = false,
+	onTickerMount,
 	onExpire,
 }: ChatMessageRowProps) {
+	const tickerRef = useCallback(
+		(node: HTMLDivElement | null) => {
+			if (node && onTickerMount) {
+				onTickerMount(node, message.id);
+			}
+		},
+		[onTickerMount, message.id],
+	);
 	// image badges follow the badges toggle, text/pronoun badges follow
 	// their own; both share the row in resolved order
 	const badges = message.renderBadges.filter((badge) =>
@@ -114,16 +130,20 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 	);
 
 	// CSS-only entrance + auto-hide: animation clocks keep running
-	// while OBS hides the source, unlike JS timers
-	const animation =
-		[
-			animate ? "hb-msg-in 220ms ease-out" : null,
-			fadeSeconds > 0
-				? `hb-fade-out 600ms ease ${fadeSeconds}s forwards`
-				: null,
-		]
-			.filter(Boolean)
-			.join(", ") || undefined;
+	// while OBS hides the source, unlike JS timers. In ticker mode the
+	// lane run owns this same property, so entrance and fade sit out:
+	// there is one `animation` per element and the run is the one that
+	// also carries the row off the screen.
+	const animation = ticker
+		? undefined
+		: [
+				animate ? "hb-msg-in 220ms ease-out" : null,
+				fadeSeconds > 0
+					? `hb-fade-out 600ms ease ${fadeSeconds}s forwards`
+					: null,
+			]
+				.filter(Boolean)
+				.join(", ") || undefined;
 	const className = [
 		"hb-message [overflow-wrap:anywhere]",
 		textShadow,
@@ -169,13 +189,14 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 			data-emote-only={emoteOnly ? "" : undefined}
 			data-event={message.event?.kind}
 			data-grouped={grouped ? "" : undefined}
+			ref={tickerRef}
 			style={style}
 			onAnimationEnd={
-				onExpire && fadeSeconds > 0
+				onExpire && (ticker || fadeSeconds > 0)
 					? (event) => {
 							if (
 								event.currentTarget === event.target &&
-								event.animationName === "hb-fade-out"
+								event.animationName === (ticker ? "hb-ticker" : "hb-fade-out")
 							) {
 								onExpire(message.id);
 							}
