@@ -37,6 +37,12 @@ Your chat. Your colors. Your howl.
 - **Adjustable emote size** - `emotescale` (1 to 4, half steps) grows
   messages that are nothing but emotes, without inflating regular text
   messages.
+- **Ticker mode** - `scroll=ticker` lays chat out as one horizontal lane
+  sliding right to left, for a strip under the gameplay instead of a
+  column beside it. `scrollspeed` runs it from 1x to 5x, with 1x a
+  deliberate crawl. A lane fits about one message every eight seconds at
+  1x, so on a fast channel it shows a sample of recent chat rather than
+  all of it.
 - **Badge art without secrets** - Every global and per-channel Twitch
   badge (including subscriber and bits art) via public, CORS-safe
   APIs, plus custom badge art overrides inline through the `badgeart`
@@ -117,8 +123,10 @@ the short version.
 | `theme`        | 31 values, listed in full at [/docs#themes](https://mrdemonwolf.github.io/howlbox/docs#themes) | Color theme preset (default `wolf`) |
 | `variant`      | theme-specific (e.g. `theme=terminal&variant=amber`) | Color variation of the chosen theme; unknown values fall back to the theme default |
 | `layout`       | `inline`, `stacked` | Name inline with the message, or on its own line above it |
-| `align`        | `left`, `right` | Which edge messages hug |
+| `align`        | `left`, `right` | Which edge messages hug; under `scroll=ticker`, which way the lane travels |
 | `group`        | `true`, `false` | Consecutive messages from one chatter share a single header |
+| `scroll`       | `off`, `ticker` | Stacked column, or one horizontal lane sliding right to left |
+| `scrollspeed`  | `1` to `5`, whole steps (default `1`) | Ticker lane speed; ignored unless `scroll=ticker` |
 | `bg`           | `off`, `panel`, `bubble`                 | Display mode (default `off`). `panel` draws its backdrop only while there are messages |
 | `size`         | percent, `50` to `300` (default `100`)   | Scales theme text, with a 12px rendered floor           |
 | `emotescale`   | `1` to `4`, half steps (default `1`)     | Grows emotes on messages that are nothing but emotes    |

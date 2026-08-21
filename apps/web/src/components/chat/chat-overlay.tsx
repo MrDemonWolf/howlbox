@@ -12,6 +12,8 @@ interface ChatOverlayProps {
 	variant: OverlayParams["variant"];
 	layout: OverlayParams["layout"];
 	align: OverlayParams["align"];
+	scroll: OverlayParams["scroll"];
+	scrollSpeed: number;
 	group: OverlayParams["group"];
 	showBadges: boolean;
 	showPronouns: boolean;
@@ -38,6 +40,8 @@ export function ChatOverlay({
 	variant,
 	layout,
 	align,
+	scroll,
+	scrollSpeed,
 	group,
 	showBadges,
 	showPronouns,
@@ -56,6 +60,7 @@ export function ChatOverlay({
 			className="fixed inset-0"
 			emoteScale={emoteScale}
 			layout={layout}
+			scroll={scroll}
 			size={size}
 			theme={theme}
 			variant={variant}
@@ -69,17 +74,20 @@ export function ChatOverlay({
 				</div>
 			)}
 			<MessageList
+				align={align}
 				animate={animate}
 				bg={bg}
 				fadeSeconds={fadeSeconds}
 				group={group}
 				messages={messages}
 				onMessageExpired={onMessageExpired}
+				scrollSpeed={scrollSpeed}
 				showAvatars={showAvatars}
 				showBadges={showBadges}
 				showPronouns={showPronouns}
 				showTimestamps={showTimestamps}
 				theme={theme}
+				ticker={scroll === "ticker"}
 				variant={variant}
 			/>
 		</HbRoot>

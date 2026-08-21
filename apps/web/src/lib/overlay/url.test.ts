@@ -39,6 +39,8 @@ describe("overlayQuery", () => {
 			theme: "wolf",
 			layout: "inline",
 			align: "left",
+			scroll: "off",
+			scrollspeed: 1,
 			group: false,
 			bg: "off",
 			size: 100,

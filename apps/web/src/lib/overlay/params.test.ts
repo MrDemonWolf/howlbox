@@ -83,6 +83,29 @@ describe("overlayParamsSchema invalid-value fallbacks", () => {
 		expect(parsed.group).toBe(OVERLAY_DEFAULTS.group);
 	});
 
+	test("scroll and scrollspeed clamp instead of erroring", () => {
+		expect(overlayParamsSchema.parse({ scroll: "ticker" }).scroll).toBe(
+			"ticker",
+		);
+		expect(overlayParamsSchema.parse({ scroll: "marquee" }).scroll).toBe(
+			OVERLAY_DEFAULTS.scroll,
+		);
+		expect(overlayParamsSchema.parse({ scrollspeed: 5 }).scrollspeed).toBe(5);
+		// out of range and non-integer both fall back rather than snapping
+		expect(overlayParamsSchema.parse({ scrollspeed: 9 }).scrollspeed).toBe(
+			OVERLAY_DEFAULTS.scrollspeed,
+		);
+		expect(overlayParamsSchema.parse({ scrollspeed: 0 }).scrollspeed).toBe(
+			OVERLAY_DEFAULTS.scrollspeed,
+		);
+		expect(overlayParamsSchema.parse({ scrollspeed: 2.5 }).scrollspeed).toBe(
+			OVERLAY_DEFAULTS.scrollspeed,
+		);
+		expect(overlayParamsSchema.parse({ scrollspeed: true }).scrollspeed).toBe(
+			OVERLAY_DEFAULTS.scrollspeed,
+		);
+	});
+
 	test("a variant outside its theme's list falls back to the default", () => {
 		expect(
 			overlayParamsSchema.parse({ theme: "neon", variant: "notreal" }).variant,

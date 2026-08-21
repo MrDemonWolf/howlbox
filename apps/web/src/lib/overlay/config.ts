@@ -9,6 +9,9 @@ export const MEDIA_MODES = ["animated", "static"] as const;
 // stacked puts badges and name on their own line above the message
 export const LAYOUTS = ["inline", "stacked"] as const;
 export const ALIGNS = ["left", "right"] as const;
+// ticker turns the message column into a single horizontal lane that
+// slides right to left; orthogonal to the theme, like layout and align
+export const SCROLL_MODES = ["off", "ticker"] as const;
 export const THEMES = [
 	"wolf",
 	"glass",
@@ -47,6 +50,7 @@ export type BgMode = (typeof BG_MODES)[number];
 export type MediaMode = (typeof MEDIA_MODES)[number];
 export type Layout = (typeof LAYOUTS)[number];
 export type Align = (typeof ALIGNS)[number];
+export type ScrollMode = (typeof SCROLL_MODES)[number];
 export type Theme = (typeof THEMES)[number];
 export type AssetScale = 1 | 2 | 3;
 
@@ -111,6 +115,8 @@ export interface OverlayParams {
 	variant: string;
 	layout: Layout;
 	align: Align;
+	scroll: ScrollMode;
+	scrollspeed: number;
 	group: boolean;
 	size: number;
 	emotescale: number;
@@ -153,6 +159,8 @@ export const OVERLAY_DEFAULTS = {
 	variant: "",
 	layout: "inline",
 	align: "left",
+	scroll: "off",
+	scrollspeed: 1,
 	group: false,
 	size: 100,
 	emotescale: 1,
@@ -177,6 +185,8 @@ export const OVERLAY_DEFAULTS = {
 	variant: string;
 	layout: Layout;
 	align: Align;
+	scroll: ScrollMode;
+	scrollspeed: number;
 	group: boolean;
 	size: number;
 	emotescale: number;

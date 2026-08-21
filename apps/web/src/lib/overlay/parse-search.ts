@@ -12,6 +12,7 @@ import {
 	normalizeVariant,
 	OVERLAY_DEFAULTS,
 	type OverlayParams,
+	SCROLL_MODES,
 	THEMES,
 	TRUTHY_TOKENS,
 } from "./config";
@@ -153,6 +154,13 @@ export function parseOverlaySearch(search: URLSearchParams): OverlayParams {
 		variant: normalizeVariant(theme, decoded.variant),
 		layout: oneOf(LAYOUTS, decoded.layout, OVERLAY_DEFAULTS.layout),
 		align: oneOf(ALIGNS, decoded.align, OVERLAY_DEFAULTS.align),
+		scroll: oneOf(SCROLL_MODES, decoded.scroll, OVERLAY_DEFAULTS.scroll),
+		scrollspeed: integer(
+			decoded.scrollspeed,
+			1,
+			5,
+			OVERLAY_DEFAULTS.scrollspeed,
+		),
 		group: boolOffByDefault(decoded.group),
 		size: integer(decoded.size, 50, 300, OVERLAY_DEFAULTS.size),
 		emotescale: halfStep(decoded.emotescale, 1, 4, OVERLAY_DEFAULTS.emotescale),
