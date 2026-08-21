@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { cn } from "@howlbox/ui/lib/utils";
 
 import { HbRoot } from "@/components/chat/hb-root";
 import { MessageList } from "@/components/chat/message-list";
@@ -58,16 +58,30 @@ const SAMPLE: ChatMessageView[] = [
 	},
 ];
 
-function ThemeTile({ theme }: { theme: Theme }) {
+function ThemeTile({
+	theme,
+	selected,
+	selectedVariant,
+	onSelect,
+}: {
+	theme: Theme;
+	selected: boolean;
+	selectedVariant: string;
+	onSelect: (theme: Theme, variant: string) => void;
+}) {
 	const variants: readonly string[] = THEME_VARIANTS[theme];
 	return (
 		// content-visibility skips rendering below-fold tiles until they
 		// scroll near, which keeps a 31-tile wall cheap with no observer code
 		<div className="[contain-intrinsic-size:auto_16rem] [content-visibility:auto]">
-			<Link
-				className="hb-card group flex flex-col overflow-hidden transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-				search={{ theme }}
-				to="/config"
+			<button
+				aria-pressed={selected && selectedVariant === ""}
+				className={cn(
+					"hb-card group flex w-full flex-col overflow-hidden text-left transition-all hover:-translate-y-1 hover:border-[color:var(--site-brand)] motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+					selected && "border-[color:var(--site-brand)]",
+				)}
+				onClick={() => onSelect(theme, "")}
+				type="button"
 			>
 				<div className="relative flex min-h-[9rem] items-end overflow-hidden bg-[linear-gradient(135deg,#0b1017_0%,#141a28_100%)]">
 					<HbRoot bg="bubble" className="w-full" theme={theme}>
@@ -90,15 +104,21 @@ function ThemeTile({ theme }: { theme: Theme }) {
 						?theme={theme}
 					</code>
 				</div>
-			</Link>
+			</button>
 			{variants.length > 0 && (
 				<div className="mt-2 flex flex-wrap gap-1.5 px-1">
 					{variants.map((variant) => (
-						<Link
-							className="hb-hairline-strong flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[color:var(--site-txt-2)] text-xs transition-colors hover:border-[color:var(--site-brand)] hover:text-[color:var(--site-txt-1)]"
+						<button
+							aria-pressed={selected && selectedVariant === variant}
+							className={cn(
+								"hb-hairline-strong flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[color:var(--site-txt-2)] text-xs transition-colors hover:border-[color:var(--site-brand)] hover:text-[color:var(--site-txt-1)]",
+								selected &&
+									selectedVariant === variant &&
+									"border-[color:var(--site-brand)] bg-[color:var(--site-brand-tint)] text-[color:var(--site-txt-1)]",
+							)}
 							key={variant}
-							search={{ theme, variant }}
-							to="/config"
+							onClick={() => onSelect(theme, variant)}
+							type="button"
 						>
 							<span
 								aria-hidden="true"
@@ -110,7 +130,7 @@ function ThemeTile({ theme }: { theme: Theme }) {
 								}}
 							/>
 							{(VARIANT_LABEL[theme] as Record<string, string>)[variant]}
-						</Link>
+						</button>
 					))}
 				</div>
 			)}
@@ -118,7 +138,15 @@ function ThemeTile({ theme }: { theme: Theme }) {
 	);
 }
 
-export function ThemeWall() {
+export function ThemeWall({
+	selected,
+	selectedVariant,
+	onSelect,
+}: {
+	selected: Theme;
+	selectedVariant: string;
+	onSelect: (theme: Theme, variant: string) => void;
+}) {
 	return (
 		<div className="flex flex-col gap-10">
 			{FAMILY_ORDER.map((family) => (
@@ -127,7 +155,13 @@ export function ThemeWall() {
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{THEMES.filter((theme) => THEME_FAMILY[theme] === family).map(
 							(theme) => (
-								<ThemeTile key={theme} theme={theme} />
+								<ThemeTile
+									key={theme}
+									onSelect={onSelect}
+									selected={theme === selected}
+									selectedVariant={selectedVariant}
+									theme={theme}
+								/>
 							),
 						)}
 					</div>
