@@ -38,6 +38,14 @@ const CASES = [
 	"layout=sideways&align=center&group=maybe",
 	"layout=stacked&layout=inline&group=1",
 	"layout=%5B%22stacked%22%5D&align=true",
+	// scroll and scrollspeed: the enum, the integer clamp and every
+	// malformed shape have to land on the same value in both parsers
+	"scroll=ticker&scrollspeed=3",
+	"scroll=marquee&scrollspeed=0",
+	"scrollspeed=9",
+	"scrollspeed=2.5",
+	"scrollspeed=true&scrollspeed=4",
+	"scroll=%5B%22ticker%22%5D&scrollspeed=%5B3%5D",
 ] as const;
 
 describe("parseOverlaySearch", () => {
