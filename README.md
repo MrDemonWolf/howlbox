@@ -1,17 +1,10 @@
 # HowlBox - Themed Twitch Chat Overlay for OBS
 
-HowlBox is a self-hosted, client-only Twitch chat overlay for OBS
-browser sources. It joins Twitch chat anonymously, renders native
-Twitch, 7TV, BTTV, and FrankerFaceZ emotes with badge art, and takes
-its entire configuration from URL query parameters, so an OBS source
-URL is the whole setup.
-
-Reading chat anonymously is what removes the account, and it is also
-the limit: HowlBox cannot send messages, moderate, or show follower
-alerts (follows only arrive over EventSub). Subs, gifts, raids, and
-cheers do arrive over anonymous IRC, and the `events` parameter
-renders them. If you need to send, moderate, or see follows, you need
-an overlay with a backend.
+HowlBox is a client-only Twitch chat overlay for OBS browser sources.
+It connects anonymously, renders Twitch, 7TV, BTTV, and FrankerFaceZ
+emotes with badge art, and stores every option in the overlay URL. The
+connection is read-only: HowlBox cannot send or moderate messages, and
+follower alerts need EventSub through a backend.
 
 Your chat. Your colors. Your howl.
 
@@ -47,6 +40,8 @@ Your chat. Your colors. Your howl.
   badge (including subscriber and bits art) via public, CORS-safe
   APIs, plus custom badge art overrides inline through the `badgeart`
   parameter or hosted in a public GitHub gist through `badgegist`.
+- **MrDemonWolf owner badge** - Owner messages use the official blue
+  wolf logo inside a shield-shaped frame.
 - **Pronoun badges** - Opt-in (`pronouns=true`) pronoun badges next to
   names, from pronouns.alejo.io, the service 7TV and FrankerFaceZ read.
   Each chatter's login is looked up there; enable it only if that
@@ -117,7 +112,9 @@ The full reference lives at `/docs` on the deployed site
 ([howlbox.mrdemonwolf.dev/docs](https://howlbox.mrdemonwolf.dev/docs)):
 every parameter with its own anchor, both custom badge art formats,
 the `hb-*` Custom CSS contract, and troubleshooting. The table below is
-the short version.
+the short version. The repository guide at
+[docs/readme.md](docs/readme.md) points to the reference source and
+contributor checks.
 
 | Parameter      | Values                                   | Description                                             |
 | -------------- | ---------------------------------------- | ------------------------------------------------------- |
@@ -189,7 +186,7 @@ becomes active" off.
 | Badges    | api.ivr.fi (Twitch badge art)       |
 | Pronouns  | pronouns.alejo.io (opt-in)          |
 | Avatars   | api.ivr.fi (batched, opt-in)        |
-| Cheermotes| static-cdn.jtvnw.net (global tiers) |
+| Cheermotes | static-cdn.jtvnw.net (global tiers) |
 | Styling   | Tailwind CSS 4 + CSS variables      |
 | UI        | shadcn/ui primitives (packages/ui)  |
 | Monorepo  | Turborepo + Bun workspaces          |
@@ -200,7 +197,7 @@ becomes active" off.
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) 1.3 or newer
+- [Bun](https://bun.sh) 1.3.14
 - OBS Studio 31 or newer (for overlay testing)
 
 ### Setup
@@ -223,7 +220,11 @@ becomes active" off.
 - `bun run dev:web`: Start only the web app (port 3001)
 - `bun run build`: Build the static site to `apps/web/dist`
 - `bun run check-types`: Check TypeScript types across the monorepo
-- `bun run check`: Run Biome formatting and linting
+- `bun test`: Run unit tests
+- `bun run test:e2e`: Run Playwright browser tests
+- `bun run check:ci`: Run Biome checks without applying fixes
+- `bun run ci`: Run format and lint checks, type checks, unit tests,
+  build, and E2E tests
 
 ### Code Quality
 
@@ -239,14 +240,15 @@ becomes active" off.
 
 Pushes to `main` build and deploy automatically via
 `.github/workflows/deploy.yml`. One-time setup: in the repository
-settings, set Pages > Source to "GitHub Actions". The target custom domain is
-`https://howlbox.mrdemonwolf.dev/`; the build sets `BASE_PATH=/` for root
-hosting. GitHub has verified `mrdemonwolf.dev` for the organization, and the
-Pages custom domain and DNS-only Cloudflare CNAME are configured. GitHub's
-HTTPS certificate is still pending; the deploy workflow blocks deployment
-until HTTPS responds successfully. For a different host or subpath,
-update `SITE_ORIGIN` and `SITE_BASE` in
-`apps/web/src/lib/seo/routes.ts` along with `BASE_PATH`.
+settings, set Pages > Source to "GitHub Actions". GitHub Pages is configured
+for root-path hosting at
+`https://howlbox.mrdemonwolf.dev/`. The custom domain is verified, the
+TLS certificate is approved, and HTTPS enforcement is on.
+Cloudflare has a DNS-only CNAME to `mrdemonwolf.github.io`. The deploy
+workflow checks the Pages domain, DNS target, and HTTPS response before it
+publishes. For a different host or subpath, update `SITE_ORIGIN` and
+`SITE_BASE` in `apps/web/src/lib/seo/routes.ts`, then set `BASE_PATH`
+to the same path.
 
 The build generates a `404.html` marked `noindex` plus a real `index.html`
 per route (including `/overlay`), so every route resolves with an
@@ -291,6 +293,8 @@ howlbox/
 ├── packages/
 │   ├── config/                # Shared tsconfig base
 │   └── ui/                    # Shared shadcn/ui components and styles
+├── docs/
+│   └── readme.md              # Contributor guide to the live docs and checks
 ├── .github/workflows/         # CI deploy to GitHub Pages
 ├── biome.json                 # Lint and format config
 └── turbo.json                 # Turborepo pipeline
@@ -305,5 +309,7 @@ howlbox/
 Have questions or feedback?
 
 - Discord: [Join my server](https://mrdwolf.net/discord)
+
+## Footer
 
 Made with love by [MrDemonWolf, Inc.](https://www.mrdemonwolf.com)

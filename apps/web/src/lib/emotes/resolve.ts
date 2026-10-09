@@ -10,7 +10,7 @@ export type BadgeMap = Map<string, string>;
 
 export const OWNER_LOGIN = "mrdemonwolf";
 export const OWNER_BADGE_URL =
-	"https://www.mrdemonwolf.com/wp-content/uploads/2022/12/cropped-logo-white-border-192x192.png";
+	"https://www.mrdemonwolf.com/wp-content/uploads/2022/12/logo.svg";
 
 export type EmotePart = Extract<MessagePart, { type: "emote" }>;
 

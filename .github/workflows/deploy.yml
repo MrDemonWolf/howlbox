@@ -63,10 +63,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       # The root-path artifact needs Pages, DNS, and HTTPS ready first.
-      # Public API and DNS checks need no token and fail closed.
+      # The Pages API check uses the job token because anonymous requests can
+      # return 404 even when the public site and custom domain are configured.
       - name: Require the HowlBox domain cutover
+        env:
+          PAGES_API_TOKEN: ${{ github.token }}
         run: |
           cname="$(curl -fsS -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${PAGES_API_TOKEN}" \
             https://api.github.com/repos/MrDemonWolf/howlbox/pages |
             jq -r '.cname // ""' |
             tr '[:upper:]' '[:lower:]')"

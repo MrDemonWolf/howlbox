@@ -1,6 +1,11 @@
 import { type CSSProperties, memo, useCallback } from "react";
 
-import { emoteOnlyCount, groupParts } from "@/lib/emotes/resolve";
+import {
+	emoteOnlyCount,
+	groupParts,
+	OWNER_BADGE_URL,
+	OWNER_LOGIN,
+} from "@/lib/emotes/resolve";
 import type { OverlayParams } from "@/lib/overlay/params";
 import {
 	outlinedUserColor,
@@ -228,7 +233,24 @@ export const ChatMessageRow = memo(function ChatMessageRow({
 					/>
 				)}
 				{badges.map((badge, index) =>
-					badge.kind === "image" ? (
+					badge.kind === "image" &&
+					message.login === OWNER_LOGIN &&
+					badge.url === OWNER_BADGE_URL ? (
+						<span
+							aria-label="MrDemonWolf owner badge"
+							className="hb-badge hb-owner-badge -my-0.5 mr-1"
+							key={`${message.id}-badge-${index}`}
+							role="img"
+						>
+							<img
+								alt=""
+								className="hb-owner-badge-icon"
+								decoding="async"
+								referrerPolicy="no-referrer"
+								src={badge.url}
+							/>
+						</span>
+					) : badge.kind === "image" ? (
 						<img
 							alt=""
 							className="hb-badge -my-0.5 mr-1 inline-block h-[1.15em] align-middle"
