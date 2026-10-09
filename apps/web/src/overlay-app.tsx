@@ -25,12 +25,12 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 	// shows the last message or two.
 	const scroll = reducedMotion ? "off" : params.scroll;
 	const mediaPreferences = { assetScale, staticMedia };
-	const emotesRef = useEmoteMap(
+	const [emotesRef, emotesRevision] = useEmoteMap(
 		params.channel,
 		params.refresh,
 		mediaPreferences,
 	);
-	const badgesRef = useBadgeMap(
+	const [badgesRef, badgesRevision] = useBadgeMap(
 		params.badges ? params.channel : undefined,
 		params.badgeart,
 		params.badgegist,
@@ -50,6 +50,7 @@ export function OverlayApp({ params }: { params: OverlayParams }) {
 		staticMedia,
 		emotesRef,
 		badgesRef,
+		mediaRevision: `${emotesRevision}:${badgesRevision}`,
 	});
 
 	useEffect(() => {

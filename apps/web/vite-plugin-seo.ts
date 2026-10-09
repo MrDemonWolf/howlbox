@@ -119,10 +119,8 @@ export function seoPlugin(): Plugin {
 			});
 			await writeFile(join(dist, "404.html"), notFound);
 
-			// robots.txt is only read from the host root, so on a project
-			// subpath this file is inert. Shipping it anyway costs nothing and
-			// becomes correct the day this moves to a custom domain. The
-			// noindex meta above is what actually keeps /overlay out.
+			// robots.txt is read from the host root. The route's noindex meta
+			// independently keeps /overlay out of search results.
 			await writeFile(
 				join(dist, "robots.txt"),
 				`User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`,

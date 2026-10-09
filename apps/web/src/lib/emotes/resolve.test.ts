@@ -1,12 +1,15 @@
 import { describe, expect, test } from "bun:test";
 
-import type { MessagePart } from "@/lib/twitch/types";
+import type { ChatMessageView, MessagePart } from "@/lib/twitch/types";
 
 import type { EmoteMap } from "./emotes";
 import {
 	emoteOnlyCount,
 	groupParts,
 	isEmoteOnly,
+	OWNER_BADGE_URL,
+	resolveMessageExtras,
+	resolveMessageMedia,
 	splitTextPart,
 } from "./resolve";
 
@@ -15,6 +18,22 @@ const emotes: EmoteMap = new Map([
 	["Hands", { url: "https://cdn/hands.png", zeroWidth: false }],
 	["RainTime", { url: "https://cdn/rain.png", zeroWidth: true }],
 ]);
+
+function message(login = "viewer"): ChatMessageView {
+	return {
+		id: "message-1",
+		channelId: null,
+		login,
+		displayName: login,
+		color: "#ffffff",
+		badges: [{ set: "subscriber", version: "12" }],
+		renderBadges: [],
+		parts: [{ type: "text", text: "Hello Kappa" }],
+		isAction: false,
+		isPrivileged: false,
+		timestamp: 1,
+	};
+}
 
 describe("splitTextPart", () => {
 	test("emits emote and text parts around whitespace", () => {
@@ -25,6 +44,7 @@ describe("splitTextPart", () => {
 				name: "Kappa",
 				url: "https://cdn/kappa.png",
 				zeroWidth: false,
+				thirdParty: true,
 			},
 			{ type: "text", text: " there" },
 		]);
@@ -147,5 +167,76 @@ describe("groupParts zero-width overlay grouping", () => {
 			emote("RainTime", true),
 		]);
 		expect(groups.length).toBe(3);
+	});
+});
+
+describe("resolveMessageMedia", () => {
+	test("adds emotes and badges when maps arrive after a message", () => {
+		const initial = resolveMessageExtras(
+			message(),
+			null,
+			null,
+			"she/her",
+			"https://cdn.example/avatar.png",
+		);
+		const lateEmotes = new Map([
+			["Kappa", { url: "https://cdn.example/kappa.png", zeroWidth: false }],
+		]);
+		const badges = new Map([
+			["subscriber/12", "https://cdn.example/subscriber.png"],
+		]);
+
+		const resolved = resolveMessageMedia(initial, lateEmotes, badges);
+
+		expect(resolved.parts).toEqual([
+			{ type: "text", text: "Hello " },
+			{
+				type: "emote",
+				name: "Kappa",
+				url: "https://cdn.example/kappa.png",
+				zeroWidth: false,
+				thirdParty: true,
+			},
+		]);
+		expect(resolved.renderBadges).toEqual([
+			{ kind: "image", url: "https://cdn.example/subscriber.png" },
+			{ kind: "text", text: "she/her" },
+		]);
+		expect(resolved.avatarUrl).toBe("https://cdn.example/avatar.png");
+	});
+
+	test("refreshes or removes previously resolved third-party emotes", () => {
+		const firstMap = new Map([
+			["Kappa", { url: "https://cdn.example/kappa-a.png", zeroWidth: false }],
+		]);
+		const refreshedMap = new Map([
+			["Kappa", { url: "https://cdn.example/kappa-b.png", zeroWidth: true }],
+		]);
+		const initial = resolveMessageExtras(message(), firstMap, null, null, null);
+
+		const refreshed = resolveMessageMedia(initial, refreshedMap, null);
+		expect(refreshed.parts).toContainEqual({
+			type: "emote",
+			name: "Kappa",
+			url: "https://cdn.example/kappa-b.png",
+			zeroWidth: true,
+			thirdParty: true,
+		});
+
+		const removed = resolveMessageMedia(refreshed, new Map(), null);
+		expect(removed.parts).toEqual([
+			{ type: "text", text: "Hello " },
+			{ type: "text", text: "Kappa" },
+		]);
+	});
+
+	test("shows the site icon badge on the owner account", () => {
+		const resolved = resolveMessageMedia(message("mrdemonwolf"), null, null);
+
+		expect(resolved.renderBadges).toContainEqual({
+			kind: "image",
+			url: OWNER_BADGE_URL,
+		});
+		expect(resolveMessageMedia(message(), null, null).renderBadges).toEqual([]);
 	});
 });

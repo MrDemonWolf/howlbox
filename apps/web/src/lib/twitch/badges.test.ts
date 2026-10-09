@@ -4,6 +4,7 @@ import { resetCacheCooldownsForTests } from "../cache";
 import {
 	fetchBadgeMap,
 	gistIdFrom,
+	mergeBadgeArt,
 	parseCustomBadgeArt,
 	parseGistBadgeArt,
 } from "./badges";
@@ -155,6 +156,26 @@ describe("parseGistBadgeArt", () => {
 	test("drops content over the size cap", () => {
 		const huge = `x=https://ex.com/${"a".repeat(70 * 1024)}.png`;
 		expect(parseGistBadgeArt(huge)).toEqual([]);
+	});
+});
+
+describe("mergeBadgeArt", () => {
+	test("bare set art covers known versions while explicit versions win", () => {
+		const map = new Map([
+			["moderator/1", "https://cdn.example/mod.png"],
+			["moderator/2", "https://cdn.example/mod-2.png"],
+			["subscriber/1", "https://cdn.example/sub.png"],
+		]);
+
+		mergeBadgeArt(map, [
+			["moderator/1", "https://custom.example/mod-1.png"],
+			["moderator", "https://custom.example/mod.png"],
+		]);
+
+		expect(map.get("moderator")).toBe("https://custom.example/mod.png");
+		expect(map.get("moderator/1")).toBe("https://custom.example/mod-1.png");
+		expect(map.get("moderator/2")).toBe("https://custom.example/mod.png");
+		expect(map.get("subscriber/1")).toBe("https://cdn.example/sub.png");
 	});
 });
 

@@ -69,8 +69,10 @@ Your chat. Your colors. Your howl.
 - **URL-only configuration** - Every option is a query parameter. No
   config files, no dashboard, no stored state.
 - **Configurator page** - Pick options live at `/config` with a real
-  overlay preview, then copy a ready OBS source URL. The landing page
-  at `/` shows a theme-switching demo.
+  overlay preview, switch between demo chatter and a live channel, then
+  copy a ready OBS source URL. It imports older `/howlbox/overlay` links
+  and emits the current custom-domain URL. The landing page at `/` shows
+  a theme-switching demo.
 - **OBS-optimized** - Transparent from first paint, zero blur filters
   (safe on CPU-rendered setups), event-driven reconnects that survive
   hidden-source timer throttling, and a visible connection status
@@ -112,7 +114,7 @@ Build an overlay URL with the builder at `/config`, or hand-write one:
 ```
 
 The full reference lives at `/docs` on the deployed site
-([mrdemonwolf.github.io/howlbox/docs](https://mrdemonwolf.github.io/howlbox/docs)):
+([howlbox.mrdemonwolf.dev/docs](https://howlbox.mrdemonwolf.dev/docs)):
 every parameter with its own anchor, both custom badge art formats,
 the `hb-*` Custom CSS contract, and troubleshooting. The table below is
 the short version.
@@ -120,7 +122,7 @@ the short version.
 | Parameter      | Values                                   | Description                                             |
 | -------------- | ---------------------------------------- | ------------------------------------------------------- |
 | `channel`      | Twitch login name                        | Channel to join (required)                              |
-| `theme`        | 31 values, listed in full at [/docs#themes](https://mrdemonwolf.github.io/howlbox/docs#themes) | Color theme preset (default `wolf`) |
+| `theme`        | 31 values, listed in full at [/docs#themes](https://howlbox.mrdemonwolf.dev/docs#themes) | Color theme preset (default `wolf`) |
 | `variant`      | theme-specific (e.g. `theme=terminal&variant=amber`) | Color variation of the chosen theme; unknown values fall back to the theme default |
 | `layout`       | `inline`, `stacked` | Name inline with the message, or on its own line above it |
 | `align`        | `left`, `right` | Which edge messages hug; under `scroll=ticker`, which way the lane travels |
@@ -237,10 +239,14 @@ becomes active" off.
 
 Pushes to `main` build and deploy automatically via
 `.github/workflows/deploy.yml`. One-time setup: in the repository
-settings, set Pages > Source to "GitHub Actions". The site serves at
-`https://mrdemonwolf.github.io/howlbox/` (the build sets
-`BASE_PATH=/howlbox/`; use a custom domain and drop the variable for
-root hosting).
+settings, set Pages > Source to "GitHub Actions". The target custom domain is
+`https://howlbox.mrdemonwolf.dev/`; the build sets `BASE_PATH=/` for root
+hosting. GitHub has verified `mrdemonwolf.dev` for the organization, and the
+Pages custom domain and DNS-only Cloudflare CNAME are configured. GitHub's
+HTTPS certificate is still pending; the deploy workflow blocks deployment
+until HTTPS responds successfully. For a different host or subpath,
+update `SITE_ORIGIN` and `SITE_BASE` in
+`apps/web/src/lib/seo/routes.ts` along with `BASE_PATH`.
 
 The build generates a `404.html` marked `noindex` plus a real `index.html`
 per route (including `/overlay`), so every route resolves with an
@@ -249,8 +255,9 @@ HTTP 200 instead of falling back to the SPA's 404 status.
 #### Coolify or any static host
 
 `bun run build` produces a fully static site in `apps/web/dist`. Serve
-that folder as-is (set `BASE_PATH` at build time if hosting under a
-subpath). No server runtime is required.
+that folder as-is. For a different host or subpath, update the SEO URL
+constants as described above and set `SITE_BASE` and `BASE_PATH` to the
+same path. No server runtime is required.
 
 ### Test URLs
 
@@ -258,9 +265,9 @@ Once deployed, these are ready to paste into an OBS browser source
 (swap the channel for testing against a busier chat):
 
 ```
-https://mrdemonwolf.github.io/howlbox/overlay?channel=mrdemonwolf&theme=wolf&bg=off&hidebots=true
-https://mrdemonwolf.github.io/howlbox/overlay?channel=mrdemonwolf&theme=glass&bg=bubble&fade=30
-https://mrdemonwolf.github.io/howlbox/overlay?channel=xqc&theme=terminal&bg=panel&timestamps=true
+https://howlbox.mrdemonwolf.dev/overlay?channel=mrdemonwolf&theme=wolf&bg=off&hidebots=true
+https://howlbox.mrdemonwolf.dev/overlay?channel=mrdemonwolf&theme=glass&bg=bubble&fade=30
+https://howlbox.mrdemonwolf.dev/overlay?channel=xqc&theme=terminal&bg=panel&timestamps=true
 ```
 
 Suggested source size: 480 x 800 at the default font scale.

@@ -101,7 +101,9 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 - `apps/web/src/lib/overlay/url.ts` - `buildOverlayUrl` /
   `overlayQuery`: serialize a config into the overlay query string,
   omitting defaults. Inverse of `params.ts`, so it round-trips.
-  `ConfigBuilder` uses it instead of a hand-rolled query ladder.
+  `ConfigBuilder` uses it instead of a hand-rolled query ladder. URLs
+  always emit from the canonical `SITE_URL`; the importer accepts old
+  `/howlbox/overlay` links and keeps their settings on the new host.
 - `apps/web/src/components/chat/` - renderer (Tailwind classes) and
   `overlay.css` (per-theme variables plus transform/opacity keyframes).
   `ChatMessageRow` is memoized. `message-list.tsx` maps each theme to a
@@ -381,7 +383,8 @@ the division can never be by zero.
 ## Deploy
 
 GitHub Pages via `.github/workflows/deploy.yml`: bun build with
-`BASE_PATH=/howlbox/` (vite `base` + router `basepath` read it). The
+`BASE_PATH=/` for `howlbox.mrdemonwolf.dev` (vite `base` + router `basepath`
+read it). The
 workflow no longer copies `index.html` to `404.html`; the seo plugin
 writes a noindexed `404.html` during the build, along with a real
 `index.html` per route so `/overlay` and the rest resolve with a 200

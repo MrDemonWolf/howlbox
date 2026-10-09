@@ -21,7 +21,7 @@ function resolveCommit(): string {
 }
 
 export default defineConfig({
-	// GitHub Pages project sites serve at /<repo>/; CI sets BASE_PATH
+	// CI sets BASE_PATH for custom-domain root or subpath builds
 	base: process.env.BASE_PATH ?? "/",
 	define: {
 		__COMMIT_HASH__: JSON.stringify(resolveCommit()),

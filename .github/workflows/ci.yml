@@ -1,7 +1,6 @@
 name: CI
 
-# Deploy only runs `bun run build`, which does not typecheck, so without
-# this a type error or a failing test reaches production green.
+# Pull requests run the same unit, browser, and build checks as Pages deploys.
 on:
   pull_request:
   push:
@@ -35,9 +34,10 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # non-mutating gate: biome ci + check-types (vite build + tsc) +
-      # tests + the production build, matching what `bun ci` runs locally
+      - name: Install Playwright Chromium
+        run: bunx playwright install chromium --with-deps --only-shell
+
       - name: Verify
         run: bun run ci
         env:
-          BASE_PATH: /howlbox/
+          BASE_PATH: /

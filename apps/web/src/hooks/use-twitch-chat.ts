@@ -1,7 +1,11 @@
 import { type RefObject, useCallback, useEffect, useState } from "react";
 
 import type { EmoteMap } from "@/lib/emotes/emotes";
-import { type BadgeMap, resolveMessageExtras } from "@/lib/emotes/resolve";
+import {
+	type BadgeMap,
+	resolveMessageExtras,
+	resolveMessageMedia,
+} from "@/lib/emotes/resolve";
 import { resolveAvatar, warmAvatar } from "@/lib/twitch/avatars";
 import { connectChat } from "@/lib/twitch/chat";
 import {
@@ -41,6 +45,7 @@ export interface UseTwitchChatOptions {
 	// maps never tear down the connection
 	emotesRef?: RefObject<EmoteMap | null>;
 	badgesRef?: RefObject<BadgeMap | null>;
+	mediaRevision?: string;
 }
 
 const DEFAULT_MAX_MESSAGES = 50;
@@ -59,15 +64,33 @@ export function useTwitchChat(
 	const avatars = options.avatars ?? "off";
 	const emoteScale = options.emoteScale ?? 2;
 	const staticMedia = options.staticMedia ?? false;
+	const emotesRef = options.emotesRef;
+	const badgesRef = options.badgesRef;
+	const mediaRevision = options.mediaRevision;
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
 	const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
 	const removeMessage = useCallback((messageId: string) => {
 		setMessages((prev) => removeById(prev, messageId));
 	}, []);
-	// emotesRef/badgesRef are read via .current at append time on
-	// purpose; adding them to the deps would tear down and rebuild the
-	// chat connection whenever a map loads (see use-emotes.ts).
+	useEffect(() => {
+		if (mediaRevision === undefined) {
+			return;
+		}
+		setMessages((prev) =>
+			prev.length === 0
+				? prev
+				: prev.map((message) =>
+						resolveMessageMedia(
+							message,
+							emotesRef?.current ?? null,
+							badgesRef?.current ?? null,
+						),
+					),
+		);
+	}, [mediaRevision, emotesRef, badgesRef]);
+
+	// Map refs stay out of the connection effect so a refresh never reconnects chat.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional ref-at-append pattern
 	useEffect(() => {
 		if (!channel) {
@@ -98,7 +121,13 @@ export function useTwitchChat(
 		const promote = (id: string) => {
 			const entry = pending.take(id);
 			if (entry) {
-				append(entry.message);
+				append(
+					resolveMessageMedia(
+						entry.message,
+						emotesRef?.current ?? null,
+						badgesRef?.current ?? null,
+					),
+				);
 			}
 		};
 
@@ -135,8 +164,8 @@ export function useTwitchChat(
 					}
 					const message = resolveMessageExtras(
 						raw,
-						options.emotesRef?.current ?? null,
-						options.badgesRef?.current ?? null,
+						emotesRef?.current ?? null,
+						badgesRef?.current ?? null,
 						pronouns ? resolvePronoun(raw.login) : null,
 						wantsAvatar ? resolveAvatar(raw.login) : null,
 					);

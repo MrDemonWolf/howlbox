@@ -11,11 +11,8 @@
 // Pages 301-redirects to for a directory. TanStack Router matches
 // "/docs/" to the "/docs" route, so nothing else has to change.
 
-export const SITE_ORIGIN = "https://mrdemonwolf.github.io";
-
-// Kept in step with BASE_PATH in .github/workflows/deploy.yml. Moving to
-// a custom domain means changing this and dropping BASE_PATH together.
-export const SITE_BASE = "/howlbox/";
+export const SITE_ORIGIN = "https://howlbox.mrdemonwolf.dev";
+export const SITE_BASE = "/";
 
 export const SITE_URL = `${SITE_ORIGIN}${SITE_BASE}`;
 export const OG_IMAGE_ALT = "HowlBox, a Twitch chat overlay for OBS";

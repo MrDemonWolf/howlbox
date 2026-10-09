@@ -6,6 +6,8 @@ export type MessagePart =
 			url: string;
 			// 7TV overlay emotes render stacked on the previous emote
 			zeroWidth?: boolean;
+			// Third-party emotes can be re-resolved when their map refreshes.
+			thirdParty?: true;
 	  };
 
 export interface ChatBadge {

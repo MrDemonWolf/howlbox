@@ -1,3 +1,5 @@
+import { Input } from "@howlbox/ui/components/input";
+import { Label } from "@howlbox/ui/components/label";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Link2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -362,6 +364,23 @@ const TROUBLE = [
 function DocsPage() {
 	const ids = useMemo(() => TOC.map((item) => item.id), []);
 	const activeId = useActiveSection(ids);
+	const [parameterSearch, setParameterSearch] = useState("");
+	const matchingParameters = useMemo(() => {
+		const query = parameterSearch.trim().toLowerCase();
+		if (!query) {
+			return [];
+		}
+		return GROUPS.flatMap((group) =>
+			group.params
+				.filter((param) =>
+					[group.title, param.name, param.values, param.body]
+						.join(" ")
+						.toLowerCase()
+						.includes(query),
+				)
+				.map((param) => ({ group: group.title, name: param.name })),
+		);
+	}, [parameterSearch]);
 
 	return (
 		<SiteShell>
@@ -436,7 +455,7 @@ function DocsPage() {
 							</p>
 							<pre className="hb-card mt-4 w-fit max-w-full overflow-x-auto p-4">
 								<code className="font-mono text-sm">
-									https://mrdemonwolf.github.io/howlbox/overlay?channel=mrdemonwolf&amp;theme=wolf&amp;bg=bubble
+									https://howlbox.mrdemonwolf.dev/overlay?channel=mrdemonwolf&amp;theme=wolf&amp;bg=bubble
 								</code>
 							</pre>
 							<ol className="mt-6 flex list-decimal flex-col gap-3 pl-5 leading-relaxed">
@@ -461,6 +480,49 @@ function DocsPage() {
 								in an OBS URL degrades to a working overlay instead of a blank
 								source.
 							</p>
+							<search className="mt-6">
+								<Label htmlFor="docs-parameter-search">
+									Search URL parameters
+								</Label>
+								<Input
+									autoComplete="off"
+									className="mt-2 min-h-11"
+									id="docs-parameter-search"
+									onChange={(event) => setParameterSearch(event.target.value)}
+									placeholder="Search by name, value, or behavior"
+									type="search"
+									value={parameterSearch}
+								/>
+								<p className="hb-text-2 mt-2 text-xs">
+									Results link to the existing parameter sections.
+								</p>
+								{parameterSearch.trim() &&
+									(matchingParameters.length > 0 ? (
+										<ul
+											aria-label="Parameter search results"
+											aria-live="polite"
+											className="hb-card mt-3 max-h-60 overflow-y-auto p-2 text-sm"
+										>
+											{matchingParameters.map((param) => (
+												<li key={param.name}>
+													<a
+														className="flex min-h-11 items-center justify-between gap-4 rounded-md px-2 py-1.5 transition-colors hover:bg-[color:var(--site-surface-2)]"
+														href={`#param-${param.name}`}
+													>
+														<code className="hb-code">{param.name}</code>
+														<span className="hb-text-2 text-right text-xs">
+															{param.group}
+														</span>
+													</a>
+												</li>
+											))}
+										</ul>
+									) : (
+										<p className="hb-text-2 mt-3 text-sm" role="status">
+											No URL parameters match this search.
+										</p>
+									))}
+							</search>
 						</section>
 
 						{/* parameter groups */}
@@ -556,6 +618,12 @@ function DocsPage() {
 							<p className="hb-text-2 mt-3 leading-relaxed">
 								Global and channel badges already load on their own. These two
 								parameters exist to swap in your own art, keyed by badge set.
+							</p>
+							<p className="hb-text-2 mt-3 leading-relaxed">
+								Messages from the HowlBox owner account,{" "}
+								<code className="hb-code">mrdemonwolf</code>, also show a small
+								wolf badge using the MrDemonWolf site icon. It follows the badge
+								visibility setting.
 							</p>
 
 							<h3 className="mt-6 font-semibold text-lg">

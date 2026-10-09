@@ -33,11 +33,14 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build
-        run: bun run build
+      - name: Install Playwright Chromium
+        run: bunx playwright install chromium --with-deps --only-shell
+
+      - name: Verify and build
+        run: bun run ci
         env:
-          # project pages serve at /<repo>/; custom domain would be /
-          BASE_PATH: /howlbox/
+          # howlbox.mrdemonwolf.dev serves from the domain root
+          BASE_PATH: /
           # baked into the footer so a deployed page names its commit
           COMMIT_SHA: ${{ github.sha }}
 
@@ -59,5 +62,26 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # The root-path artifact needs Pages, DNS, and HTTPS ready first.
+      # Public API and DNS checks need no token and fail closed.
+      - name: Require the HowlBox domain cutover
+        run: |
+          cname="$(curl -fsS -H 'Accept: application/vnd.github+json' \
+            https://api.github.com/repos/MrDemonWolf/howlbox/pages |
+            jq -r '.cname // ""' |
+            tr '[:upper:]' '[:lower:]')"
+          if [[ "$cname" != "howlbox.mrdemonwolf.dev" ]]; then
+            echo "::error::Refusing root deployment: Pages cname is '${cname:-unset}'."
+            exit 1
+          fi
+          dns_target="$(dig +short CNAME howlbox.mrdemonwolf.dev |
+            tr '[:upper:]' '[:lower:]' |
+            sed 's/\.$//')"
+          if [[ "$dns_target" != "mrdemonwolf.github.io" ]]; then
+            echo "::error::Refusing root deployment: DNS CNAME is '${dns_target:-unset}'."
+            exit 1
+          fi
+          curl -fsSI --max-time 10 https://howlbox.mrdemonwolf.dev/ >/dev/null
+
       - id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

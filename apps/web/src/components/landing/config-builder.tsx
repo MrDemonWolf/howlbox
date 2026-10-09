@@ -38,6 +38,7 @@ export function ConfigBuilder({
 				}
 			: DEFAULTS,
 	);
+	const [liveChat, setLiveChat] = useState(false);
 	const [importDraft, setImportDraft] = useState("");
 
 	const set = <K extends keyof Config>(key: K, value: Config[K]) =>
@@ -74,19 +75,49 @@ export function ConfigBuilder({
 	// never on the empty starting state.
 	const channelInvalid = cleanChannel.length > 0 && !channelReady;
 
-	const url = useMemo(
-		() => buildOverlayUrl(configToOverlay(config, cleanChannel)),
-		[cleanChannel, config],
+	const { overlayConfig, url } = useMemo(() => {
+		const overlayConfig = configToOverlay(config, cleanChannel);
+		return { overlayConfig, url: buildOverlayUrl(overlayConfig) };
+	}, [cleanChannel, config]);
+	const [previewChannel, setPreviewChannel] = useState(() =>
+		isValidLogin(cleanChannel) ? cleanChannel : "",
+	);
+	// Keep the last valid preview connected while an edited login is temporarily
+	// invalid; blank input still disconnects immediately.
+	useEffect(() => {
+		if (!cleanChannel) {
+			setPreviewChannel("");
+			return;
+		}
+		if (!isValidLogin(cleanChannel)) return;
+
+		const timer = setTimeout(() => setPreviewChannel(cleanChannel), 500);
+		return () => clearTimeout(timer);
+	}, [cleanChannel]);
+	const livePreviewConfig = useMemo(
+		() => ({
+			...overlayConfig,
+			channel: cleanChannel ? previewChannel : "",
+		}),
+		[cleanChannel, overlayConfig, previewChannel],
 	);
 
 	// destructive: one click wipes every field. Snapshot first and hand
 	// the old config back through an Undo action on the toast.
 	const reset = () => {
 		const previous = config;
+		const previousLiveChat = liveChat;
 		setConfig(DEFAULTS);
+		setLiveChat(false);
 		setImportDraft("");
 		toast.success("Reset to defaults", {
-			action: { label: "Undo", onClick: () => setConfig(previous) },
+			action: {
+				label: "Undo",
+				onClick: () => {
+					setConfig(previous);
+					setLiveChat(previousLiveChat);
+				},
+			},
 		});
 	};
 
@@ -101,7 +132,7 @@ export function ConfigBuilder({
 		}
 		setConfig(parsedToConfig(parsed));
 		setImportDraft("");
-		toast.success("Loaded, every control now matches that link");
+		toast.success("Loaded. The output now uses the current HowlBox URL.");
 	};
 
 	// Pasting a real overlay URL is unambiguous, so skip the Load click.
@@ -122,6 +153,9 @@ export function ConfigBuilder({
 				channelInvalid={channelInvalid}
 				channelReady={channelReady}
 				config={config}
+				liveChat={liveChat}
+				liveConfig={livePreviewConfig}
+				onLiveChatChange={setLiveChat}
 				onReset={reset}
 				settled={settled}
 				url={url}

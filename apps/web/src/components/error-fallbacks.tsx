@@ -33,8 +33,7 @@ export function RootErrorFallback({ error, reset }: ErrorComponentProps) {
 					>
 						Try again
 					</button>
-					{/* BASE_URL, not "/": on GitHub Pages the app lives at
-					    /howlbox/, so a bare "/" would leave the site */}
+					{/* BASE_URL keeps the home link correct for subpath hosting */}
 					<a
 						className="hb-btn hb-btn-secondary"
 						href={import.meta.env.BASE_URL}
