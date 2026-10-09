@@ -96,7 +96,7 @@ export function ConfigOutput({
 				checked={liveChat}
 				hint={
 					liveChat && !channelReady
-						? "Enter a valid Twitch channel above. No connection is made until then."
+						? "Enter a valid channel to connect. When editing, the preview stays on the last valid channel until the new name settles."
 						: "Off shows the demo chat, including MrDemonWolf. On connects to the channel above."
 				}
 				id="cfg-live-chat-preview"

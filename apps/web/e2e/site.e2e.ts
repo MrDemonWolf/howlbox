@@ -118,14 +118,27 @@ test("builder switches its preview between demo and live chat", async ({
 	await expect(preview).toContainText(
 		"Enter a valid Twitch channel above to preview live chat.",
 	);
-	await page
-		.getByLabel(/Twitch channel/)
-		.pressSequentially("wolf_friend", { delay: 70 });
+	await page.clock.install();
+	const channelInput = page.getByLabel(/Twitch channel/);
+	await channelInput.fill("old_channel");
+	await page.clock.fastForward(500);
 	await expect.poll(() => liveSocketAttempts).toBe(1);
 	await expect(preview.locator(".hb-status")).toBeVisible();
 	await expect(preview.getByText("MrDemonWolf", { exact: true })).toHaveCount(
 		0,
 	);
+
+	// While editing to another channel, an invalid intermediate value keeps
+	// the last settled connection until the new login has been stable for 500ms.
+	await channelInput.fill("new_channel!");
+	await expect(liveToggle).toHaveAccessibleDescription(
+		/preview stays on the last valid channel/,
+	);
+	await channelInput.fill("new_channel");
+	await page.clock.fastForward(499);
+	await expect.poll(() => liveSocketAttempts).toBe(1);
+	await page.clock.fastForward(1);
+	await expect.poll(() => liveSocketAttempts).toBe(2);
 
 	await liveToggle.uncheck();
 	await expect(preview.getByText("MrDemonWolf", { exact: true })).toBeVisible();
