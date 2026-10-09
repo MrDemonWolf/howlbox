@@ -197,6 +197,29 @@ export function parseCustomBadgeArt(raw: string): [string, string][] {
 	return out;
 }
 
+export function mergeBadgeArt(
+	map: BadgeMap,
+	pairs: readonly [string, string][],
+): BadgeMap {
+	for (const [key, url] of pairs) {
+		if (key.includes("/")) {
+			continue;
+		}
+		map.set(key, url);
+		for (const versionKey of map.keys()) {
+			if (versionKey.startsWith(`${key}/`)) {
+				map.set(versionKey, url);
+			}
+		}
+	}
+	for (const [key, url] of pairs) {
+		if (key.includes("/")) {
+			map.set(key, url);
+		}
+	}
+	return map;
+}
+
 // A gist file is either JSON ({ "set/version": "url" }) or the same
 // set=url line format the inline param uses. Bad entries drop out.
 export function parseGistBadgeArt(content: string): [string, string][] {

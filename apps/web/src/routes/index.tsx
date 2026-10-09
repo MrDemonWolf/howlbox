@@ -5,7 +5,6 @@ import { useState } from "react";
 import { OverlayPreview } from "@/components/landing/overlay-preview";
 import {
 	Band,
-	GITHUB_URL,
 	MONO,
 	OBSSteps,
 	SectionHead,
@@ -290,14 +289,9 @@ function LandingPage() {
 								Build your URL
 								<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
 							</Link>
-							<a
-								className="hb-btn hb-btn-secondary"
-								href={GITHUB_URL}
-								rel="noreferrer"
-								target="_blank"
-							>
-								Read the source
-							</a>
+							<Link className="hb-btn hb-btn-secondary" to="/docs">
+								Read the docs
+							</Link>
 						</div>
 					</div>
 

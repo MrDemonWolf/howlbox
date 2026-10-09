@@ -33,11 +33,14 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build
-        run: bun run build
+      - name: Install Playwright Chromium
+        run: bunx playwright install chromium --with-deps --only-shell
+
+      - name: Verify and build
+        run: bun run ci
         env:
-          # project pages serve at /<repo>/; custom domain would be /
-          BASE_PATH: /howlbox/
+          # howlbox.mrdemonwolf.dev serves from the domain root
+          BASE_PATH: /
           # baked into the footer so a deployed page names its commit
           COMMIT_SHA: ${{ github.sha }}
 

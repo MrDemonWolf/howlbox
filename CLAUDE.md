@@ -381,7 +381,8 @@ the division can never be by zero.
 ## Deploy
 
 GitHub Pages via `.github/workflows/deploy.yml`: bun build with
-`BASE_PATH=/howlbox/` (vite `base` + router `basepath` read it). The
+`BASE_PATH=/` for `howlbox.mrdemonwolf.dev` (vite `base` + router `basepath`
+read it). The
 workflow no longer copies `index.html` to `404.html`; the seo plugin
 writes a noindexed `404.html` during the build, along with a real
 `index.html` per route so `/overlay` and the rest resolve with a 200

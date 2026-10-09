@@ -8,6 +8,10 @@ import type { EmoteMap } from "./emotes";
 
 export type BadgeMap = Map<string, string>;
 
+export const OWNER_LOGIN = "mrdemonwolf";
+export const OWNER_BADGE_URL =
+	"https://www.mrdemonwolf.com/wp-content/uploads/2022/12/cropped-logo-white-border-192x192.png";
+
 export type EmotePart = Extract<MessagePart, { type: "emote" }>;
 
 export interface RenderGroup {
@@ -97,6 +101,7 @@ export function splitTextPart(text: string, emotes: EmoteMap): MessagePart[] {
 				name: token,
 				url: emote.url,
 				zeroWidth: emote.zeroWidth,
+				thirdParty: true,
 			});
 		} else {
 			pendingText += token;
@@ -116,12 +121,20 @@ export function resolveMessageExtras(
 	pronoun: string | null,
 	avatarUrl: string | null,
 ): ChatMessageView {
-	const parts =
-		emotes && emotes.size > 0
-			? view.parts.flatMap((part) =>
-					part.type === "text" ? splitTextPart(part.text, emotes) : [part],
-				)
-			: view.parts;
+	const parts = emotes
+		? view.parts.flatMap((part): MessagePart[] => {
+				if (part.type === "text") {
+					return splitTextPart(part.text, emotes);
+				}
+				if (!part.thirdParty) {
+					return [part];
+				}
+				const emote = emotes.get(part.name);
+				return emote
+					? [{ ...part, url: emote.url, zeroWidth: emote.zeroWidth }]
+					: [{ type: "text", text: part.name }];
+			})
+		: view.parts;
 	const renderBadges: RenderBadge[] = [];
 	if (badges) {
 		for (const badge of view.badges) {
@@ -133,9 +146,27 @@ export function resolveMessageExtras(
 			}
 		}
 	}
+	if (view.login === OWNER_LOGIN) {
+		renderBadges.push({ kind: "image", url: OWNER_BADGE_URL });
+	}
 	// pronoun rides last, after the native badges (7TV/FFZ convention)
 	if (pronoun) {
 		renderBadges.push({ kind: "text", text: pronoun });
 	}
 	return { ...view, parts, renderBadges, avatarUrl: avatarUrl ?? undefined };
+}
+
+export function resolveMessageMedia(
+	view: ChatMessageView,
+	emotes: EmoteMap | null,
+	badges: BadgeMap | null,
+): ChatMessageView {
+	const pronoun = view.renderBadges.find((badge) => badge.kind === "text");
+	return resolveMessageExtras(
+		view,
+		emotes,
+		badges,
+		pronoun?.kind === "text" ? pronoun.text : null,
+		view.avatarUrl ?? null,
+	);
 }

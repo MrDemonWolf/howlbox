@@ -1,4 +1,10 @@
-import { type RefObject, useCallback, useEffect, useRef } from "react";
+import {
+	type RefObject,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 import { type EmoteMap, fetchEmoteMap } from "@/lib/emotes/emotes";
 import type { MediaPreferences } from "@/lib/emotes/media";
@@ -6,6 +12,7 @@ import type { BadgeMap } from "@/lib/emotes/resolve";
 import {
 	fetchBadgeMap,
 	fetchGistBadgeArt,
+	mergeBadgeArt,
 	parseCustomBadgeArt,
 } from "@/lib/twitch/badges";
 
@@ -18,17 +25,16 @@ function mapIsEmpty(value: ReadonlyMap<unknown, unknown>): boolean {
 	return value.size === 0;
 }
 
-// Returned as a ref, not state, on purpose: the chat hook reads .current
-// at append time, so a map arriving after connect never reconnects or
-// re-renders old rows. The effect owns its AbortSignal, so a channel
-// change or unmount cancels all provider work started by that effect.
+// The stable ref avoids reconnecting chat when provider maps load. Revision
+// changes let the chat hook refresh retained rows without replacing the ref.
 function useAsyncRef<T>(
 	channel: string | undefined,
 	fetcher: (channel: string, options: AsyncFetchOptions) => Promise<T>,
 	refreshMinutes = 0,
 	isEmpty?: (value: T) => boolean,
-): RefObject<T | null> {
+): readonly [RefObject<T | null>, number] {
 	const ref = useRef<T | null>(null);
+	const [revision, setRevision] = useState(0);
 	const previousChannelRef = useRef(channel);
 	useEffect(() => {
 		if (previousChannelRef.current !== channel || !channel) {
@@ -55,6 +61,7 @@ function useAsyncRef<T>(
 					// map. A new channel still accepts empty as its initial result.
 					if (active && (ref.current === null || !isEmpty?.(value))) {
 						ref.current = value;
+						setRevision((current) => current + 1);
 					}
 				})
 				.catch(() => {
@@ -77,7 +84,7 @@ function useAsyncRef<T>(
 			}
 		};
 	}, [channel, fetcher, refreshMinutes, isEmpty]);
-	return ref;
+	return [ref, revision];
 }
 
 export function useEmoteMap(
@@ -121,12 +128,8 @@ export function useBadgeMap(
 				mapResult.status === "fulfilled" ? mapResult.value : new Map();
 			const gistPairs =
 				gistResult.status === "fulfilled" ? gistResult.value : [];
-			for (const [key, url] of gistPairs) {
-				map.set(key, url);
-			}
-			for (const [key, url] of parseCustomBadgeArt(customArt)) {
-				map.set(key, url);
-			}
+			mergeBadgeArt(map, gistPairs);
+			mergeBadgeArt(map, parseCustomBadgeArt(customArt));
 			return map;
 		},
 		[assetScale, customArt, gistRef],
