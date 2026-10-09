@@ -230,7 +230,7 @@ describe("resolveMessageMedia", () => {
 		]);
 	});
 
-	test("shows the site icon badge on the owner account", () => {
+	test("shows the official site logo badge on the owner account", () => {
 		const resolved = resolveMessageMedia(message("mrdemonwolf"), null, null);
 
 		expect(resolved.renderBadges).toContainEqual({

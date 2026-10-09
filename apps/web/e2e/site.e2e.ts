@@ -103,16 +103,17 @@ test("builder switches its preview between demo and live chat", async ({
 	});
 	await expect(liveToggle).not.toBeChecked();
 	await expect(preview.getByText("MrDemonWolf", { exact: true })).toBeVisible();
+	await expect(preview.locator(".hb-owner-badge").first()).toHaveAttribute(
+		"aria-label",
+		"MrDemonWolf owner badge",
+	);
 	await expect(
 		preview
 			.locator(
-				'img.hb-badge[src="https://www.mrdemonwolf.com/wp-content/uploads/2022/12/cropped-logo-white-border-192x192.png"]',
+				'.hb-owner-badge img[src="https://www.mrdemonwolf.com/wp-content/uploads/2022/12/logo.svg"]',
 			)
 			.first(),
-	).toHaveAttribute(
-		"src",
-		"https://www.mrdemonwolf.com/wp-content/uploads/2022/12/cropped-logo-white-border-192x192.png",
-	);
+	).toBeVisible();
 
 	await liveToggle.check();
 	await expect(preview).toContainText(
