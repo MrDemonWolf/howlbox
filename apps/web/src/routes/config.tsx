@@ -46,9 +46,9 @@ function ConfigPage() {
 					Build your overlay URL
 				</h1>
 				<p className="hb-text-2 mt-4 max-w-2xl text-pretty text-lg leading-relaxed">
-					The preview on the left is the real overlay, rendered over an OBS
-					transparency checker. Already running one? Paste its URL at the top of
-					the form and every control loads with your settings.
+					The preview on the left uses the real overlay renderer. Paste any
+					existing link, including the old GitHub Pages URL, to load its
+					settings and get a current custom-domain link.
 				</p>
 			</section>
 

@@ -64,6 +64,71 @@ test("builder explains the required channel and writes its URL", async ({
 	).not.toHaveAttribute("aria-disabled", "true");
 });
 
+test("builder imports a legacy Pages link and emits the custom-domain URL", async ({
+	page,
+}) => {
+	await page.goto("./config/");
+	await page
+		.getByRole("textbox", { name: "Existing overlay URL" })
+		.fill(
+			"https://mrdemonwolf.github.io/howlbox/overlay?channel=wolf_friend&theme=neon&bg=panel",
+		);
+	await page.getByRole("button", { name: "Load" }).click();
+
+	await expect(
+		page.getByRole("region", { name: "Generated overlay URL" }),
+	).toContainText(
+		"https://howlbox.mrdemonwolf.dev/overlay?channel=wolf_friend&theme=neon&bg=panel",
+	);
+});
+
+test("builder switches its preview between demo and live chat", async ({
+	page,
+}) => {
+	await page.route("**/*", (route) =>
+		route.request().url().startsWith("http://127.0.0.1:4173/")
+			? route.continue()
+			: route.abort(),
+	);
+	let liveSocketAttempts = 0;
+	await page.routeWebSocket("wss://**/*", (socket) => {
+		liveSocketAttempts += 1;
+		socket.close({ code: 1000, reason: "external chat blocked in E2E" });
+	});
+	await page.goto("./config/");
+
+	const preview = page.locator(".hb-root");
+	const liveToggle = page.getByRole("checkbox", {
+		name: "Use live Twitch chat",
+	});
+	await expect(liveToggle).not.toBeChecked();
+	await expect(preview.getByText("MrDemonWolf", { exact: true })).toBeVisible();
+	await expect(
+		preview
+			.locator(
+				'img.hb-badge[src="https://www.mrdemonwolf.com/wp-content/uploads/2022/12/cropped-logo-white-border-192x192.png"]',
+			)
+			.first(),
+	).toHaveAttribute(
+		"src",
+		"https://www.mrdemonwolf.com/wp-content/uploads/2022/12/cropped-logo-white-border-192x192.png",
+	);
+
+	await liveToggle.check();
+	await expect(preview).toContainText(
+		"Enter a valid Twitch channel above to preview live chat.",
+	);
+	await page.getByLabel(/Twitch channel/).fill("wolf_friend");
+	await expect.poll(() => liveSocketAttempts).toBeGreaterThan(0);
+	await expect(preview.locator(".hb-status")).toBeVisible();
+	await expect(preview.getByText("MrDemonWolf", { exact: true })).toHaveCount(
+		0,
+	);
+
+	await liveToggle.uncheck();
+	await expect(preview.getByText("MrDemonWolf", { exact: true })).toBeVisible();
+});
+
 test("overlay gives setup guidance when no channel is configured", async ({
 	page,
 }) => {

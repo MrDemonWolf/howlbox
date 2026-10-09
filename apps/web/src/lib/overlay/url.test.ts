@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import type { OverlayConfig } from "./url";
-import { overlayQuery, parseOverlayUrl } from "./url";
+import { buildOverlayUrl, overlayQuery, parseOverlayUrl } from "./url";
 
 const FULL: OverlayConfig = {
 	channel: "xqc",
@@ -103,6 +103,16 @@ describe("parseOverlayUrl", () => {
 		}
 	});
 
+	test("imports the legacy GitHub Pages project URL", () => {
+		const parsed = parseOverlayUrl(
+			"https://mrdemonwolf.github.io/howlbox/overlay?channel=xqc&theme=neon&bg=panel",
+		);
+
+		expect(parsed?.channel).toBe("xqc");
+		expect(parsed?.theme).toBe("neon");
+		expect(parsed?.bg).toBe("panel");
+	});
+
 	test("strips a trailing fragment", () => {
 		expect(parseOverlayUrl("channel=xqc#anchor")?.channel).toBe("xqc");
 	});
@@ -117,6 +127,15 @@ describe("parseOverlayUrl", () => {
 		expect(parseOverlayUrl("")).toBeNull();
 		expect(parseOverlayUrl("unrelated=1&foo=bar")).toBeNull();
 	});
+});
+
+test("emits overlay links on the canonical custom domain root", () => {
+	const url = new URL(buildOverlayUrl(FULL));
+
+	expect(url.origin).toBe("https://howlbox.mrdemonwolf.dev");
+	expect(url.pathname).toBe("/overlay");
+	expect(url.searchParams.get("channel")).toBe("xqc");
+	expect(url.searchParams.get("theme")).toBe("neon");
 });
 
 describe("round trip", () => {

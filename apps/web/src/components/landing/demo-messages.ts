@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { OWNER_BADGE_URL } from "@/lib/emotes/resolve";
 import type { ChatEventKind, ChatMessageView } from "@/lib/twitch/types";
 
 function emote(name: string, id: string) {
@@ -69,6 +70,17 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 		isAction: false,
 		isPrivileged: false,
 		isSubscriber: true,
+	},
+	{
+		channelId: null,
+		login: "mrdemonwolf",
+		displayName: "MrDemonWolf",
+		color: "#00ACED",
+		badges: [],
+		renderBadges: [{ kind: "image", url: OWNER_BADGE_URL }],
+		parts: [text("checking in from the demo chat")],
+		isAction: false,
+		isPrivileged: true,
 	},
 	{
 		channelId: null,

@@ -13,6 +13,10 @@ The current branch contains the overlay, docs, test, and custom-domain work.
 It is isolated from the deployed `main`; Pages settings and production DNS have
 not changed.
 
+The configurator preview switches between seeded demo chat and a live Twitch
+channel. Older GitHub Pages overlay links still import, then the builder emits
+the canonical custom-domain URL.
+
 ## Git and deployment state
 
 - GitHub main at 2cb33e8ecd5e6dd3c7dbbfeed62566315f5bf53a is the deployed Pages
@@ -22,6 +26,8 @@ not changed.
   `howlbox.mrdemonwolf.dev`; its Cloudflare zone is active, but it has no
   explicit DNS record. The existing wildcard record currently points this
   hostname at the apex site.
+- The GitHub organization domain `mrdemonwolf.dev` is verified, which satisfies
+  GitHub's ownership prerequisite for adding this subdomain.
 - The branch now builds for `/` and uses the custom hostname for canonical,
   social, and copy-ready overlay URLs. The deployed artifact and DNS remain
   unchanged until the root build passes and the production cutover is run.
@@ -45,6 +51,8 @@ not changed.
   Moderation-delayed messages use the latest maps when they are released.
 - Messages from the owner login mrdemonwolf receive a small wolf image badge.
   The badge follows the existing image badge visibility setting.
+- The seeded configurator demo includes a MrDemonWolf sample message with the
+  same owner badge.
 - The existing custom art validation and precedence order remain in place:
   fetched Twitch art, then badgegist, then inline badgeart.
 
@@ -56,6 +64,10 @@ not changed.
 - The parameter reference has client-side search over names, accepted values,
   and descriptions. Search results link to the existing #param-* anchors.
   The current on-page table of contents and deep links remain available.
+- The configurator switches between demo chat and live chat. Live mode connects
+  only when a valid channel login is entered; demo mode stays offline.
+- Import accepts the old `mrdemonwolf.github.io/howlbox/overlay` URL and emits
+  the canonical root URL on `howlbox.mrdemonwolf.dev`.
 
 ### Browser tests and deployment safety
 
@@ -63,6 +75,8 @@ not changed.
   BASE_PATH. The suite covers the landing page, docs links and search, the
   configurator, overlay setup guidance, and a valid-channel overlay startup.
   The overlay smoke test blocks external HTTP and WebSocket traffic.
+- Additional browser tests verify legacy URL import and switching between demo
+  chat, rendering the owner badge, and an actual mocked live socket attempt.
 - The CI script now includes the browser suite. Both pull request CI and the
   Pages artifact build install headless Chromium before running it. `actionlint`
   passes on both workflow files. Playwright always starts its own preview, so a
@@ -130,7 +144,8 @@ source check confirms the icon size and visual fit on an owner message.
 
 ### Stage 3: Make docs and setup easier to use
 
-Status: first navigation and search improvements are implemented.
+Status: navigation, search, the legacy URL migration, and the demo/live preview
+switch are implemented.
 
 - Keep the new search local and small. Do not add a search service or database.
 - Consider showing the default and a copy-ready example consistently for every
@@ -161,21 +176,21 @@ then compare the same fixture and OBS Browser Source behavior.
 
 ### Stage 5: Release
 
-Status: root-path changes are prepared locally. The PR can be reviewed without
-deploying, but do not merge until the domain cutover is ready. A main push
-deploys immediately; the root build's absolute asset URLs are incompatible
+Status: root-path changes are prepared locally. The user authorized the
+cutover; GitHub Pages and Cloudflare have not been changed yet. A main push
+deploys immediately, and the root build's absolute asset URLs are incompatible
 with the current `/howlbox/` project URL. GitHub's documented order is to add
 the custom domain in Pages settings, add a DNS-only Cloudflare CNAME pointing
-to `mrdemonwolf.github.io`, then deploy this root-path build. This is a brief
-production routing transition, so the current domain and DNS must be changed
-as one cutover. GitHub Actions publishing does not need a repository `CNAME`
-file.
+to `mrdemonwolf.github.io`, confirm HTTPS is ready, then deploy this root-path
+build. The deploy job now requires the Pages domain, DNS-only CNAME, and a
+successful HTTPS response before publishing.
+GitHub Actions publishing does not need a repository `CNAME` file.
 
 - Run bun run ci with BASE_PATH=/.
 - Independent Codex review is complete with no remaining actionable findings.
-- After user approval, configure Pages and DNS in the documented order, merge
-  through the normal GitHub workflow, then verify the Pages deployment and the
-  live landing, docs, configurator, and overlay routes.
+- Configure Pages and DNS in the documented order, merge through the normal
+  GitHub workflow, then verify the Pages deployment and the live landing, docs,
+  configurator, and overlay routes.
 - Treat CI success as a gate, not as proof that a real OBS source or live Twitch
   chat was checked.
 
@@ -183,16 +198,17 @@ file.
 
 - Before edits, all 241 existing unit tests and the full existing CI script
   passed.
-- `BASE_PATH=/ bun run ci` passed after the root-path changes: Biome checked
-  134 files, check-types passed, all 245 unit tests passed, the production
-  build passed, and all 7 Chromium E2E tests passed. `actionlint` and
+- `BASE_PATH=/ bun run ci` passed after the latest changes: Biome, check-types,
+  unit tests, production build, and all 9 Chromium E2E tests passed. Biome
+  reports two existing CSS specificity warnings. `actionlint` and
   `git diff --check` also passed.
 - The built home, docs, configurator, sitemap, and robots file use the target
   hostname, with app assets and routes at the domain root.
 - The root-path app is visible in the local dev preview at
   `http://127.0.0.1:4174/`. The current GitHub Pages artifact has not changed.
-- The independent Codex review found no remaining actionable issues after the
-  follow-up fixes. This branch is locally verified and ready for PR review.
+- The independent Codex review of the latest diff found no remaining
+  actionable issues after the Pages, DNS, HTTPS, owner badge, and socket checks
+  were tightened.
 - The current favicon exposed by mrdemonwolf.com is a 192 by 192 PNG, not an SVG.
   The owner badge uses that official asset at
   https://www.mrdemonwolf.com/wp-content/uploads/2022/12/cropped-logo-white-border-192x192.png.

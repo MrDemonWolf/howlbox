@@ -9,6 +9,7 @@ import {
 	type ScrollMode,
 	type Theme,
 } from "@/lib/overlay/params";
+import { SITE_URL } from "@/lib/seo/routes";
 import {
 	type AvatarMode,
 	type ChatEventKind,
@@ -147,7 +148,7 @@ export function overlayQuery(config: OverlayConfig): string {
 }
 
 export function buildOverlayUrl(config: OverlayConfig): string {
-	return `${window.location.origin}${import.meta.env.BASE_URL}overlay?${overlayQuery(config)}`;
+	return `${SITE_URL}overlay?${overlayQuery(config)}`;
 }
 
 // Read an existing overlay link back into a config, so a streamer can

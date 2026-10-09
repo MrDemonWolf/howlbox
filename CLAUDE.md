@@ -101,7 +101,9 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 - `apps/web/src/lib/overlay/url.ts` - `buildOverlayUrl` /
   `overlayQuery`: serialize a config into the overlay query string,
   omitting defaults. Inverse of `params.ts`, so it round-trips.
-  `ConfigBuilder` uses it instead of a hand-rolled query ladder.
+  `ConfigBuilder` uses it instead of a hand-rolled query ladder. URLs
+  always emit from the canonical `SITE_URL`; the importer accepts old
+  `/howlbox/overlay` links and keeps their settings on the new host.
 - `apps/web/src/components/chat/` - renderer (Tailwind classes) and
   `overlay.css` (per-theme variables plus transform/opacity keyframes).
   `ChatMessageRow` is memoized. `message-list.tsx` maps each theme to a

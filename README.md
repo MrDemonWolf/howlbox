@@ -69,8 +69,10 @@ Your chat. Your colors. Your howl.
 - **URL-only configuration** - Every option is a query parameter. No
   config files, no dashboard, no stored state.
 - **Configurator page** - Pick options live at `/config` with a real
-  overlay preview, then copy a ready OBS source URL. The landing page
-  at `/` shows a theme-switching demo.
+  overlay preview, switch between demo chatter and a live channel, then
+  copy a ready OBS source URL. It imports older `/howlbox/overlay` links
+  and emits the current custom-domain URL. The landing page at `/` shows
+  a theme-switching demo.
 - **OBS-optimized** - Transparent from first paint, zero blur filters
   (safe on CPU-rendered setups), event-driven reconnects that survive
   hidden-source timer throttling, and a visible connection status
@@ -251,8 +253,8 @@ HTTP 200 instead of falling back to the SPA's 404 status.
 
 `bun run build` produces a fully static site in `apps/web/dist`. Serve
 that folder as-is. For a different host or subpath, update the SEO URL
-constants as described above and set `BASE_PATH` at build time. No server
-runtime is required.
+constants as described above and set `SITE_BASE` and `BASE_PATH` to the
+same path. No server runtime is required.
 
 ### Test URLs
 

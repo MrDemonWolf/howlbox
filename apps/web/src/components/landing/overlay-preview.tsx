@@ -4,6 +4,8 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { HbRoot } from "@/components/chat/hb-root";
 import { MessageList } from "@/components/chat/message-list";
 import { useDemoStream } from "@/components/landing/demo-messages";
+import { useBadgeMap, useEmoteMap } from "@/hooks/use-emotes";
+import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import type {
 	Align,
 	BgMode,
@@ -12,10 +14,14 @@ import type {
 	ScrollMode,
 	Theme,
 } from "@/lib/overlay/params";
+import { assetScaleFor, isValidLogin } from "@/lib/overlay/params";
+import type { OverlayConfig } from "@/lib/overlay/url";
+import { KNOWN_BOTS } from "@/lib/twitch/bots";
 import type {
 	AvatarMode,
 	ChatEventKind,
 	ChatMessageView,
+	ConnectionStatus,
 } from "@/lib/twitch/types";
 
 import "@/components/chat/overlay.css";
@@ -51,7 +57,33 @@ interface OverlayPreviewProps {
 	// "checker" shows the transparency checkerboard (honest OBS view);
 	// "gameplay" fakes a game feed to sell legibility over video.
 	backdrop?: "checker" | "gameplay";
+	// Live mode is opt-in and only connects while a valid channel is set.
+	liveChat?: boolean;
+	liveConfig?: OverlayConfig;
 }
+
+interface PreviewMessageProps {
+	align: Align;
+	animate: boolean;
+	bg: BgMode;
+	fadeSeconds: number;
+	group: boolean;
+	showAvatars: boolean;
+	showBadges: boolean;
+	showPronouns: boolean;
+	showTimestamps: boolean;
+	scrollSpeed: number;
+	theme: Theme;
+	ticker: boolean;
+	variant: string;
+}
+
+const STATUS_LABEL: Record<ConnectionStatus, string> = {
+	connecting: "connecting to chat",
+	connected: "connected to chat",
+	disconnected: "disconnected, retrying",
+	join_failed: "could not join channel",
+};
 
 function useLogicalScale(enabled: boolean) {
 	const frameRef = useRef<HTMLDivElement>(null);
@@ -106,6 +138,106 @@ function staticMedia(message: ChatMessageView): ChatMessageView {
 	return { ...message, event, parts };
 }
 
+function DemoPreviewMessages({
+	events,
+	limit,
+	mediaMode,
+	avatarMode,
+	showAvatars,
+	presentation,
+}: {
+	events?: readonly ChatEventKind[];
+	limit: number;
+	mediaMode: MediaMode;
+	avatarMode?: AvatarMode;
+	showAvatars: boolean;
+	presentation: PreviewMessageProps;
+}) {
+	const { messages, removeMessage } = useDemoStream({ events, limit });
+	const previewMessages = useMemo(
+		() =>
+			messages.map((message) => {
+				const avatarAllowed =
+					avatarMode === undefined ||
+					avatarMode === "all" ||
+					(avatarMode === "subs" && message.isSubscriber);
+				const withAvatar = avatarAllowed
+					? message
+					: { ...message, avatarUrl: undefined };
+				return mediaMode === "static" ? staticMedia(withAvatar) : withAvatar;
+			}),
+		[avatarMode, mediaMode, messages],
+	);
+
+	return (
+		<MessageList
+			{...presentation}
+			messages={previewMessages}
+			onMessageExpired={removeMessage}
+			showAvatars={
+				avatarMode === undefined ? showAvatars : avatarMode !== "off"
+			}
+		/>
+	);
+}
+
+function LivePreviewMessages({
+	config,
+	presentation,
+}: {
+	config: OverlayConfig;
+	presentation: PreviewMessageProps;
+}) {
+	const assetScale = assetScaleFor(config.size, config.emotescale);
+	const staticAssets = config.media === "static";
+	const preferences = { assetScale, staticMedia: staticAssets };
+	const [emotesRef, emotesRevision] = useEmoteMap(
+		config.channel,
+		config.refresh,
+		preferences,
+	);
+	const [badgesRef, badgesRevision] = useBadgeMap(
+		config.badges ? config.channel : undefined,
+		config.badgeart,
+		config.badgegist,
+		config.refresh,
+		preferences,
+	);
+	const { messages, removeMessage, status } = useTwitchChat(config.channel, {
+		maxMessages: config.max,
+		delaySeconds: config.delay,
+		hiddenLogins: config.hidebots
+			? [...KNOWN_BOTS, ...config.hide]
+			: config.hide,
+		allowedLogins: config.allow,
+		hideCommands: config.hidecommands,
+		pronouns: config.pronouns,
+		events: config.events,
+		avatars: config.avatars,
+		emoteScale: assetScale,
+		staticMedia: staticAssets,
+		emotesRef,
+		badgesRef,
+		mediaRevision: `${emotesRevision}:${badgesRevision}`,
+	});
+
+	return (
+		<>
+			<div
+				className="hb-status absolute top-2 left-2 rounded-md bg-black/80 px-2 py-1 text-white text-xs [font-family:system-ui,sans-serif]"
+				role={status === "join_failed" ? "alert" : "status"}
+			>
+				{STATUS_LABEL[status]}
+			</div>
+			<MessageList
+				{...presentation}
+				messages={messages}
+				onMessageExpired={removeMessage}
+			/>
+		</>
+	);
+}
+
 // Wraps the shared MessageList in a card (absolute, not fixed) layered
 // over a gameplay stand-in, so bg=off transparency reads honestly.
 export function OverlayPreview({
@@ -132,26 +264,27 @@ export function OverlayPreview({
 	logicalViewport = false,
 	className = "h-105",
 	backdrop = "gameplay",
+	liveChat = false,
+	liveConfig,
 }: OverlayPreviewProps) {
-	const { messages, removeMessage } = useDemoStream({
-		events,
-		limit: maxMessages,
-	});
 	const { frameRef, scale } = useLogicalScale(logicalViewport);
-	const previewMessages = useMemo(
-		() =>
-			messages.map((message) => {
-				const avatarAllowed =
-					avatarMode === undefined ||
-					avatarMode === "all" ||
-					(avatarMode === "subs" && message.isSubscriber);
-				const withAvatar = avatarAllowed
-					? message
-					: { ...message, avatarUrl: undefined };
-				return mediaMode === "static" ? staticMedia(withAvatar) : withAvatar;
-			}),
-		[avatarMode, mediaMode, messages],
-	);
+	const presentation: PreviewMessageProps = {
+		align,
+		animate,
+		bg,
+		fadeSeconds,
+		group,
+		showAvatars: avatarMode === undefined ? showAvatars : avatarMode !== "off",
+		showBadges,
+		showPronouns,
+		showTimestamps,
+		scrollSpeed,
+		theme,
+		ticker: scroll === "ticker",
+		variant,
+	};
+	const canConnectLive =
+		liveChat && liveConfig && isValidLogin(liveConfig.channel);
 	const preview = (
 		<>
 			<div
@@ -173,25 +306,27 @@ export function OverlayPreview({
 				theme={theme}
 				variant={variant}
 			>
-				<MessageList
-					align={align}
-					animate={animate}
-					bg={bg}
-					fadeSeconds={fadeSeconds}
-					group={group}
-					messages={previewMessages}
-					onMessageExpired={removeMessage}
-					scrollSpeed={scrollSpeed}
-					showAvatars={
-						avatarMode === undefined ? showAvatars : avatarMode !== "off"
-					}
-					showBadges={showBadges}
-					showPronouns={showPronouns}
-					showTimestamps={showTimestamps}
-					theme={theme}
-					ticker={scroll === "ticker"}
-					variant={variant}
-				/>
+				{liveChat ? (
+					canConnectLive && liveConfig ? (
+						<LivePreviewMessages
+							config={liveConfig}
+							presentation={presentation}
+						/>
+					) : (
+						<div className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-white">
+							Enter a valid Twitch channel above to preview live chat.
+						</div>
+					)
+				) : (
+					<DemoPreviewMessages
+						avatarMode={avatarMode}
+						events={events}
+						limit={maxMessages}
+						mediaMode={mediaMode}
+						presentation={presentation}
+						showAvatars={showAvatars}
+					/>
+				)}
 			</HbRoot>
 		</>
 	);

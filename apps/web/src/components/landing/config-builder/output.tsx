@@ -12,7 +12,9 @@ import {
 	OverlayPreview,
 } from "@/components/landing/overlay-preview";
 import { MONO } from "@/components/landing/site-chrome";
+import type { OverlayConfig } from "@/lib/overlay/url";
 
+import { Toggle } from "./fields";
 import type { Config } from "./form-model";
 
 export function ConfigOutput({
@@ -21,9 +23,15 @@ export function ConfigOutput({
 	channelReady,
 	channelInvalid,
 	settled,
+	liveChat,
+	liveConfig,
+	onLiveChatChange,
 	onReset,
 }: {
 	config: Config;
+	liveChat: boolean;
+	liveConfig: OverlayConfig;
+	onLiveChatChange: (value: boolean) => void;
 	url: string;
 	channelReady: boolean;
 	channelInvalid: boolean;
@@ -84,6 +92,17 @@ export function ConfigOutput({
 					{settled}
 				</span>
 			</div>
+			<Toggle
+				checked={liveChat}
+				hint={
+					liveChat && !channelReady
+						? "Enter a valid Twitch channel above. No connection is made until then."
+						: "Off shows the demo chat, including MrDemonWolf. On connects to the channel above."
+				}
+				id="cfg-live-chat-preview"
+				label="Use live Twitch chat"
+				onChange={onLiveChatChange}
+			/>
 			<OverlayPreview
 				animate={config.animate}
 				backdrop="checker"
@@ -94,6 +113,8 @@ export function ConfigOutput({
 				logicalViewport
 				fadeSeconds={config.fade}
 				maxMessages={config.max}
+				liveChat={liveChat}
+				liveConfig={liveConfig}
 				mediaMode={config.media}
 				showBadges={config.badges}
 				showPronouns={config.pronouns}
