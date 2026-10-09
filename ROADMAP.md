@@ -1,6 +1,6 @@
 # HowlBox product and quality roadmap
 
-Updated: 2026-10-08
+Updated: 2026-10-09
 
 ## Direction
 
@@ -10,8 +10,9 @@ make the long parameter reference easier to scan, and fix overlay correctness
 without changing its message contract, URL format, or public hb-* CSS hooks.
 
 The current branch contains the overlay, docs, test, and custom-domain work.
-It is isolated from the deployed `main`; Pages settings and production DNS have
-not changed.
+It is isolated from the deployed `main`. The Pages custom domain and explicit
+DNS record are configured; GitHub's HTTPS certificate is pending, so the
+root-path build has not been deployed.
 
 The configurator preview switches between seeded demo chat and a live Twitch
 channel. Older GitHub Pages overlay links still import, then the builder emits
@@ -22,15 +23,16 @@ the canonical custom-domain URL.
 - GitHub main at 2cb33e8ecd5e6dd3c7dbbfeed62566315f5bf53a is the deployed Pages
   source. The latest successful Pages run observed during this work was
   [run 33620119018](https://github.com/MrDemonWolf/howlbox/actions/runs/33620119018).
-- GitHub Pages still has no custom domain configured. The target hostname is
-  `howlbox.mrdemonwolf.dev`; its Cloudflare zone is active, but it has no
-  explicit DNS record. The existing wildcard record currently points this
-  hostname at the apex site.
+- GitHub Pages is configured with `howlbox.mrdemonwolf.dev`. Cloudflare has an
+  explicit DNS-only CNAME to `mrdemonwolf.github.io`, and public DNS resolves
+  to that target. GitHub has not issued the HTTPS certificate yet
+  (`https_certificate: null`, `https_enforced: false`), so the deploy guard is
+  holding the root-path artifact. The existing wildcard record is unchanged.
 - The GitHub organization domain `mrdemonwolf.dev` is verified, which satisfies
   GitHub's ownership prerequisite for adding this subdomain.
 - The branch now builds for `/` and uses the custom hostname for canonical,
-  social, and copy-ready overlay URLs. The deployed artifact and DNS remain
-  unchanged until the root build passes and the production cutover is run.
+  social, and copy-ready overlay URLs. The currently deployed Pages artifact
+  remains unchanged until HTTPS is ready and the root build is deployed.
 - The home checkout is clean and aligned with origin/main.
 - The former divergent local main tip is retained at
   rescue/main-before-align-20261008.
@@ -176,20 +178,18 @@ then compare the same fixture and OBS Browser Source behavior.
 
 ### Stage 5: Release
 
-Status: root-path changes are prepared locally. The user authorized the
-cutover; GitHub Pages and Cloudflare have not been changed yet. A main push
-deploys immediately, and the root build's absolute asset URLs are incompatible
-with the current `/howlbox/` project URL. GitHub's documented order is to add
-the custom domain in Pages settings, add a DNS-only Cloudflare CNAME pointing
-to `mrdemonwolf.github.io`, confirm HTTPS is ready, then deploy this root-path
-build. The deploy job now requires the Pages domain, DNS-only CNAME, and a
-successful HTTPS response before publishing.
+Status: Pages custom domain and DNS-only Cloudflare CNAME are configured.
+GitHub's HTTPS certificate is pending, so the root-path build has not been
+deployed. A main push deploys immediately, and the root build's absolute asset
+URLs are incompatible with the current `/howlbox/` project URL. The deploy job
+requires the Pages domain, DNS-only CNAME, and a successful HTTPS response
+before publishing.
 GitHub Actions publishing does not need a repository `CNAME` file.
 
 - Run bun run ci with BASE_PATH=/.
 - Independent Codex review is complete with no remaining actionable findings.
-- Configure Pages and DNS in the documented order, merge through the normal
-  GitHub workflow, then verify the Pages deployment and the live landing, docs,
+- Wait for GitHub HTTPS readiness, then merge through the normal GitHub
+  workflow and verify the Pages deployment and live landing, docs,
   configurator, and overlay routes.
 - Treat CI success as a gate, not as proof that a real OBS source or live Twitch
   chat was checked.
