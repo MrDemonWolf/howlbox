@@ -68,6 +68,8 @@ the canonical custom-domain URL.
   The current on-page table of contents and deep links remain available.
 - The configurator switches between demo chat and live chat. Live mode connects
   only when a valid channel login is entered; demo mode stays offline.
+- Live preview waits 500ms after a valid channel edit before reconnecting or
+  fetching channel-specific media. Form state and generated URLs stay immediate.
 - Import accepts the old `mrdemonwolf.github.io/howlbox/overlay` URL and emits
   the canonical root URL on `howlbox.mrdemonwolf.dev`.
 

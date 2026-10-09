@@ -79,6 +79,19 @@ export function ConfigBuilder({
 		const overlayConfig = configToOverlay(config, cleanChannel);
 		return { overlayConfig, url: buildOverlayUrl(overlayConfig) };
 	}, [cleanChannel, config]);
+	const [previewChannel, setPreviewChannel] = useState(cleanChannel);
+	// Keep keystrokes from restarting live chat and media fetches.
+	useEffect(() => {
+		const timer = setTimeout(() => setPreviewChannel(cleanChannel), 500);
+		return () => clearTimeout(timer);
+	}, [cleanChannel]);
+	const livePreviewConfig = useMemo(
+		() => ({
+			...overlayConfig,
+			channel: isValidLogin(cleanChannel) ? previewChannel : cleanChannel,
+		}),
+		[cleanChannel, overlayConfig, previewChannel],
+	);
 
 	// destructive: one click wipes every field. Snapshot first and hand
 	// the old config back through an Undo action on the toast.
@@ -132,7 +145,7 @@ export function ConfigBuilder({
 				channelReady={channelReady}
 				config={config}
 				liveChat={liveChat}
-				liveConfig={overlayConfig}
+				liveConfig={livePreviewConfig}
 				onLiveChatChange={setLiveChat}
 				onReset={reset}
 				settled={settled}

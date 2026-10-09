@@ -91,9 +91,9 @@ test("builder switches its preview between demo and live chat", async ({
 			: route.abort(),
 	);
 	let liveSocketAttempts = 0;
-	await page.routeWebSocket("wss://**/*", (socket) => {
+	// Leave the mock socket open; closing it triggers the chat retry policy.
+	await page.routeWebSocket("wss://**/*", () => {
 		liveSocketAttempts += 1;
-		socket.close({ code: 1000, reason: "external chat blocked in E2E" });
 	});
 	await page.goto("./config/");
 
@@ -118,8 +118,10 @@ test("builder switches its preview between demo and live chat", async ({
 	await expect(preview).toContainText(
 		"Enter a valid Twitch channel above to preview live chat.",
 	);
-	await page.getByLabel(/Twitch channel/).fill("wolf_friend");
-	await expect.poll(() => liveSocketAttempts).toBeGreaterThan(0);
+	await page
+		.getByLabel(/Twitch channel/)
+		.pressSequentially("wolf_friend", { delay: 70 });
+	await expect.poll(() => liveSocketAttempts).toBe(1);
 	await expect(preview.locator(".hb-status")).toBeVisible();
 	await expect(preview.getByText("MrDemonWolf", { exact: true })).toHaveCount(
 		0,

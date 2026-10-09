@@ -241,10 +241,11 @@ Pushes to `main` build and deploy automatically via
 `.github/workflows/deploy.yml`. One-time setup: in the repository
 settings, set Pages > Source to "GitHub Actions". The target custom domain is
 `https://howlbox.mrdemonwolf.dev/`; the build sets `BASE_PATH=/` for root
-hosting. The Pages custom domain and DNS-only Cloudflare CNAME are configured.
-GitHub's HTTPS certificate is still pending; the deploy workflow blocks the
-root-path build until HTTPS responds successfully. For a different host or
-subpath, update `SITE_ORIGIN` and `SITE_BASE` in
+hosting. GitHub has verified `mrdemonwolf.dev` for the organization, and the
+Pages custom domain and DNS-only Cloudflare CNAME are configured. GitHub's
+HTTPS certificate is still pending; the deploy workflow blocks the root-path
+build until HTTPS responds successfully. For a different host or subpath,
+update `SITE_ORIGIN` and `SITE_BASE` in
 `apps/web/src/lib/seo/routes.ts` along with `BASE_PATH`.
 
 The build generates a `404.html` marked `noindex` plus a real `index.html`
