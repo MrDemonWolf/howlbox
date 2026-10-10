@@ -108,7 +108,7 @@ export function ConfigOutput({
 				backdrop="checker"
 				bg={config.bg}
 				avatarMode={config.avatars}
-				className="h-[34rem]"
+				className="aspect-[3/5] max-h-[50rem]"
 				events={config.events}
 				logicalViewport
 				fadeSeconds={config.fade}
