@@ -116,13 +116,17 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   enum as a `Record<Theme, ...>` so a new theme fails to compile until
   it is labeled. The landing/config pickers read these; the enum value
   stays the URL contract.
-- `apps/web/src/routes/docs.tsx` - `/docs`, the reference: quick start,
-  every URL param grouped the way the configurator groups them (each
-  with a `#param-<name>` anchor so writeups can deep-link), theme
-  values, the two custom badge art formats, the `hb-*` Custom CSS
-  contract, troubleshooting, and an explicit "what it will not do"
-  section (anonymous IRC cannot send, moderate, or see EventSub). The
-  param copy here is canonical; README's table is the short version.
+- `apps/docs/content/docs/` - Fumadocs MDX source for `/docs`: quick
+  start, every URL param, themes, badge art, Custom CSS, troubleshooting,
+  and anonymous chat limits. The URL reference preserves `#param-<name>`
+  anchors. Its frontmatter owns each page's title, description, and search
+  keywords; `url-reference.mdx` is canonical for param copy, and README's
+  table is the short version.
+- `apps/docs/` - Next.js static Fumadocs app, built at `/docs` with
+  Orama local search. `scripts/merge-docs.ts` copies its static export
+  into `apps/web/dist/docs` without replacing the Vite landing page or
+  configurator. `bun run dev:web` proxies the local docs server at
+  `localhost:3002` through the Vite site on `localhost:3001`.
 - `apps/web/src/routes/` - `/` landing, `/config` URL builder, and
   the router wrapper for `/overlay`. `bootstrap.ts` detects the overlay
   pathname before site code loads, stamps transparency synchronously,
@@ -146,11 +150,12 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
 
 ## SEO and social
 
-- `apps/web/src/lib/seo/routes.ts` is the single source: `SEO_ROUTES`
-  (path, title, description, og image, index flag), `SITE_URL`,
+- `apps/web/src/lib/seo/routes.ts` is the single source for Vite-site
+  routes: `SEO_ROUTES` (path, title, description, og image, index flag), `SITE_URL`,
   `canonicalFor`, and the `WebApplication` JSON-LD. Add a route here
-  when you add one to `routes/`.
-- `apps/web/vite-plugin-seo.ts` runs on `closeBundle` and writes one
+  when you add one to `apps/web/src/routes/`. Fumadocs pages take their
+  metadata from each MDX page's frontmatter.
+- `apps/web/vite-plugin-seo.ts` runs on `writeBundle` and writes one
   real `dist/<route>/index.html` per route with its own head, plus
   `404.html`, `robots.txt`, `sitemap.xml`. This exists because GitHub
   Pages otherwise answers every route but `/` from `404.html` with an
@@ -158,7 +163,8 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   body renders. The head is swapped between the `SEO:BEGIN` /
   `SEO:END` markers in `index.html`; do not reformat those comments.
 - Canonical form is WITH a trailing slash, matching the GitHub Pages
-  directory redirect. TanStack Router matches `/docs/` to `/docs`.
+  directory redirect. Fumadocs exports `/docs/` and nested pages as
+  static directories.
 - `/overlay` gets `noindex, nofollow` and no canonical, and stays out
   of the sitemap. `robots.txt` cannot help: it is only read from the
   host root, so on a project subpath it is inert.

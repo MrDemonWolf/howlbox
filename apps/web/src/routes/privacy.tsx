@@ -149,8 +149,8 @@ function PrivacyPage() {
 			<section>
 				<h2>Contact</h2>
 				<p>
-					Questions about this policy? Reach us via{" "}
-					{ext("https://mrdwolf.net/discord", "Discord")} or{" "}
+					Questions about this policy? Discord is our preferred contact channel:{" "}
+					{ext("https://mrdwolf.net/discord", "Discord")}. You can also visit{" "}
 					{ext("https://www.mrdemonwolf.com", "mrdemonwolf.com")}. See also our{" "}
 					<Link to="/terms">Terms of Service</Link>.
 				</p>

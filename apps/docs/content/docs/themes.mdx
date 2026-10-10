@@ -1,0 +1,51 @@
+---
+title: Themes
+description: Browse HowlBox's 31 Twitch chat overlay themes, four theme families, and available color variants.
+keywords:
+  - HowlBox themes
+  - Twitch overlay themes
+  - theme variants
+  - OBS overlay
+---
+
+<span id="themes"></span>
+
+HowlBox has 31 themes across four families. Each theme defines its own typography, surfaces, borders, and shadows. The overlay loads only the CSS for the selected theme.
+
+Open the [configurator](/config/) to see the live preview and select a theme. The [landing page](/#themes) shows the theme wall.
+
+## Clean
+
+`wolf`, `glass`, `dark`, `light`, `contrast`, `nobox`, `luxe`, `brutal`, `holo`
+
+## Gamer
+
+`neon`, `xbox`, `galaxy`, `ember`, `cyber`, `hud`, `aurora`
+
+## Cozy
+
+`cozy`, `mocha`, `sakura`, `forest`, `ocean`, `frost`, `paper`, `comic`
+
+## Retro
+
+`terminal`, `retro95`, `xp`, `arcade`, `gameboy`, `vhs`, `vapor`
+
+## Color variants
+
+Variants change a theme's palette while keeping its layout and typography. Add `variant` to the URL only for a theme that supports it:
+
+```text
+/overlay?channel=you&theme=terminal&variant=amber
+```
+
+Available variants are `terminal` (`amber`, `ice`), `neon` (`cyan`, `lime`), `cozy` (`mint`, `peach`), `galaxy` (`nebula`), `gameboy` (`pocket`, `virtual`), `cyber` (`gold`), `ember` (`coal`), `ocean` (`tropic`), and `luxe` (`silver`, `rose`). Unknown values use the theme's default palette.
+
+## Display modes
+
+Every theme supports the three background modes:
+
+- `bg=off` keeps the page transparent and outlines text for contrast.
+- `bg=panel` draws one themed surface while messages are present.
+- `bg=bubble` draws a surface behind each message.
+
+Reduced-transparency settings switch surfaces to opaque colors. Reduced-motion settings disable ticker motion and animated art.

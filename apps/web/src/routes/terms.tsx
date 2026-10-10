@@ -109,8 +109,8 @@ function TermsPage() {
 			<section>
 				<h2>Contact</h2>
 				<p>
-					Questions about these terms? Reach us via{" "}
-					{ext("https://mrdwolf.net/discord", "Discord")} or{" "}
+					Questions about these terms? Discord is our preferred contact channel:{" "}
+					{ext("https://mrdwolf.net/discord", "Discord")}. You can also visit{" "}
 					{ext("https://www.mrdemonwolf.com", "mrdemonwolf.com")}.
 				</p>
 			</section>

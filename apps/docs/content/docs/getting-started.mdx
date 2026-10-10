@@ -1,0 +1,40 @@
+---
+title: Quick start
+description: Create a HowlBox URL, add it as an OBS browser source, and keep its live chat connection available between scenes.
+keywords:
+  - HowlBox setup
+  - OBS browser source
+  - Twitch chat
+  - quick start
+---
+
+<span id="quick-start"></span>
+
+Start in the [configurator](/config/), or use this example and replace `mrdemonwolf` with your Twitch login:
+
+```text
+https://howlbox.mrdemonwolf.dev/overlay?channel=mrdemonwolf&theme=wolf&bg=bubble
+```
+
+## Add it to OBS
+
+1. In OBS, open **Sources**, select **+**, then choose **Browser**.
+2. Paste the overlay URL into the address field.
+3. Set the browser source dimensions. `480 x 800` is a useful starting point.
+4. Leave **Shutdown source when not visible** and **Refresh browser when scene becomes active** off. Both interrupt a live connection.
+
+The required `channel` value is a Twitch login name, not a channel URL. All other URL parameters are optional. Invalid values fall back to safe defaults so a typo does not produce a blank overlay.
+
+## Change the appearance
+
+Use the configurator to select one of the [31 themes](/docs/themes/), choose a transparent, panel, or bubble background, and adjust message layout. Use the `size` URL parameter to change text size. Resizing the browser source with OBS transform handles can blur text.
+
+## Keep chat connected
+
+HowlBox reconnects when the source becomes visible or the network changes. It does not use a timer for reconnects because OBS throttles timers in hidden sources. Leave the two source options above disabled so the browser page can keep its connection.
+
+## Test the source
+
+Anonymous chat has no history. A new browser source stays empty until someone sends a message after it connects. Open the Twitch channel in a browser and send a message to verify the source.
+
+Read the [URL reference](/docs/url-reference/) for every available option, or use the [configurator](/config/) to generate a URL without editing query parameters by hand.

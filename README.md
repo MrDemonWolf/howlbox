@@ -110,9 +110,9 @@ Build an overlay URL with the builder at `/config`, or hand-write one:
 
 The full reference lives at `/docs` on the deployed site
 ([howlbox.mrdemonwolf.dev/docs](https://howlbox.mrdemonwolf.dev/docs)):
-every parameter with its own anchor, both custom badge art formats,
-the `hb-*` Custom CSS contract, and troubleshooting. The table below is
-the short version. The repository guide at
+setup, every URL parameter, themes, both custom badge art formats, the
+`hb-*` Custom CSS contract, troubleshooting, and anonymous chat limits.
+The table below is the short version. The repository guide at
 [docs/readme.md](docs/readme.md) points to the reference source and
 contributor checks.
 
@@ -177,21 +177,22 @@ becomes active" off.
 
 ## Tech Stack
 
-| Layer     | Technology                          |
-| --------- | ----------------------------------- |
-| Framework | React 19 + TanStack Router (Vite)   |
-| Language  | TypeScript (strict)                 |
-| Chat      | @twurple/chat (anonymous IRC)       |
-| Emotes    | 7TV, BTTV, FrankerFaceZ public APIs |
-| Badges    | api.ivr.fi (Twitch badge art)       |
-| Pronouns  | pronouns.alejo.io (opt-in)          |
-| Avatars   | api.ivr.fi (batched, opt-in)        |
-| Cheermotes | static-cdn.jtvnw.net (global tiers) |
-| Styling   | Tailwind CSS 4 + CSS variables      |
-| UI        | shadcn/ui primitives (packages/ui)  |
-| Monorepo  | Turborepo + Bun workspaces          |
-| Linting   | Biome                               |
-| Deploy    | GitHub Pages (static)               |
+| Layer                 | Technology                                      |
+| --------------------- | ----------------------------------------------- |
+| Site and configurator | React 19 + TanStack Router (Vite)               |
+| Docs                  | Next.js static export + Fumadocs MDX + Orama    |
+| Language              | TypeScript (strict)                             |
+| Chat                  | @twurple/chat (anonymous IRC)                    |
+| Emotes                | 7TV, BTTV, FrankerFaceZ public APIs             |
+| Badges                | api.ivr.fi (Twitch badge art)                   |
+| Pronouns              | pronouns.alejo.io (opt-in)                      |
+| Avatars               | api.ivr.fi (batched, opt-in)                    |
+| Cheermotes            | static-cdn.jtvnw.net (global tiers)             |
+| Styling               | Tailwind CSS 4 + CSS variables                  |
+| UI                    | shadcn/ui primitives (packages/ui)              |
+| Monorepo              | Turborepo + Bun workspaces                      |
+| Linting               | Biome                                           |
+| Deploy                | GitHub Pages (static)                           |
 
 ## Development
 
@@ -217,8 +218,8 @@ becomes active" off.
 ### Development Scripts
 
 - `bun run dev`: Start all apps in development mode
-- `bun run dev:web`: Start only the web app (port 3001)
-- `bun run build`: Build the static site to `apps/web/dist`
+- `bun run dev:web`: Start the site on port 3001 and Fumadocs on 3002, proxied under `/docs`
+- `bun run build`: Build and merge the static site and docs into `apps/web/dist`
 - `bun run check-types`: Check TypeScript types across the monorepo
 - `bun test`: Run unit tests
 - `bun run test:e2e`: Run Playwright browser tests
@@ -279,6 +280,7 @@ Suggested source size: 480 x 800 at the default font scale.
 ```
 howlbox/
 ├── apps/
+│   ├── docs/                 # Fumadocs MDX, static search, and static export
 │   └── web/
 │       └── src/
 │           ├── components/
@@ -289,12 +291,14 @@ howlbox/
 │           │   ├── emotes/    # 7TV/BTTV/FFZ fetch, cache, resolution
 │           │   ├── overlay/   # URL param schema + builder
 │           │   └── twitch/    # Anonymous chat client, badges, colors
-│           └── routes/        # / landing, /config builder, /docs reference, /overlay
+│           └── routes/        # / landing, /config builder, /overlay
 ├── packages/
 │   ├── config/                # Shared tsconfig base
 │   └── ui/                    # Shared shadcn/ui components and styles
 ├── docs/
 │   └── readme.md              # Contributor guide to the live docs and checks
+├── scripts/
+│   └── merge-docs.ts           # Adds the docs export under apps/web/dist/docs
 ├── .github/workflows/         # CI deploy to GitHub Pages
 ├── biome.json                 # Lint and format config
 └── turbo.json                 # Turborepo pipeline

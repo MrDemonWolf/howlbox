@@ -55,7 +55,7 @@ export function LegalPage({
 						"[&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-5",
 						"[&_li]:marker:text-[color:var(--site-brand)]",
 						"[&_code]:rounded [&_code]:bg-[color:var(--site-surface)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]",
-						"[&_a]:text-[color:var(--site-brand-text)] [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-[color:var(--site-txt-1)]",
+						"[&_a:hover]:text-[color:var(--site-txt-1)] [&_a]:text-[color:var(--site-brand-text)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition-colors",
 					)}
 				>
 					{children}

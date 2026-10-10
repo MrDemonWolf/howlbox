@@ -1,7 +1,7 @@
 # HowlBox Documentation - Live Reference and Contributor Guide
 
 HowlBox is a client-only Twitch chat overlay for OBS browser sources. Its
-live reference explains the URL settings, themes, custom badge art, styling
+Fumadocs site explains setup, URL settings, themes, custom badge art, styling
 hooks, and the limits of anonymous chat.
 
 Your chat. Your colors. Your howl.
@@ -57,8 +57,9 @@ EventSub.
 
 | Layer | Technology |
 | ----- | ---------- |
-| Docs page | React route in `apps/web/src/routes/docs.tsx` |
-| Framework | React 19, TanStack Router, and Vite |
+| Docs site | Fumadocs MDX in `apps/docs/content/docs/` |
+| Docs framework | Next.js static export with Orama search |
+| Site and configurator | React 19, TanStack Router, and Vite |
 | Language | TypeScript |
 | Styling | Tailwind CSS 4 and CSS variables |
 | Chat | `@twurple/chat` anonymous IRC |
@@ -78,7 +79,7 @@ EventSub.
 
 ### Development Scripts
 
-- `bun run dev:web` - Start the web app on port 3001.
+- `bun run dev:web` - Start the site on port 3001 and proxy Fumadocs at `/docs/` from port 3002.
 - `bun run check:ci` - Run Biome checks without applying fixes.
 - `bun run check-types` - Check workspace types.
 - `bun test` - Run unit tests.
@@ -91,20 +92,23 @@ EventSub.
 - Keep TypeScript strict and use Biome for formatting and linting.
 - Test overlay behavior with unit tests and Playwright.
 - Keep the canonical parameter descriptions in
-  `apps/web/src/routes/docs.tsx` and the root README's short table in sync.
+  `apps/docs/content/docs/url-reference.mdx` and the root README's short
+  table in sync. Page titles, descriptions, and search keywords live in
+  the MDX frontmatter.
 
 ## Project Structure
 
 ```text
 howlbox/
-├── apps/web/src/routes/docs.tsx  # Live parameter reference
+├── apps/docs/content/docs/       # Live Fumadocs source pages
+├── apps/docs/app/                # Static docs site and search index
 ├── apps/web/src/lib/overlay/     # URL schema, defaults, and builders
 ├── docs/readme.md                # This contributor guide
 └── README.md                     # Project overview and quick start
 ```
 
-The live `/docs/` page is rendered from the React route. This Markdown
-file is a repository guide, not a source file for that page.
+The live `/docs/` site is generated from MDX in `apps/docs/content/docs/`.
+This Markdown file is a repository guide, not a source page.
 
 ## License
 

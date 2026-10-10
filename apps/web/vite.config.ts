@@ -34,6 +34,13 @@ export default defineConfig({
 		// random *.trycloudflare.com hostname each run, so the suffix is
 		// allowed rather than one fixed host. Dev server only, never built.
 		allowedHosts: [".trycloudflare.com"],
+		proxy: {
+			"/docs": {
+				target: `http://127.0.0.1:${process.env.DOCS_PORT ?? "3002"}`,
+				changeOrigin: true,
+				ws: true,
+			},
+		},
 	},
 	resolve: {
 		tsconfigPaths: true,

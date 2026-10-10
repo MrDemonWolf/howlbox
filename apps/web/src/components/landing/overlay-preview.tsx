@@ -27,9 +27,9 @@ import type {
 import "@/components/chat/overlay.css";
 import "@/components/chat/themes/index.css";
 
-export const OBS_WIDTH = 480;
-export const OBS_HEIGHT = 800;
-export const OBS_DIMENSIONS = `${OBS_WIDTH} × ${OBS_HEIGHT}`;
+export const PREVIEW_WIDTH = 480;
+export const PREVIEW_HEIGHT = 480;
+export const PREVIEW_DIMENSIONS = `${PREVIEW_WIDTH} × ${PREVIEW_HEIGHT}`;
 
 interface OverlayPreviewProps {
 	theme: Theme;
@@ -100,8 +100,8 @@ function useLogicalScale(enabled: boolean) {
 		const measure = () => {
 			setScale(
 				Math.min(
-					frame.clientWidth / OBS_WIDTH,
-					frame.clientHeight / OBS_HEIGHT,
+					frame.clientWidth / PREVIEW_WIDTH,
+					frame.clientHeight / PREVIEW_HEIGHT,
 				),
 			);
 		};
@@ -343,9 +343,9 @@ export function OverlayPreview({
 				<div
 					className="absolute top-1/2 left-1/2 origin-center"
 					style={{
-						height: OBS_HEIGHT,
+						height: PREVIEW_HEIGHT,
 						transform: `translate(-50%, -50%) scale(${scale})`,
-						width: OBS_WIDTH,
+						width: PREVIEW_WIDTH,
 					}}
 				>
 					{preview}

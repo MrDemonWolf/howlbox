@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/ocean.css";
+@import "fumadocs-ui/css/preset.css";
+@import "@fontsource-variable/inter";
+
+@theme {
+	--color-fd-primary: hsl(194 100% 31%);
+	--color-fd-primary-foreground: hsl(0 0% 100%);
+	--color-fd-background: hsl(220 33% 99%);
+	--color-fd-foreground: hsl(222 46% 12%);
+	--color-fd-muted: hsl(220 28% 96%);
+	--color-fd-muted-foreground: hsl(220 13% 39%);
+	--color-fd-secondary: hsl(220 24% 93%);
+	--color-fd-secondary-foreground: hsl(222 46% 12%);
+	--color-fd-accent: hsl(194 90% 94%);
+	--color-fd-accent-foreground: hsl(194 100% 25%);
+	--color-fd-card: hsl(0 0% 100%);
+	--color-fd-card-foreground: hsl(222 46% 12%);
+	--color-fd-popover: hsl(0 0% 100%);
+	--color-fd-popover-foreground: hsl(222 46% 12%);
+	--color-fd-border: hsl(220 18% 87%);
+	--color-fd-ring: hsl(194 100% 31%);
+	--font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+.dark {
+	--color-fd-primary: hsl(194 100% 61%);
+	--color-fd-primary-foreground: hsl(222 46% 9%);
+	--color-fd-background: hsl(222 46% 6%);
+	--color-fd-foreground: hsl(214 32% 96%);
+	--color-fd-muted: hsl(222 32% 11%);
+	--color-fd-muted-foreground: hsl(216 16% 69%);
+	--color-fd-secondary: hsl(222 29% 14%);
+	--color-fd-secondary-foreground: hsl(214 32% 96%);
+	--color-fd-accent: hsl(194 70% 16%);
+	--color-fd-accent-foreground: hsl(194 100% 78%);
+	--color-fd-card: hsl(222 38% 9%);
+	--color-fd-card-foreground: hsl(214 32% 96%);
+	--color-fd-popover: hsl(222 38% 9%);
+	--color-fd-popover-foreground: hsl(214 32% 96%);
+	--color-fd-border: hsl(222 24% 20%);
+	--color-fd-ring: hsl(194 100% 61%);
+	--shiki-dark: #f2f7ff;
+	--shiki-dark-bg: #0b1220;
+}
+
+:root {
+	--shiki-light: #101827;
+	--shiki-light-bg: #f2f6fb;
+}
+
+body {
+	font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+}

@@ -163,12 +163,12 @@ export function SiteHeader() {
 					>
 						Themes
 					</Link>
-					<Link
+					<a
 						className="hb-text-2 text-sm transition-colors hover:text-[color:var(--site-txt-1)] max-sm:hidden"
-						to="/docs"
+						href={`${import.meta.env.BASE_URL}docs/`}
 					>
 						Docs
-					</Link>
+					</a>
 					<a
 						className="hb-text-2 text-sm transition-colors hover:text-[color:var(--site-txt-1)] max-sm:hidden"
 						href={GITHUB_URL}
@@ -278,9 +278,7 @@ export const DISCLAIMER =
 	"HowlBox is an independent, open-source tool. Not affiliated with, endorsed by, or sponsored by Twitch Interactive, Amazon, 7TV, BetterTTV, or FrankerFaceZ. Twitch is a trademark of Twitch Interactive, Inc.";
 
 export function SiteFooter() {
-	// Single compact row (copyright + inline nav), matching the wolfwave
-	// footer; the Twitch/7TV disclaimer sits above it since HowlBox
-	// surfaces those trademarks and wolfwave has no equivalent need.
+	// Keep build metadata beside the copyright and outside the site navigation.
 	return (
 		<footer className="hb-bg-surface hb-hairline border-t">
 			<div className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -288,24 +286,42 @@ export function SiteFooter() {
 					{DISCLAIMER}
 				</p>
 				<div className="hb-hairline hb-text-2 mt-6 flex flex-col items-center justify-between gap-4 border-t pt-6 text-sm sm:flex-row">
-					<p>
-						© {new Date().getFullYear()} HowlBox by{" "}
+					<div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-start">
+						<p>
+							© {new Date().getFullYear()} HowlBox by{" "}
+							<a
+								className="transition-colors hover:text-[color:var(--site-txt-1)]"
+								href="https://www.mrdemonwolf.com"
+								rel="noreferrer"
+								target="_blank"
+							>
+								MrDemonWolf, Inc.
+							</a>
+						</p>
+						<span className={`${MONO} text-xs opacity-70`}>
+							Build{" "}
+							{__COMMIT_HASH__ === "dev" ? (
+								"dev"
+							) : (
+								<a
+									aria-label={`View build commit ${__COMMIT_HASH__.slice(0, 7)}`}
+									className="transition-colors hover:text-[color:var(--site-txt-1)]"
+									href={`${GITHUB_URL}/commit/${__COMMIT_HASH__}`}
+									rel="noreferrer"
+									target="_blank"
+								>
+									{__COMMIT_HASH__.slice(0, 7)}
+								</a>
+							)}
+						</span>
+					</div>
+					<nav className="flex flex-wrap items-center justify-center gap-6">
 						<a
 							className="transition-colors hover:text-[color:var(--site-txt-1)]"
-							href="https://www.mrdemonwolf.com"
-							rel="noreferrer"
-							target="_blank"
-						>
-							MrDemonWolf, Inc.
-						</a>
-					</p>
-					<nav className="flex flex-wrap items-center justify-center gap-6">
-						<Link
-							className="transition-colors hover:text-[color:var(--site-txt-1)]"
-							to="/docs"
+							href={`${import.meta.env.BASE_URL}docs/`}
 						>
 							Docs
-						</Link>
+						</a>
 						<a
 							className="transition-colors hover:text-[color:var(--site-txt-1)]"
 							href={GITHUB_URL}
@@ -334,18 +350,6 @@ export function SiteFooter() {
 						>
 							Terms
 						</Link>
-						{__COMMIT_HASH__ === "dev" ? (
-							<span className={`${MONO} text-xs opacity-70`}>dev</span>
-						) : (
-							<a
-								className={`${MONO} text-xs opacity-70 transition-colors hover:text-[color:var(--site-txt-1)]`}
-								href={`${GITHUB_URL}/commit/${__COMMIT_HASH__}`}
-								rel="noreferrer"
-								target="_blank"
-							>
-								{__COMMIT_HASH__.slice(0, 7)}
-							</a>
-						)}
 					</nav>
 				</div>
 			</div>

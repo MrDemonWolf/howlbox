@@ -1,0 +1,42 @@
+---
+title: Custom badge art
+description: Replace Twitch badge images with inline badgeart mappings or a public badgegist, including safe URL limits and precedence.
+keywords:
+  - Twitch badge art
+  - badgeart
+  - badgegist
+  - owner badge
+---
+
+<span id="badge-art"></span>
+
+Twitch global and channel badges load automatically. Use `badgeart` or `badgegist` when you want to replace a badge image.
+
+Messages from the owner account `mrdemonwolf` also show the official MrDemonWolf wolf logo inside a shield-shaped badge. It follows the `badges` visibility setting.
+
+## Inline mappings with `badgeart`
+
+Use comma-separated `set=url` pairs. Add `/version` to target one version of a badge set.
+
+```text
+&badgeart=moderator=https://example.com/mod.png,subscriber/12=https://example.com/1yr.png
+```
+
+## Hosted mappings with `badgegist`
+
+Point `badgegist` at a public gist ID or URL. The gist can contain one mapping per line or a JSON map. Editing the gist updates the art without changing the browser source URL.
+
+```text
+moderator=https://example.com/mod.png
+vip=https://example.com/vip.png
+```
+
+## Precedence and limits
+
+From weakest to strongest, HowlBox uses Twitch art, then `badgegist`, then inline `badgeart`. A bare set key covers every version of that set. A version-specific key overrides the bare key.
+
+Badge image URLs must use HTTPS and cannot contain a username or password. The browser must be able to fetch the image with permissive CORS headers. The combined inline and gist mapping list is capped at 200 entries.
+
+Gist data is fetched from GitHub's public API without a token. GitHub allows 60 unauthenticated requests per hour per IP. Refresh is off by default; when enabled, the five-minute minimum keeps requests below that limit. Gists over 16 files or 64 KB are skipped entirely.
+
+Badge, emote, and avatar images use a `no-referrer` policy, so the overlay URL is not sent to their hosts.

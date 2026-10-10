@@ -1,0 +1,35 @@
+---
+title: Troubleshooting
+description: Diagnose blank HowlBox sources, missing messages or emotes, blurry text, and custom badge art issues in OBS.
+keywords:
+  - HowlBox troubleshooting
+  - OBS browser source
+  - missing Twitch emotes
+  - blank overlay
+---
+
+<span id="troubleshooting"></span>
+
+## The source is blank in OBS
+
+Check the `channel` parameter. A value outside Twitch's login pattern is rejected and the overlay shows a status message. A missing `channel` has its own setup prompt. Confirm that the channel exists and that the source URL includes a login name, not a Twitch page URL.
+
+## Nothing appears until someone talks
+
+There is no chat backlog. Anonymous IRC receives messages from the moment it connects. Send a message in the channel after the browser source connects to test it.
+
+## The text is blurry
+
+Set width and height in the browser source properties instead of resizing it with OBS transform handles. Reset the source transform, then use the `size` parameter to adjust text. See the [URL reference](/docs/url-reference/).
+
+## Messages stop arriving after a scene change
+
+Turn off **Shutdown source when not visible** and **Refresh browser when scene becomes active**. Both interrupt a live connection. HowlBox reconnects on visibility and network events rather than using a timer that OBS may throttle.
+
+## 7TV or BTTV emotes are missing
+
+Those services only return emotes configured for the channel. Channel emotes override global emotes, and the results are cached in local storage. Reload the source to pick up changes or enable a refresh interval for channel art.
+
+## Custom badge art is not showing
+
+Check the precedence: Twitch art, then `badgegist`, then `badgeart`. A bare set key applies to every version, while a version-specific entry overrides it. The image must use HTTPS, contain no URL credentials, and be served with permissive CORS headers. Gists over 16 files or 64 KB are skipped. See [custom badge art](/docs/custom-badges/).

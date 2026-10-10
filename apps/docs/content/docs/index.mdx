@@ -1,0 +1,52 @@
+---
+title: HowlBox documentation
+description: Set up the HowlBox Twitch chat overlay, choose a theme, and customize its URL, badges, and CSS for OBS.
+keywords:
+  - HowlBox
+  - Twitch chat overlay
+  - OBS browser source
+  - setup
+  - documentation
+---
+
+Everything the overlay needs is in its URL. Use the configurator to build one, or read the guides when you want to understand each setting.
+
+<Cards>
+  <Card title="Quick start" href="/getting-started/">
+    Add a browser source in OBS and connect it to your Twitch channel.
+  </Card>
+  <Card title="URL reference" href="/url-reference/">
+    Find every query parameter, accepted value, default, and stable anchor.
+  </Card>
+  <Card title="Themes" href="/themes/">
+    Browse all 31 themes and their color variants.
+  </Card>
+  <Card title="Custom badges" href="/custom-badges/">
+    Add badge art inline or load it from a public GitHub gist.
+  </Card>
+  <Card title="Custom CSS" href="/custom-css/">
+    Style the overlay with its stable hb-* selector contract.
+  </Card>
+  <Card title="Troubleshooting" href="/troubleshooting/">
+    Fix blank sources, missing emotes, and common OBS settings.
+  </Card>
+</Cards>
+
+## Build an overlay URL
+
+The [configurator](/config/) keeps the overlay visible while you choose its theme, layout, and chat options. Paste an older GitHub Pages overlay URL into the builder and it will load those settings into the current URL format.
+
+<Callout type="info">
+  HowlBox connects to Twitch chat anonymously. It does not need an account, OAuth token, API key, or backend.
+</Callout>
+
+## What the overlay can do
+
+- Show Twitch chat with native Twitch, 7TV, BTTV, and FrankerFaceZ emotes.
+- Render channel badges, custom badge art, and the MrDemonWolf owner badge.
+- Choose from 31 themes, three background modes, and optional event rows.
+- Configure filters, message timing, emote size, avatars, and pronouns in the URL.
+
+## What it cannot do
+
+The connection is read-only. It cannot send or moderate chat, read deleted message contents or the mod queue, load chat history from before it connected, or show follower alerts. See [anonymous chat limits](./limitations) for details.

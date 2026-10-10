@@ -8,8 +8,8 @@ import { useRef } from "react";
 import { toast } from "sonner";
 
 import {
-	OBS_DIMENSIONS,
 	OverlayPreview,
+	PREVIEW_DIMENSIONS,
 } from "@/components/landing/overlay-preview";
 import { MONO } from "@/components/landing/site-chrome";
 import type { OverlayConfig } from "@/lib/overlay/url";
@@ -79,7 +79,7 @@ export function ConfigOutput({
 				<span
 					className={`text-[0.65rem] text-[color:var(--site-brand-text)] ${MONO}`}
 				>
-					Live preview · {OBS_DIMENSIONS}
+					Live preview · {PREVIEW_DIMENSIONS}
 				</span>
 				{/* This line already mirrors the state a sighted user reads off
 				    the preview, so it doubles as the status region rather than
@@ -108,7 +108,7 @@ export function ConfigOutput({
 				backdrop="checker"
 				bg={config.bg}
 				avatarMode={config.avatars}
-				className="h-[34rem]"
+				className="mx-auto aspect-square w-full max-w-[30rem]"
 				events={config.events}
 				logicalViewport
 				fadeSeconds={config.fade}

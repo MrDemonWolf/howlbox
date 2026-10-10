@@ -1,0 +1,50 @@
+---
+title: Custom CSS
+description: Use HowlBox's stable hb-* classes, data attributes, and CSS variables in the OBS browser source Custom CSS field.
+keywords:
+  - OBS custom CSS
+  - hb-root
+  - HowlBox CSS hooks
+  - overlay styling
+---
+
+<span id="custom-css"></span>
+
+OBS browser sources include a **Custom CSS** field. HowlBox treats the following class names as a stable styling contract.
+
+| Selector | Element |
+| --- | --- |
+| `.hb-root` | Overlay root. Carries `data-theme` and optional `data-variant`, `data-layout`, `data-align`, and `data-scroll` attributes. |
+| `.hb-messages` | Message column, or the ticker lane when `scroll=ticker`. |
+| `.hb-message` | One row. Emote-only rows also carry `data-emote-only`; grouped continuation rows carry `data-grouped`. |
+| `.hb-head` | Timestamp, avatar, badges, pronouns, and name. |
+| `.hb-name` | Chatter display name. |
+| `.hb-text` | Message body. |
+| `.hb-badge` | One badge image. |
+| `.hb-avatar` | Profile picture when `avatars` is enabled. |
+| `.hb-event-line` | Event text. The row carries `data-event` with its event kind. |
+| `.hb-cheermote` | Bits tier image on a cheer row. |
+| `.hb-pronoun` | Pronoun badge when enabled. |
+| `.hb-time` | Timestamp when enabled. |
+| `.hb-sep` | Separator between the name and message. |
+| `.hb-emote` | Emote image in the message body. |
+| `.hb-status` | Connection or setup status message. |
+
+## CSS variables
+
+`--hb-avatar-size` controls avatar size and defaults to `1.5em`. `--hb-avatar-radius` controls its shape, and `--hb-avatar-ring` controls the border. Themes can change the radius. `--hb-event-accent` sets an event row's accent color. `--hb-emote-scale` scales emotes and is not set by the app, so it can be overridden directly.
+
+Theme blocks have greater selector specificity than a bare `.hb-root` rule. Match the background and theme attributes to override a theme variable reliably:
+
+```css
+.hb-root[data-bg][data-theme] {
+  --hb-text: #ffd6f2;
+  --hb-emote-scale: 1.25;
+}
+```
+
+`data-bg` is always present. A selector with fewer attributes can lose to a theme or variant rule.
+
+## Glass and blur
+
+`backdrop-filter` cannot blur gameplay behind an OBS browser source. OBS composites video outside the page, and CSS can only sample pixels inside the page. HowlBox themes that suggest glass use gradient fills, borders, and noise instead.

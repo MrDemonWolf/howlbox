@@ -1,0 +1,104 @@
+---
+title: Overlay URL reference
+description: All HowlBox overlay URL parameters, defaults, accepted values, and compatibility anchors.
+keywords:
+  - URL parameters
+  - overlay configuration
+  - Twitch chat settings
+  - badgeart
+  - badgegist
+---
+
+The browser source URL is the configuration file. Parameters that are missing or invalid use their defaults. `channel` is the only required setting; without a valid Twitch login, the overlay shows a status message instead of joining chat.
+
+<span id="channel"></span>
+
+## Channel
+
+| Parameter | Values | Default | Behavior |
+| --- | --- | --- | --- |
+| <span id="param-channel"></span>`channel` | Twitch login name | none | The channel to join. Use `mrdemonwolf`, not `twitch.tv/mrdemonwolf`. The login is lowercased; spaces, dots, slashes, and other characters outside Twitch's login pattern are rejected. |
+
+<span id="look"></span>
+
+## Look
+
+| Parameter | Values | Default | Behavior |
+| --- | --- | --- | --- |
+| <span id="param-theme"></span>`theme` | 31 theme values | `wolf` | Selects the font, colors, surfaces, borders, and shadows. Only the selected theme's CSS is loaded. See [themes](/docs/themes/). |
+| <span id="param-variant"></span>`variant` | Theme-specific | theme default | Changes the selected theme's palette. Unsupported values fall back to that theme's default. The default is omitted from generated URLs. |
+| <span id="param-layout"></span>`layout` | `inline`, `stacked` | `inline` | Keep the author and message on one line or put the author on a separate line above the message. Ignored in ticker mode. |
+| <span id="param-align"></span>`align` | `left`, `right` | `left` | Choose the edge messages grow from. In ticker mode, this chooses the lane direction. |
+| <span id="param-scroll"></span>`scroll` | `off`, `ticker` | `off` | Use a bottom-up message column or a single horizontal ticker lane. Ticker mode drops a message if it cannot start within six seconds rather than building a delayed queue. Reduced-motion preference falls back to the column. |
+| <span id="param-scrollspeed"></span>`scrollspeed` | `1` to `5`, whole steps | `1` | Ticker speed multiplier. A lane fits about one message every eight seconds at 1x and one every two seconds at 5x. Ignored unless `scroll=ticker`. |
+| <span id="param-bg"></span>`bg` | `off`, `panel`, `bubble` | `off` | Show outlined text over gameplay, one themed panel, or a surface behind every message. An empty panel stays transparent. Reduced-transparency preferences use solid surfaces. |
+| <span id="param-size"></span>`size` | `50` to `300`, percent | `100` | Scales theme text, with a 12px rendered minimum. Change this instead of scaling the browser source in OBS. |
+| <span id="param-emotescale"></span>`emotescale` | `1` to `4`, half steps | `1` | Grows messages made only of emotes. Text messages stay at normal size. The multiplier is shared across emotes in a message, and a system reduced-motion preference selects static art. |
+| <span id="param-avatars"></span>`avatars` | `off`, `all`, `subs` | `off` | Show profile pictures before names using api.ivr.fi. `subs` only looks up subscribers and founders. This is a per-user third-party lookup; the first message may arrive before the picture. |
+
+<span id="events"></span>
+
+## Events
+
+| Parameter | Values | Default | Behavior |
+| --- | --- | --- | --- |
+| <span id="param-events"></span>`events` | Comma-separated `sub`, `cheer`, `raid`, `first`, `announce`, or `all` | none | Add subscription, gift, cheer, raid, first-message, returning-chatter, and announcement rows. These arrive over the same anonymous IRC connection. Gift bombs collapse into one row. Follows require EventSub and are not available. |
+
+<span id="messages"></span>
+
+## Messages
+
+| Parameter | Values | Default | Behavior |
+| --- | --- | --- | --- |
+| <span id="param-max"></span>`max` | `1` to `200` | `50` | Maximum number of messages kept on screen. Older rows are removed first. |
+| <span id="param-fade"></span>`fade` | `0` to `600`, seconds | `0` | Auto-hide each message after this many seconds. Zero keeps it until `max` removes it. The countdown uses CSS animation so it continues when OBS throttles hidden-page timers. |
+| <span id="param-group"></span>`group` | `true`, `false` | `false` | Consecutive messages from one chatter share a header. Event rows break a group. If moderation removes the first row, the next row restores its header. |
+| <span id="param-badges"></span>`badges` | `true`, `false` | `true` | Show Twitch global and channel badge art before the name. This also controls the MrDemonWolf owner badge. |
+| <span id="param-pronouns"></span>`pronouns` | `true`, `false` | `false` | Show a pronoun label from pronouns.alejo.io. This makes a per-user third-party lookup; the first message may arrive before the label. |
+| <span id="param-timestamps"></span>`timestamps` | `true`, `false` | `false` | Show an `HH:MM` timestamp before each message. |
+| <span id="param-animate"></span>`animate` | `true`, `false` | `true` | Enable message entrance animation. It changes only opacity and transform. |
+| <span id="param-media"></span>`media` | `animated`, `static` | `animated` | Choose animated or static emote and cheer art. Static art reduces transfer, decoding, and repaint work. Reduced-motion preference also selects static art. |
+
+<span id="moderation"></span>
+
+## Moderation and filters
+
+| Parameter | Values | Default | Behavior |
+| --- | --- | --- | --- |
+| <span id="param-delay"></span>`delay` | `0` to `300`, seconds | `0` | Hold regular messages before rendering so deletions and timeouts can arrive first. Moderator and broadcaster messages, event rows, and moderation removals do not wait in the buffer. |
+| <span id="param-hidebots"></span>`hidebots` | `true`, `false` | `false` | Hide common bots such as Nightbot, StreamElements, Streamlabs, and Moobot. |
+| <span id="param-hidecommands"></span>`hidecommands` | `true`, `false` | `false` | Hide messages beginning with `!`. A real message with an event decoration is also hidden if it begins with `!`. |
+| <span id="param-hide"></span>`hide` | Comma-separated logins | none | Always hide the listed users. Invalid login values are dropped. |
+| <span id="param-allow"></span>`allow` | Comma-separated logins | none | Featured mode: show only the listed users. An empty list shows everyone. |
+
+<span id="advanced"></span>
+
+## Advanced
+
+| Parameter | Values | Default | Behavior |
+| --- | --- | --- | --- |
+| <span id="param-badgeart"></span>`badgeart` | Comma-separated `set=url` or `set/version=url` pairs | none | Override badge images directly in the URL. HTTPS image URLs without embedded credentials are required. See [custom badges](/docs/custom-badges/). |
+| <span id="param-badgegist"></span>`badgegist` | Public GitHub gist ID or URL | none | Load the same badge pairs from a public gist so you can update art without editing the OBS URL. See [custom badges](/docs/custom-badges/). |
+| <span id="param-refresh"></span>`refresh` | `0`, or `1` to `1440` minutes | `0` | Refetch channel emote and badge maps. Values from 1 to 4 round up to the 5-minute minimum. Global maps retain their normal cache duration. |
+
+## URL examples
+
+Transparent chat with the wolf theme:
+
+```text
+/overlay?channel=you&theme=wolf&bg=off
+```
+
+Right-aligned ticker with larger text:
+
+```text
+/overlay?channel=you&scroll=ticker&scrollspeed=2&align=right&size=125
+```
+
+Featured chat with event rows:
+
+```text
+/overlay?channel=you&allow=friend_one,friend_two&events=sub,cheer,raid
+```
+
+The [configurator](/config/) builds these URLs and can import older `/howlbox/overlay` links.

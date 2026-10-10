@@ -214,8 +214,8 @@
 
 /* ?group continuation rows: same chatter as the row above, header and
    separator hide, text stands alone */
-.hb-message[data-grouped] .hb-head,
-.hb-message[data-grouped] .hb-sep {
+.hb-root .hb-message[data-grouped] .hb-head,
+.hb-root .hb-message[data-grouped] .hb-sep {
 	display: none;
 }
 
