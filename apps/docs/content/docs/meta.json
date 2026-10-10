@@ -1,0 +1,13 @@
+{
+	"title": "HowlBox documentation",
+	"pages": [
+		"index",
+		"getting-started",
+		"url-reference",
+		"themes",
+		"custom-badges",
+		"custom-css",
+		"troubleshooting",
+		"limitations"
+	]
+}

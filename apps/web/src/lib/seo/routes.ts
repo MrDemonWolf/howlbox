@@ -8,8 +8,7 @@
 // with an HTTP 404 status.
 //
 // Canonical form is WITH a trailing slash, because that is what GitHub
-// Pages 301-redirects to for a directory. TanStack Router matches
-// "/docs/" to the "/docs" route, so nothing else has to change.
+// Pages 301-redirects to for a directory.
 
 export const SITE_ORIGIN = "https://howlbox.mrdemonwolf.dev";
 export const SITE_BASE = "/";
@@ -37,14 +36,6 @@ export const SEO_ROUTES: SeoRoute[] = [
 		description:
 			"A self-hosted Twitch chat overlay for OBS browser sources. Thirty-one themes, 7TV, BTTV and FFZ emotes, and the whole configuration rides in the URL. No login, no API keys, no server.",
 		ogImage: "og-v2.png",
-		index: true,
-	},
-	{
-		path: "docs",
-		title: "Overlay URL parameters and CSS hooks - HowlBox",
-		description:
-			"Every HowlBox URL parameter with its own anchor, both custom badge art formats, the hb-* class contract for the OBS Custom CSS field, troubleshooting, and what anonymous chat cannot do.",
-		ogImage: "og-docs-v2.png",
 		index: true,
 	},
 	{

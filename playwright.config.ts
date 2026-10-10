@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const basePath = process.env.BASE_PATH ?? "/";
+const basePathPart = (process.env.BASE_PATH ?? "/").replace(/^\/+|\/+$/g, "");
+const basePath = basePathPart ? `/${basePathPart}/` : "/";
 const baseURL = `http://127.0.0.1:4173${basePath}`;
 
 export default defineConfig({
@@ -24,8 +25,8 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: "bun run serve --host 127.0.0.1 --port 4173 --strictPort",
-		cwd: "apps/web",
+		command: "python3 scripts/serve-e2e.py",
+		cwd: ".",
 		url: baseURL,
 		reuseExistingServer: false,
 		timeout: 30_000,

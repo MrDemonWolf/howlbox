@@ -10,6 +10,9 @@ build
 
 # Generated files
 apps/web/src/routeTree.gen.ts
+apps/docs/.next
+apps/docs/.source
+apps/docs/out
 
 # Environment variables
 .env

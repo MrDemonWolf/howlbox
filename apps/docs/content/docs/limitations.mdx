@@ -1,0 +1,21 @@
+---
+title: Anonymous chat limits
+description: What HowlBox can and cannot show through its read-only anonymous Twitch IRC connection.
+keywords:
+  - Twitch IRC limits
+  - anonymous chat
+  - EventSub
+  - HowlBox privacy
+---
+
+<span id="limits"></span>
+
+HowlBox reads Twitch chat anonymously. That keeps setup simple and removes account credentials, but it also sets the limits of the overlay.
+
+- It cannot send messages, timeouts, or bans.
+- It cannot read the moderator queue, AutoMod holds, or the contents of deleted messages.
+- It cannot show follower alerts. Follows arrive through EventSub, which requires an authenticated app. Subs, gifts, raids, cheers, first messages, and announcements are available through anonymous chat.
+- It cannot show chat history from before the browser source connected.
+- It cannot show whispers or messages from a channel it has not joined.
+
+These features require an authenticated backend and an OAuth app. The configurator and overlay do not ask for Twitch credentials.

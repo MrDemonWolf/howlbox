@@ -123,7 +123,7 @@ export function seoPlugin(): Plugin {
 			// independently keeps /overlay out of search results.
 			await writeFile(
 				join(dist, "robots.txt"),
-				`User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`,
+				`User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\nSitemap: ${SITE_URL}docs/sitemap.xml\n`,
 			);
 
 			const urls = SEO_ROUTES.filter((route) => route.index)

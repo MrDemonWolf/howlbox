@@ -289,9 +289,12 @@ function LandingPage() {
 								Build your URL
 								<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
 							</Link>
-							<Link className="hb-btn hb-btn-secondary" to="/docs">
+							<a
+								className="hb-btn hb-btn-secondary"
+								href={`${import.meta.env.BASE_URL}docs/`}
+							>
 								Read the docs
-							</Link>
+							</a>
 						</div>
 					</div>
 
@@ -484,9 +487,12 @@ function LandingPage() {
 							Build your URL
 							<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
 						</Link>
-						<Link className="hb-btn hb-btn-secondary" to="/docs">
+						<a
+							className="hb-btn hb-btn-secondary"
+							href={`${import.meta.env.BASE_URL}docs/`}
+						>
 							Read the parameter reference
-						</Link>
+						</a>
 					</div>
 				</div>
 			</Band>
