@@ -77,17 +77,22 @@ export function useTwitchChat(
 		if (mediaRevision === undefined) {
 			return;
 		}
-		setMessages((prev) =>
-			prev.length === 0
-				? prev
-				: prev.map((message) =>
-						resolveMessageMedia(
-							message,
-							emotesRef?.current ?? null,
-							badgesRef?.current ?? null,
-						),
-					),
-		);
+		setMessages((prev) => {
+			if (prev.length === 0) {
+				return prev;
+			}
+			let changed = false;
+			const next = prev.map((message) => {
+				const resolved = resolveMessageMedia(
+					message,
+					emotesRef?.current ?? null,
+					badgesRef?.current ?? null,
+				);
+				changed ||= resolved !== message;
+				return resolved;
+			});
+			return changed ? next : prev;
+		});
 	}, [mediaRevision, emotesRef, badgesRef]);
 
 	// Map refs stay out of the connection effect so a refresh never reconnects chat.

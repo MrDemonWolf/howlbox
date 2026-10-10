@@ -4,6 +4,8 @@ import type { ChatMessageView, MessagePart } from "@/lib/twitch/types";
 
 import type { EmoteMap } from "./emotes";
 import {
+	badgeMapsEqual,
+	emoteMapsEqual,
 	emoteOnlyCount,
 	groupParts,
 	isEmoteOnly,
@@ -18,6 +20,44 @@ const emotes: EmoteMap = new Map([
 	["Hands", { url: "https://cdn/hands.png", zeroWidth: false }],
 	["RainTime", { url: "https://cdn/rain.png", zeroWidth: true }],
 ]);
+
+describe("provider map equality", () => {
+	test("compares emote map values without depending on map identity or order", () => {
+		expect(emoteMapsEqual(emotes, new Map([...emotes].reverse()))).toBe(true);
+		expect(
+			emoteMapsEqual(
+				emotes,
+				new Map([
+					...emotes,
+					["NewEmote", { url: "https://cdn/new.png", zeroWidth: false }],
+				]),
+			),
+		).toBe(false);
+		expect(
+			emoteMapsEqual(
+				emotes,
+				new Map([
+					["Kappa", { url: "https://cdn/changed.png", zeroWidth: false }],
+					...Array.from(emotes).slice(1),
+				]),
+			),
+		).toBe(false);
+	});
+
+	test("compares badge entries independent of map identity and order", () => {
+		const first = new Map([
+			["subscriber/12", "https://cdn/sub.png"],
+			["moderator", "https://cdn/mod.png"],
+		]);
+		expect(badgeMapsEqual(first, new Map([...first].reverse()))).toBe(true);
+		expect(
+			badgeMapsEqual(
+				first,
+				new Map([["subscriber/12", "https://cdn/changed.png"]]),
+			),
+		).toBe(false);
+	});
+});
 
 function message(login = "viewer"): ChatMessageView {
 	return {
@@ -171,6 +211,28 @@ describe("groupParts zero-width overlay grouping", () => {
 });
 
 describe("resolveMessageMedia", () => {
+	test("reuses message and media identities when refresh does not affect the row", () => {
+		const initial = resolveMessageExtras(
+			message(),
+			new Map([["Kappa", { url: "https://cdn/kappa.png", zeroWidth: false }]]),
+			new Map([["subscriber/12", "https://cdn/subscriber.png"]]),
+			"she/her",
+			"https://cdn.example/avatar.png",
+		);
+		const refreshed = resolveMessageMedia(
+			initial,
+			new Map([
+				["Kappa", { url: "https://cdn/kappa.png", zeroWidth: false }],
+				["Unrelated", { url: "https://cdn/unrelated.png", zeroWidth: false }],
+			]),
+			new Map([["subscriber/12", "https://cdn/subscriber.png"]]),
+		);
+
+		expect(refreshed).toBe(initial);
+		expect(refreshed.parts).toBe(initial.parts);
+		expect(refreshed.renderBadges).toBe(initial.renderBadges);
+	});
+
 	test("adds emotes and badges when maps arrive after a message", () => {
 		const initial = resolveMessageExtras(
 			message(),
@@ -203,6 +265,29 @@ describe("resolveMessageMedia", () => {
 			{ kind: "text", text: "she/her" },
 		]);
 		expect(resolved.avatarUrl).toBe("https://cdn.example/avatar.png");
+	});
+
+	test("updates and removes refreshed badge art", () => {
+		const initial = resolveMessageExtras(
+			message(),
+			null,
+			new Map([["subscriber/12", "https://cdn.example/sub-a.png"]]),
+			null,
+			null,
+		);
+		const refreshed = resolveMessageMedia(
+			initial,
+			null,
+			new Map([["subscriber/12", "https://cdn.example/sub-b.png"]]),
+		);
+
+		expect(refreshed).not.toBe(initial);
+		expect(refreshed.renderBadges).toEqual([
+			{ kind: "image", url: "https://cdn.example/sub-b.png" },
+		]);
+
+		const removed = resolveMessageMedia(refreshed, null, new Map());
+		expect(removed.renderBadges).toEqual([]);
 	});
 
 	test("refreshes or removes previously resolved third-party emotes", () => {

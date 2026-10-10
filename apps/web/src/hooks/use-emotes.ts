@@ -8,7 +8,11 @@ import {
 
 import { type EmoteMap, fetchEmoteMap } from "@/lib/emotes/emotes";
 import type { MediaPreferences } from "@/lib/emotes/media";
-import type { BadgeMap } from "@/lib/emotes/resolve";
+import {
+	type BadgeMap,
+	badgeMapsEqual,
+	emoteMapsEqual,
+} from "@/lib/emotes/resolve";
 import {
 	fetchBadgeMap,
 	fetchGistBadgeArt,
@@ -32,6 +36,7 @@ function useAsyncRef<T>(
 	fetcher: (channel: string, options: AsyncFetchOptions) => Promise<T>,
 	refreshMinutes = 0,
 	isEmpty?: (value: T) => boolean,
+	isEqual?: (previous: T, next: T) => boolean,
 ): readonly [RefObject<T | null>, number] {
 	const ref = useRef<T | null>(null);
 	const [revision, setRevision] = useState(0);
@@ -59,7 +64,11 @@ function useAsyncRef<T>(
 				.then((value) => {
 					// A total provider outage must not replace a working in-memory
 					// map. A new channel still accepts empty as its initial result.
-					if (active && (ref.current === null || !isEmpty?.(value))) {
+					if (
+						active &&
+						(ref.current === null || !isEmpty?.(value)) &&
+						(ref.current === null || !isEqual?.(ref.current, value))
+					) {
 						ref.current = value;
 						setRevision((current) => current + 1);
 					}
@@ -83,7 +92,7 @@ function useAsyncRef<T>(
 				clearInterval(timer);
 			}
 		};
-	}, [channel, fetcher, refreshMinutes, isEmpty]);
+	}, [channel, fetcher, refreshMinutes, isEmpty, isEqual]);
 	return [ref, revision];
 }
 
@@ -99,7 +108,13 @@ export function useEmoteMap(
 			fetchEmoteMap(login, { ...options, assetScale, staticMedia }),
 		[assetScale, staticMedia],
 	);
-	return useAsyncRef<EmoteMap>(channel, fetcher, refreshMinutes, mapIsEmpty);
+	return useAsyncRef<EmoteMap>(
+		channel,
+		fetcher,
+		refreshMinutes,
+		mapIsEmpty,
+		emoteMapsEqual,
+	);
 }
 
 // Precedence, weakest to strongest: Twitch < gist < inline, so a one-off
@@ -134,5 +149,11 @@ export function useBadgeMap(
 		},
 		[assetScale, customArt, gistRef],
 	);
-	return useAsyncRef<BadgeMap>(channel, fetcher, refreshMinutes, mapIsEmpty);
+	return useAsyncRef<BadgeMap>(
+		channel,
+		fetcher,
+		refreshMinutes,
+		mapIsEmpty,
+		badgeMapsEqual,
+	);
 }
