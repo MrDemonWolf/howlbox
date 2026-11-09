@@ -238,12 +238,13 @@ preprocess, since the router re-serializes the validated value.
   text over arbitrary gameplay. `prefers-reduced-transparency` swaps
   `--hb-surface` to `--hb-surface-solid` (the override selector must
   tie theme-block specificity: `.hb-root, .hb-root[data-theme]`).
-- `hb-*` class names are a public contract for the OBS Custom CSS
-  field. Never rename them. That now includes `hb-avatar`,
-  `hb-event-line`, `hb-cheermote` and `hb-demo-tag` (the `?demo` marker), plus the `data-event="<kind>"`
-  attribute on `hb-message` (so `hb-message[data-event="raid"]` can be
-  styled on its own), and `data-scroll` on `hb-root` alongside
-  `data-layout` / `data-align` / `data-variant`.
+- `hb-*` class names are a public contract for the OBS Custom CSS field.
+  Never rename them. That now includes `hb-avatar`, `hb-event-line`,
+  `hb-cheermote` and `hb-demo-tag` (the `?demo` marker), plus the
+  `data-event="<kind>"` attribute on `hb-message` (so
+  `hb-message[data-event="raid"]` can be styled on its own), and
+  `data-scroll` on `hb-root` alongside `data-layout` / `data-align` /
+  `data-variant`.
 - OBS shows no error UI for browser sources; the overlay renders its
   own status pill (connecting / disconnected / could not join).
 - Target Chromium 127 (OBS 31+). devicePixelRatio is always 1.
