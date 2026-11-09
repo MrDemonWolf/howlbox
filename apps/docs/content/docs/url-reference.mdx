@@ -7,9 +7,10 @@ keywords:
   - Twitch chat settings
   - badgeart
   - badgegist
+  - demo chat
 ---
 
-The browser source URL is the configuration file. Parameters that are missing or invalid use their defaults. `channel` is the only required setting; without a valid Twitch login, the overlay shows a status message instead of joining chat.
+The browser source URL is the configuration file. Parameters that are missing or invalid use their defaults. `channel` is the only required setting unless `demo` is on; without a valid Twitch login, the overlay shows a status message instead of joining chat.
 
 <span id="channel"></span>
 
@@ -18,6 +19,7 @@ The browser source URL is the configuration file. Parameters that are missing or
 | Parameter | Values | Default | Behavior |
 | --- | --- | --- | --- |
 | <span id="param-channel"></span>`channel` | Twitch login name | none | The channel to join. Use `mrdemonwolf`, not `twitch.tv/mrdemonwolf`. The login is lowercased; spaces, dots, slashes, and other characters outside Twitch's login pattern are rejected. |
+| <span id="param-demo"></span>`demo` | `true`, `false` | `false` | Show a looping sample chat instead of joining Twitch, so you can place, size, and style the source in OBS before chat is moving. `channel` is not needed. Look and message settings (`theme`, `size`, `max`, `fade`, `events`, `avatars`, `media`) apply; chat filters and `delay` do not. The configurator's Copy test URL button adds it for you. Remove it before going live. |
 
 <span id="look"></span>
 

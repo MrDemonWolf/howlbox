@@ -136,7 +136,8 @@ Vite, Tailwind 4) + `packages/ui` (shadcn primitives) +
   utilities, Inter, TanStack Router, and Zod do not enter the OBS graph.
   Shared site chrome is `components/landing/site-chrome.tsx`. The
   landing and builder previews use the real `MessageList` and `HbRoot`
-  with canned data from `demo-messages.ts`.
+  with canned data from `components/chat/demo-messages.ts`, the same
+  script `?demo` plays on the overlay itself.
 - Site color: `--site-*` tokens in `index.css`, a light default plus a
   `.dark` override and a `prefers-color-scheme` fallback, all scoped to
   `html:not(.hb-overlay)`. Flat surfaces only (base / surface / elev +
@@ -202,7 +203,9 @@ Usage table in `README.md`; keep both in sync. Defaults:
 `badgeart`/`badgegist` empty, `badges`
 and `animate` on, all other flags off (`pronouns` too - opt-in, since
 it is a per-user pronouns.alejo.io lookup; `avatars` for the same
-reason). Ranges: `max` 1-200, `delay` 0-300s, `fade`
+reason; `demo` swaps the Twitch connection for the canned
+`demo-messages.ts` script, lazy-loaded so normal sources never fetch it,
+and makes `channel` optional). Ranges: `max` 1-200, `delay` 0-300s, `fade`
 0-600s, `refresh` 0 or 1-1440min (1-4 round up to 5),
 `scrollspeed` 1-5 whole steps, `emotescale` 1-4
 in half steps. That
