@@ -181,5 +181,6 @@ export function parseOverlaySearch(search: URLSearchParams): OverlayParams {
 		badgeart: stringValue(decoded.badgeart, OVERLAY_DEFAULTS.badgeart),
 		badgegist: stringValue(decoded.badgegist, OVERLAY_DEFAULTS.badgegist),
 		refresh,
+		demo: boolOffByDefault(decoded.demo),
 	};
 }
