@@ -8,7 +8,11 @@ import {
 	type Theme,
 } from "@/lib/overlay/params";
 import { BG_LABEL, THEME_LABEL } from "@/lib/overlay/theme-meta";
-import { buildOverlayUrl, parseOverlayUrl } from "@/lib/overlay/url";
+import {
+	buildOverlayUrl,
+	buildTestOverlayUrl,
+	parseOverlayUrl,
+} from "@/lib/overlay/url";
 import { type ChatEventKind, EVENT_KINDS } from "@/lib/twitch/types";
 
 import {
@@ -75,9 +79,13 @@ export function ConfigBuilder({
 	// never on the empty starting state.
 	const channelInvalid = cleanChannel.length > 0 && !channelReady;
 
-	const { overlayConfig, url } = useMemo(() => {
+	const { overlayConfig, url, testUrl } = useMemo(() => {
 		const overlayConfig = configToOverlay(config, cleanChannel);
-		return { overlayConfig, url: buildOverlayUrl(overlayConfig) };
+		return {
+			overlayConfig,
+			url: buildOverlayUrl(overlayConfig),
+			testUrl: buildTestOverlayUrl(overlayConfig),
+		};
 	}, [cleanChannel, config]);
 	const [previewChannel, setPreviewChannel] = useState(() =>
 		isValidLogin(cleanChannel) ? cleanChannel : "",
@@ -158,6 +166,7 @@ export function ConfigBuilder({
 				onLiveChatChange={setLiveChat}
 				onReset={reset}
 				settled={settled}
+				testUrl={testUrl}
 				url={url}
 			/>
 			<ConfigSections

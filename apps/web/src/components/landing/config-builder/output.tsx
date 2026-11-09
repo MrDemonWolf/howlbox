@@ -29,6 +29,7 @@ export function ConfigOutput({
 	channelReady,
 	channelInvalid,
 	settled,
+	testUrl,
 	liveChat,
 	liveConfig,
 	onLiveChatChange,
@@ -39,6 +40,7 @@ export function ConfigOutput({
 	liveConfig: OverlayConfig;
 	onLiveChatChange: (value: boolean) => void;
 	url: string;
+	testUrl: string;
 	channelReady: boolean;
 	channelInvalid: boolean;
 	settled: string;
@@ -82,14 +84,13 @@ export function ConfigOutput({
 	// Same settings plus ?demo, so the source can be placed in OBS on the
 	// canned chat. No channel needed, so it is never disabled.
 	const copyTestUrl = async () => {
-		const testUrl = `${url}&demo=true`;
 		try {
 			await navigator.clipboard.writeText(testUrl);
-			toast.success(
-				"Test URL copied. It shows sample chat; swap in the real URL when placed",
-			);
+			toast.success("Test URL copied, paste it into OBS to place the source");
 		} catch {
-			toast.error("Could not copy automatically. Add &demo=true to the URL");
+			toast.error(
+				"Could not copy automatically. Copy the URL above and add &demo=true to the end",
+			);
 		}
 	};
 
@@ -175,9 +176,16 @@ export function ConfigOutput({
 				</section>
 			</div>
 
-			<div className="flex flex-wrap gap-2">
+			{/* The real link's two actions are a matched pair that fills the
+			    column under the readout they act on. Reset is housekeeping,
+			    so it is small, quiet and pushed to the far end. Measured at a
+			    390px phone the pair alone leaves 26px, so below sm the labels
+			    shorten (Preview, icon-only Reset) to keep all three on one
+			    row. Swaps ride inner spans: .hb-btn is unlayered CSS and
+			    would beat a display utility on the button itself. */}
+			<div className="flex flex-wrap items-center gap-2">
 				<button
-					className="hb-btn hb-btn-primary"
+					className="hb-btn hb-btn-primary flex-1"
 					disabled={!channelReady}
 					onClick={copy}
 					type="button"
@@ -187,7 +195,7 @@ export function ConfigOutput({
 				<a
 					aria-disabled={!channelReady}
 					className={cn(
-						"hb-btn hb-btn-secondary",
+						"hb-btn hb-btn-secondary flex-1",
 						!channelReady && "pointer-events-none opacity-50",
 					)}
 					href={url}
@@ -195,18 +203,17 @@ export function ConfigOutput({
 					tabIndex={channelReady ? undefined : -1}
 					target="_blank"
 				>
-					<ExternalLink className="size-4" /> Open preview
+					<ExternalLink className="size-4" />
+					<span className="sm:hidden">Preview</span>
+					<span className="max-sm:hidden">Open preview</span>
 				</a>
 				<button
-					className="hb-btn hb-btn-secondary"
-					onClick={copyTestUrl}
-					title="Copy a URL that shows sample chat, for placing the source in OBS"
+					className="hb-btn hb-btn-ghost hb-btn-sm ml-auto shrink-0"
+					onClick={onReset}
 					type="button"
 				>
-					<MessagesSquare className="size-4" /> Copy test URL
-				</button>
-				<button className="hb-btn hb-btn-ghost" onClick={onReset} type="button">
-					<RotateCcw className="size-4" /> Reset
+					<RotateCcw aria-hidden="true" className="size-4" />
+					<span className="max-sm:sr-only">Reset</span>
 				</button>
 			</div>
 			{/* Copy and Open are disabled without a channel, and a disabled
@@ -237,6 +244,28 @@ export function ConfigOutput({
 					</button>
 				</div>
 			)}
+
+			{/* Placement is a different job from going live, so the test
+			    link gets its own strip and says what it is, instead of a
+			    fourth button in the row above. Never disabled: demo needs
+			    no channel. */}
+			<div className="hb-hairline flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-xl border px-4 py-3">
+				<p className="min-w-0 flex-1 basis-[15rem] text-[color:var(--site-txt-2)] text-sm leading-snug">
+					<span className="text-[color:var(--site-txt-1)]">
+						Placing the source in OBS first?
+					</span>{" "}
+					The test URL plays sample chat with these settings. Delete{" "}
+					<code className="font-mono text-[0.8125rem]">&amp;demo=true</code>{" "}
+					from it to go live.
+				</p>
+				<button
+					className="hb-btn hb-btn-secondary hb-btn-sm shrink-0"
+					onClick={copyTestUrl}
+					type="button"
+				>
+					<MessagesSquare className="size-4" /> Copy test URL
+				</button>
+			</div>
 		</div>
 	);
 }
