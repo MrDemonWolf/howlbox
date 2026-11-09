@@ -154,14 +154,30 @@ export function ConfigOutput({
 			{/* terminal-style readout: the whole config, as one URL */}
 			<div className="hb-hairline overflow-hidden rounded-xl border bg-[color:var(--site-surface)]">
 				<div className="hb-hairline flex items-center gap-2 border-b px-3 py-2.5">
-					<span className="size-2.5 rounded-full bg-[#ff5f57]" />
-					<span className="size-2.5 rounded-full bg-[#febc2e]" />
-					<span className="size-2.5 rounded-full bg-[#28c840]" />
+					<span className="size-2.5 rounded-full bg-[#ff5f57] max-sm:hidden" />
+					<span className="size-2.5 rounded-full bg-[#febc2e] max-sm:hidden" />
+					<span className="size-2.5 rounded-full bg-[#28c840] max-sm:hidden" />
+					{/* the dots are decoration; on a phone they give way so the
+					    label and Reset share one line */}
 					<span
-						className={`ml-1 text-[0.65rem] text-[color:var(--site-txt-2)] ${MONO}`}
+						className={`whitespace-nowrap text-[0.65rem] text-[color:var(--site-txt-2)] sm:ml-1 ${MONO}`}
 					>
 						obs browser source
 					</span>
+					{/* Reset clears the config this card spells out, so it lives
+					    in the card's own chrome: quiet, and never next to Copy
+					    where a slip would wipe the form. It also keeps the
+					    action row to two buttons, which is what lets that row
+					    hold one line on a 320px phone. 28px tall clears the
+					    WCAG 2.5.8 24px target without growing the bar. */}
+					<button
+						className="-my-1 ml-auto inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[color:var(--site-txt-2)] text-xs transition-colors hover:bg-[color:var(--site-elev)] hover:text-[color:var(--site-txt-1)]"
+						onClick={onReset}
+						type="button"
+					>
+						<RotateCcw aria-hidden="true" className="size-3.5" />
+						Reset
+					</button>
 				</div>
 				{/* labelled so it is identifiable when tabbing or browsing by
 				    region; the announcement itself is the debounced status
@@ -176,21 +192,21 @@ export function ConfigOutput({
 				</section>
 			</div>
 
-			{/* The real link's two actions are a matched pair that fills the
-			    column under the readout they act on. Reset is housekeeping,
-			    so it is small, quiet and pushed to the far end. Measured at a
-			    390px phone the pair alone leaves 26px, so below sm the labels
-			    shorten (Preview, icon-only Reset) to keep all three on one
-			    row. Swaps ride inner spans: .hb-btn is unlayered CSS and
-			    would beat a display utility on the button itself. */}
-			<div className="flex flex-wrap items-center gap-2">
+			{/* The real link's two actions, a matched pair under the
+			    readout they act on. At 320px the row has 272px and the pair
+			    measures 271 with icons, too tight to trust across fonts, so
+			    icons drop below 380px; "Open preview" shortens below sm.
+			    Swaps ride inner elements: .hb-btn is unlayered CSS and would
+			    beat a display utility on the button itself. */}
+			<div className="flex gap-2">
 				<button
 					className="hb-btn hb-btn-primary flex-1"
 					disabled={!channelReady}
 					onClick={copy}
 					type="button"
 				>
-					<Copy className="size-4" /> Copy URL
+					<Copy aria-hidden="true" className="size-4 max-[379px]:hidden" />
+					Copy URL
 				</button>
 				<a
 					aria-disabled={!channelReady}
@@ -203,18 +219,13 @@ export function ConfigOutput({
 					tabIndex={channelReady ? undefined : -1}
 					target="_blank"
 				>
-					<ExternalLink className="size-4" />
+					<ExternalLink
+						aria-hidden="true"
+						className="size-4 max-[379px]:hidden"
+					/>
 					<span className="sm:hidden">Preview</span>
 					<span className="max-sm:hidden">Open preview</span>
 				</a>
-				<button
-					className="hb-btn hb-btn-ghost hb-btn-sm ml-auto shrink-0"
-					onClick={onReset}
-					type="button"
-				>
-					<RotateCcw aria-hidden="true" className="size-4" />
-					<span className="max-sm:sr-only">Reset</span>
-				</button>
 			</div>
 			{/* Copy and Open are disabled without a channel, and a disabled
 			    button explains nothing on its own. Say what is missing, in
