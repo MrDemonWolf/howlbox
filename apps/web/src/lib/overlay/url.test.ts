@@ -1,7 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
 import type { OverlayConfig } from "./url";
-import { buildOverlayUrl, overlayQuery, parseOverlayUrl } from "./url";
+import {
+	buildOverlayUrl,
+	buildTestOverlayUrl,
+	overlayQuery,
+	parseOverlayUrl,
+} from "./url";
 
 const FULL: OverlayConfig = {
 	channel: "xqc",
@@ -171,5 +176,23 @@ describe("round trip", () => {
 		expect(parsed.refresh).toBe(FULL.refresh);
 		expect(parsed.events).toEqual(FULL.events);
 		expect(parsed.avatars).toBe(FULL.avatars);
+	});
+});
+
+describe("buildTestOverlayUrl", () => {
+	test("turns demo on and keeps every other setting", () => {
+		const parsed = parseOverlayUrl(buildTestOverlayUrl(FULL));
+		expect(parsed?.demo).toBe(true);
+		expect(parsed?.channel).toBe(FULL.channel);
+		expect(parsed?.theme).toBe(FULL.theme);
+		expect(parsed?.events).toEqual(FULL.events);
+	});
+
+	test("removing the demo flag gives back the real overlay link", () => {
+		for (const config of [FULL, { ...FULL, channel: "" }]) {
+			const live = buildTestOverlayUrl(config).replace("&demo=true", "");
+			expect(live).toBe(buildOverlayUrl(config));
+			expect(parseOverlayUrl(live)?.demo).toBe(false);
+		}
 	});
 });
