@@ -151,6 +151,14 @@ export function buildOverlayUrl(config: OverlayConfig): string {
 	return `${SITE_URL}overlay?${overlayQuery(config)}`;
 }
 
+// The same link with sample chat on, for placing the source in OBS. demo
+// goes last and on its own so deleting "&demo=true" hands back exactly
+// buildOverlayUrl's link: the settings, and the channel when one is set
+// (the your_channel placeholder otherwise), all survive the test run.
+export function buildTestOverlayUrl(config: OverlayConfig): string {
+	return `${buildOverlayUrl(config)}&demo=true`;
+}
+
 // Read an existing overlay link back into a config, so a streamer can
 // paste the URL already in OBS and keep editing it. Accepts a full URL,
 // a bare query string, or "?a=b". Every field runs back through

@@ -205,7 +205,10 @@ and `animate` on, all other flags off (`pronouns` too - opt-in, since
 it is a per-user pronouns.alejo.io lookup; `avatars` for the same
 reason; `demo` swaps the Twitch connection for the canned
 `demo-messages.ts` script, lazy-loaded so normal sources never fetch it,
-and makes `channel` optional). Ranges: `max` 1-200, `delay` 0-300s, `fade`
+and makes `channel` optional; `buildTestOverlayUrl` appends
+`&demo=true` last so deleting it restores the live link, and the stream
+catches up missed rows on the same wake events chat nudges on, capped at
+one column by `missedDemoRows`). Ranges: `max` 1-200, `delay` 0-300s, `fade`
 0-600s, `refresh` 0 or 1-1440min (1-4 round up to 5),
 `scrollspeed` 1-5 whole steps, `emotescale` 1-4
 in half steps. That
@@ -235,12 +238,13 @@ preprocess, since the router re-serializes the validated value.
   text over arbitrary gameplay. `prefers-reduced-transparency` swaps
   `--hb-surface` to `--hb-surface-solid` (the override selector must
   tie theme-block specificity: `.hb-root, .hb-root[data-theme]`).
-- `hb-*` class names are a public contract for the OBS Custom CSS
-  field. Never rename them. That now includes `hb-avatar`,
-  `hb-event-line` and `hb-cheermote`, plus the `data-event="<kind>"`
-  attribute on `hb-message` (so `hb-message[data-event="raid"]` can be
-  styled on its own), and `data-scroll` on `hb-root` alongside
-  `data-layout` / `data-align` / `data-variant`.
+- `hb-*` class names are a public contract for the OBS Custom CSS field.
+  Never rename them. That now includes `hb-avatar`, `hb-event-line`,
+  `hb-cheermote` and `hb-demo-tag` (the `?demo` marker), plus the
+  `data-event="<kind>"` attribute on `hb-message` (so
+  `hb-message[data-event="raid"]` can be styled on its own), and
+  `data-scroll` on `hb-root` alongside `data-layout` / `data-align` /
+  `data-variant`.
 - OBS shows no error UI for browser sources; the overlay renders its
   own status pill (connecting / disconnected / could not join).
 - Target Chromium 127 (OBS 31+). devicePixelRatio is always 1.

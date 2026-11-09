@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { OverlayParams } from "@/lib/overlay/params";
 import type { ChatMessageView, ConnectionStatus } from "@/lib/twitch/types";
 
@@ -24,13 +26,15 @@ interface ChatOverlayProps {
 	size: number;
 	emoteScale: number;
 	onMessageExpired?: (id: string) => void;
+	// overlay-level chrome drawn above the messages (the demo tag)
+	notice?: ReactNode;
 }
 
 // Everything the URL decides about how the overlay looks, as opposed to
 // which messages it shows. Live and demo mode share one of these.
 export type ChatOverlayLook = Omit<
 	ChatOverlayProps,
-	"messages" | "status" | "onMessageExpired"
+	"messages" | "status" | "onMessageExpired" | "notice"
 >;
 
 const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
@@ -59,6 +63,7 @@ export function ChatOverlay({
 	size,
 	emoteScale,
 	onMessageExpired,
+	notice,
 }: ChatOverlayProps) {
 	return (
 		<HbRoot
@@ -80,6 +85,7 @@ export function ChatOverlay({
 					{STATUS_LABEL[status]}
 				</div>
 			)}
+			{notice}
 			<MessageList
 				align={align}
 				animate={animate}

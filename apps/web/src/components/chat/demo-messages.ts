@@ -312,6 +312,22 @@ export function presentDemoMessage(
 	return { ...withAvatar, event, parts };
 }
 
+// Rows a demo stream owes after a gap. Hidden pages throttle timers (OBS
+// hides sources, browsers background tabs), so the interval can stall
+// for a minute at a time while fades keep running on their CSS clocks.
+// On wake the stream adds what it missed, but never more than `cap`: past
+// one full column, older rows would be evicted the moment they landed.
+export function missedDemoRows(
+	elapsedMs: number,
+	intervalMs: number,
+	cap: number,
+): number {
+	if (!(elapsedMs > 0) || !(intervalMs > 0) || cap <= 0) {
+		return 0;
+	}
+	return Math.min(Math.floor(elapsedMs / intervalMs), cap);
+}
+
 // canned message stream shared by the landing demo, the config preview
 // and the overlay's ?demo mode. Not a real connection; timestamps use wall-clock so the
 // optional timestamp column reads sensibly.
@@ -358,6 +374,7 @@ export function useDemoStream({
 
 	useEffect(() => {
 		let count = 0;
+		let lastAddAt = Date.now();
 		// Start empty so an effect re-run (StrictMode, HMR, or a changed
 		// event filter) cannot leave rows the current preview excludes.
 		setMessages([]);
@@ -365,6 +382,7 @@ export function useDemoStream({
 			const script = scriptMessages[count % scriptMessages.length];
 			const id = `demo-${count}`;
 			count++;
+			lastAddAt = Date.now();
 			if (!script) {
 				return;
 			}
@@ -384,8 +402,53 @@ export function useDemoStream({
 		for (let index = 0; index < burst; index++) {
 			add();
 		}
-		const timer = setInterval(add, intervalMs);
-		return () => clearInterval(timer);
+		let timer = setInterval(add, intervalMs);
+		// The same wake signals chat.ts nudges on. No retry timer: the
+		// catch-up runs only when the page is actually shown again.
+		const catchUp = () => {
+			const missed = missedDemoRows(
+				Date.now() - lastAddAt,
+				intervalMs,
+				Math.min(limit, scriptMessages.length),
+			);
+			if (missed === 0) {
+				return;
+			}
+			for (let index = 0; index < missed; index++) {
+				add();
+			}
+			// restart so the next row is a full interval after the catch-up
+			clearInterval(timer);
+			timer = setInterval(add, intervalMs);
+		};
+		const onVisibility = () => {
+			if (document.visibilityState === "visible") {
+				catchUp();
+			}
+		};
+		const onObsVisible = (event: Event) => {
+			if (
+				(event as CustomEvent<{ visible?: boolean }>).detail?.visible === true
+			) {
+				catchUp();
+			}
+		};
+		const onObsActive = (event: Event) => {
+			if (
+				(event as CustomEvent<{ active?: boolean }>).detail?.active === true
+			) {
+				catchUp();
+			}
+		};
+		document.addEventListener("visibilitychange", onVisibility);
+		window.addEventListener("obsSourceVisibleChanged", onObsVisible);
+		window.addEventListener("obsSourceActiveChanged", onObsActive);
+		return () => {
+			clearInterval(timer);
+			document.removeEventListener("visibilitychange", onVisibility);
+			window.removeEventListener("obsSourceVisibleChanged", onObsVisible);
+			window.removeEventListener("obsSourceActiveChanged", onObsActive);
+		};
 	}, [avatarMode, initial, intervalMs, limit, scriptMessages, staticMedia]);
 
 	return { messages, removeMessage };

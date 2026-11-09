@@ -29,6 +29,7 @@ export function ConfigOutput({
 	channelReady,
 	channelInvalid,
 	settled,
+	testUrl,
 	liveChat,
 	liveConfig,
 	onLiveChatChange,
@@ -39,6 +40,7 @@ export function ConfigOutput({
 	liveConfig: OverlayConfig;
 	onLiveChatChange: (value: boolean) => void;
 	url: string;
+	testUrl: string;
 	channelReady: boolean;
 	channelInvalid: boolean;
 	settled: string;
@@ -82,14 +84,13 @@ export function ConfigOutput({
 	// Same settings plus ?demo, so the source can be placed in OBS on the
 	// canned chat. No channel needed, so it is never disabled.
 	const copyTestUrl = async () => {
-		const testUrl = `${url}&demo=true`;
 		try {
 			await navigator.clipboard.writeText(testUrl);
-			toast.success(
-				"Test URL copied. It shows sample chat; swap in the real URL when placed",
-			);
+			toast.success("Test URL copied, paste it into OBS to place the source");
 		} catch {
-			toast.error("Could not copy automatically. Add &demo=true to the URL");
+			toast.error(
+				"Could not copy automatically. Copy the URL above and add &demo=true to the end",
+			);
 		}
 	};
 
@@ -153,14 +154,30 @@ export function ConfigOutput({
 			{/* terminal-style readout: the whole config, as one URL */}
 			<div className="hb-hairline overflow-hidden rounded-xl border bg-[color:var(--site-surface)]">
 				<div className="hb-hairline flex items-center gap-2 border-b px-3 py-2.5">
-					<span className="size-2.5 rounded-full bg-[#ff5f57]" />
-					<span className="size-2.5 rounded-full bg-[#febc2e]" />
-					<span className="size-2.5 rounded-full bg-[#28c840]" />
+					<span className="size-2.5 rounded-full bg-[#ff5f57] max-sm:hidden" />
+					<span className="size-2.5 rounded-full bg-[#febc2e] max-sm:hidden" />
+					<span className="size-2.5 rounded-full bg-[#28c840] max-sm:hidden" />
+					{/* the dots are decoration; on a phone they give way so the
+					    label and Reset share one line */}
 					<span
-						className={`ml-1 text-[0.65rem] text-[color:var(--site-txt-2)] ${MONO}`}
+						className={`whitespace-nowrap text-[0.65rem] text-[color:var(--site-txt-2)] sm:ml-1 ${MONO}`}
 					>
 						obs browser source
 					</span>
+					{/* Reset clears the config this card spells out, so it lives
+					    in the card's own chrome: quiet, and never next to Copy
+					    where a slip would wipe the form. It also keeps the
+					    action row to two buttons, which is what lets that row
+					    hold one line on a 320px phone. 28px tall clears the
+					    WCAG 2.5.8 24px target without growing the bar. */}
+					<button
+						className="-my-1 ml-auto inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[color:var(--site-txt-2)] text-xs transition-colors hover:bg-[color:var(--site-elev)] hover:text-[color:var(--site-txt-1)]"
+						onClick={onReset}
+						type="button"
+					>
+						<RotateCcw aria-hidden="true" className="size-3.5" />
+						Reset
+					</button>
 				</div>
 				{/* labelled so it is identifiable when tabbing or browsing by
 				    region; the announcement itself is the debounced status
@@ -175,19 +192,26 @@ export function ConfigOutput({
 				</section>
 			</div>
 
-			<div className="flex flex-wrap gap-2">
+			{/* The real link's two actions, a matched pair under the
+			    readout they act on. At 320px the row has 272px and the pair
+			    measures 271 with icons, too tight to trust across fonts, so
+			    icons drop below 380px; "Open preview" shortens below sm.
+			    Swaps ride inner elements: .hb-btn is unlayered CSS and would
+			    beat a display utility on the button itself. */}
+			<div className="flex gap-2">
 				<button
-					className="hb-btn hb-btn-primary"
+					className="hb-btn hb-btn-primary flex-1"
 					disabled={!channelReady}
 					onClick={copy}
 					type="button"
 				>
-					<Copy className="size-4" /> Copy URL
+					<Copy aria-hidden="true" className="size-4 max-[379px]:hidden" />
+					Copy URL
 				</button>
 				<a
 					aria-disabled={!channelReady}
 					className={cn(
-						"hb-btn hb-btn-secondary",
+						"hb-btn hb-btn-secondary flex-1",
 						!channelReady && "pointer-events-none opacity-50",
 					)}
 					href={url}
@@ -195,19 +219,13 @@ export function ConfigOutput({
 					tabIndex={channelReady ? undefined : -1}
 					target="_blank"
 				>
-					<ExternalLink className="size-4" /> Open preview
+					<ExternalLink
+						aria-hidden="true"
+						className="size-4 max-[379px]:hidden"
+					/>
+					<span className="sm:hidden">Preview</span>
+					<span className="max-sm:hidden">Open preview</span>
 				</a>
-				<button
-					className="hb-btn hb-btn-secondary"
-					onClick={copyTestUrl}
-					title="Copy a URL that shows sample chat, for placing the source in OBS"
-					type="button"
-				>
-					<MessagesSquare className="size-4" /> Copy test URL
-				</button>
-				<button className="hb-btn hb-btn-ghost" onClick={onReset} type="button">
-					<RotateCcw className="size-4" /> Reset
-				</button>
 			</div>
 			{/* Copy and Open are disabled without a channel, and a disabled
 			    button explains nothing on its own. Say what is missing, in
@@ -237,6 +255,28 @@ export function ConfigOutput({
 					</button>
 				</div>
 			)}
+
+			{/* Placement is a different job from going live, so the test
+			    link gets its own strip and says what it is, instead of a
+			    fourth button in the row above. Never disabled: demo needs
+			    no channel. */}
+			<div className="hb-hairline flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-xl border px-4 py-3">
+				<p className="min-w-0 flex-1 basis-[15rem] text-[color:var(--site-txt-2)] text-sm leading-snug">
+					<span className="text-[color:var(--site-txt-1)]">
+						Placing the source in OBS first?
+					</span>{" "}
+					The test URL plays sample chat with these settings. Delete{" "}
+					<code className="font-mono text-[0.8125rem]">&amp;demo=true</code>{" "}
+					from it to go live.
+				</p>
+				<button
+					className="hb-btn hb-btn-secondary hb-btn-sm shrink-0"
+					onClick={copyTestUrl}
+					type="button"
+				>
+					<MessagesSquare className="size-4" /> Copy test URL
+				</button>
+			</div>
 		</div>
 	);
 }
