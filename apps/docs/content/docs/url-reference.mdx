@@ -19,7 +19,7 @@ The browser source URL is the configuration file. Parameters that are missing or
 | Parameter | Values | Default | Behavior |
 | --- | --- | --- | --- |
 | <span id="param-channel"></span>`channel` | Twitch login name | none | The channel to join. Use `mrdemonwolf`, not `twitch.tv/mrdemonwolf`. The login is lowercased; spaces, dots, slashes, and other characters outside Twitch's login pattern are rejected. |
-| <span id="param-demo"></span>`demo` | `true`, `false` | `false` | Show a looping sample chat instead of joining Twitch, so you can place, size, and style the source in OBS before chat is moving. `channel` is not needed. Look and message settings (`theme`, `size`, `max`, `fade`, `events`, `avatars`, `media`) apply; chat filters and `delay` do not. The configurator's Copy test URL button adds it for you. Remove it before going live. |
+| <span id="param-demo"></span>`demo` | `true`, `false` | `false` | Show a looping sample chat instead of joining Twitch, so you can place, size, and style the source in OBS before chat is moving. `channel` is not needed. Look and message settings (`theme`, `size`, `max`, `fade`, `events`, `avatars`, `media`) apply; chat filters and `delay` do not. A corner tag marks the source as sample chat so a forgotten flag cannot pass for real chat on stream. The configurator's Copy test URL button adds the flag as `&demo=true` at the end of your normal link, so deleting that text gives back your live overlay with every setting intact. If a hidden source is shown again, it catches up on the rows it missed. |
 
 <span id="look"></span>
 
