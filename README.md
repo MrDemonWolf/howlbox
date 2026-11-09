@@ -119,6 +119,7 @@ contributor checks.
 | Parameter      | Values                                   | Description                                             |
 | -------------- | ---------------------------------------- | ------------------------------------------------------- |
 | `channel`      | Twitch login name                        | Channel to join (required)                              |
+| `demo`         | flag                                     | Sample chat instead of a Twitch connection, for placing and styling the source; `channel` becomes optional |
 | `theme`        | 31 values, listed in full at [/docs#themes](https://howlbox.mrdemonwolf.dev/docs#themes) | Color theme preset (default `wolf`) |
 | `variant`      | theme-specific (e.g. `theme=terminal&variant=amber`) | Color variation of the chosen theme; unknown values fall back to the theme default |
 | `layout`       | `inline`, `stacked` | Name inline with the message, or on its own line above it |

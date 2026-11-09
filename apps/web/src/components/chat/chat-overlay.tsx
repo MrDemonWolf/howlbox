@@ -26,6 +26,13 @@ interface ChatOverlayProps {
 	onMessageExpired?: (id: string) => void;
 }
 
+// Everything the URL decides about how the overlay looks, as opposed to
+// which messages it shows. Live and demo mode share one of these.
+export type ChatOverlayLook = Omit<
+	ChatOverlayProps,
+	"messages" | "status" | "onMessageExpired"
+>;
+
 const STATUS_LABEL: Record<Exclude<ConnectionStatus, "connected">, string> = {
 	connecting: "connecting to chat",
 	disconnected: "disconnected, retrying",

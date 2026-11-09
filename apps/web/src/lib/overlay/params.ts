@@ -199,6 +199,9 @@ const overlayParamsShape = z.object({
 		.preprocess(numberish, z.coerce.number().int().min(0).max(1440))
 		.catch(0)
 		.transform((v) => (v > 0 && v < 5 ? 5 : v)),
+	// canned demo chat instead of a Twitch connection, for placing and
+	// styling the source before a real chat is moving
+	demo: boolParam,
 });
 
 // The known-URL-keys list for parseOverlayUrl. Taken from the inner

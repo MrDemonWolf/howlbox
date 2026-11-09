@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { OWNER_BADGE_URL } from "@/lib/emotes/resolve";
-import type { ChatEventKind, ChatMessageView } from "@/lib/twitch/types";
+import type {
+	AvatarMode,
+	ChatEventKind,
+	ChatMessageView,
+} from "@/lib/twitch/types";
 
 function emote(name: string, id: string) {
 	return {
@@ -270,13 +274,59 @@ export const DEMO_SCRIPT: ScriptMessage[] = [
 	},
 ];
 
-// canned message stream shared by the landing demo and the config
-// preview. Not a real connection; timestamps use wall-clock so the
+// Apply the overlay's avatar and media settings to a demo row. The script
+// carries animated art and an avatar on every chatter, so the settings
+// that would have filtered those at fetch time are applied here instead.
+// undefined avatarMode keeps every avatar (the landing demo's own toggle).
+export function presentDemoMessage(
+	message: ChatMessageView,
+	avatarMode: AvatarMode | undefined,
+	staticMedia: boolean,
+): ChatMessageView {
+	const avatarAllowed =
+		avatarMode === undefined ||
+		avatarMode === "all" ||
+		(avatarMode === "subs" && message.isSubscriber);
+	const withAvatar = avatarAllowed
+		? message
+		: { ...message, avatarUrl: undefined };
+	if (!staticMedia) {
+		return withAvatar;
+	}
+	const parts = withAvatar.parts.map((part) =>
+		part.type === "emote"
+			? {
+					...part,
+					url: part.url.replace("/default/dark/", "/static/dark/"),
+				}
+			: part,
+	);
+	const event = withAvatar.event?.cheermoteUrl
+		? {
+				...withAvatar.event,
+				cheermoteUrl: withAvatar.event.cheermoteUrl
+					.replace("/animated/", "/static/")
+					.replace(/\.gif$/, ".png"),
+			}
+		: withAvatar.event;
+	return { ...withAvatar, event, parts };
+}
+
+// canned message stream shared by the landing demo, the config preview
+// and the overlay's ?demo mode. Not a real connection; timestamps use wall-clock so the
 // optional timestamp column reads sensibly.
 interface DemoStreamOptions {
 	limit?: number;
 	intervalMs?: number;
+	// rows shown at once on start, capped at one pass of the script, so a
+	// placement check sees a filled column without waiting for the interval
+	initial?: number;
 	events?: readonly ChatEventKind[];
+	// When set, presentDemoMessage runs once per row at append time, so
+	// rows keep their identity and stay memoized. The site previews leave
+	// these unset and map instead, because their settings change live.
+	avatarMode?: AvatarMode;
+	staticMedia?: boolean;
 }
 
 interface DemoStream {
@@ -287,7 +337,10 @@ interface DemoStream {
 export function useDemoStream({
 	limit = 8,
 	intervalMs = 1700,
+	initial = 4,
 	events,
+	avatarMode,
+	staticMedia,
 }: DemoStreamOptions = {}): DemoStream {
 	const [messages, setMessages] = useState<ChatMessageView[]>([]);
 	const scriptMessages = useMemo(
@@ -315,24 +368,25 @@ export function useDemoStream({
 			if (!script) {
 				return;
 			}
-			setMessages((current) =>
-				[
-					...current,
-					{
-						...script,
-						id,
-						timestamp: Date.now(),
-						avatarUrl: avatarFor(script.login),
-					},
-				].slice(-limit),
-			);
+			const message: ChatMessageView = {
+				...script,
+				id,
+				timestamp: Date.now(),
+				avatarUrl: avatarFor(script.login),
+			};
+			const shown =
+				avatarMode === undefined && staticMedia === undefined
+					? message
+					: presentDemoMessage(message, avatarMode, staticMedia ?? false);
+			setMessages((current) => [...current, shown].slice(-limit));
 		};
-		for (let index = 0; index < Math.min(4, limit); index++) {
+		const burst = Math.min(initial, limit, scriptMessages.length);
+		for (let index = 0; index < burst; index++) {
 			add();
 		}
 		const timer = setInterval(add, intervalMs);
 		return () => clearInterval(timer);
-	}, [intervalMs, limit, scriptMessages]);
+	}, [avatarMode, initial, intervalMs, limit, scriptMessages, staticMedia]);
 
 	return { messages, removeMessage };
 }

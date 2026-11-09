@@ -137,6 +137,7 @@ export interface OverlayParams {
 	badgeart: string;
 	badgegist: string;
 	refresh: number;
+	demo: boolean;
 }
 
 // Provider 1x art is sized for the default renderer at OBS DPR 1. Increase
@@ -179,6 +180,7 @@ export const OVERLAY_DEFAULTS = {
 	pronouns: false,
 	events: [] as ChatEventKind[],
 	avatars: "off",
+	demo: false,
 } satisfies {
 	bg: BgMode;
 	theme: Theme;
@@ -205,6 +207,7 @@ export const OVERLAY_DEFAULTS = {
 	pronouns: boolean;
 	events: ChatEventKind[];
 	avatars: AvatarMode;
+	demo: boolean;
 };
 
 export const LOGIN_RE = /^[a-z0-9_]{1,25}$/;

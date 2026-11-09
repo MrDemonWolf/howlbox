@@ -3,7 +3,13 @@
 // manual-copy fallback live here because they own the URL readout node.
 
 import { cn } from "@howlbox/ui/lib/utils";
-import { AlertCircle, Copy, ExternalLink, RotateCcw } from "lucide-react";
+import {
+	AlertCircle,
+	Copy,
+	ExternalLink,
+	MessagesSquare,
+	RotateCcw,
+} from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
 
@@ -70,6 +76,20 @@ export function ConfigOutput({
 			toast.error(
 				"Could not copy automatically, the URL is selected, press Ctrl+C",
 			);
+		}
+	};
+
+	// Same settings plus ?demo, so the source can be placed in OBS on the
+	// canned chat. No channel needed, so it is never disabled.
+	const copyTestUrl = async () => {
+		const testUrl = `${url}&demo=true`;
+		try {
+			await navigator.clipboard.writeText(testUrl);
+			toast.success(
+				"Test URL copied. It shows sample chat; swap in the real URL when placed",
+			);
+		} catch {
+			toast.error("Could not copy automatically. Add &demo=true to the URL");
 		}
 	};
 
@@ -177,6 +197,14 @@ export function ConfigOutput({
 				>
 					<ExternalLink className="size-4" /> Open preview
 				</a>
+				<button
+					className="hb-btn hb-btn-secondary"
+					onClick={copyTestUrl}
+					title="Copy a URL that shows sample chat, for placing the source in OBS"
+					type="button"
+				>
+					<MessagesSquare className="size-4" /> Copy test URL
+				</button>
 				<button className="hb-btn hb-btn-ghost" onClick={onReset} type="button">
 					<RotateCcw className="size-4" /> Reset
 				</button>

@@ -46,6 +46,11 @@ const CASES = [
 	"scrollspeed=2.5",
 	"scrollspeed=true&scrollspeed=4",
 	"scroll=%5B%22ticker%22%5D&scrollspeed=%5B3%5D",
+	// demo is a plain off-by-default flag, bare or valued
+	"demo",
+	"demo=1&channel=xqc",
+	"demo=off",
+	"demo=maybe&demo=true",
 ] as const;
 
 describe("parseOverlaySearch", () => {

@@ -1,9 +1,12 @@
 import { cn } from "@howlbox/ui/lib/utils";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
+import {
+	presentDemoMessage,
+	useDemoStream,
+} from "@/components/chat/demo-messages";
 import { HbRoot } from "@/components/chat/hb-root";
 import { MessageList } from "@/components/chat/message-list";
-import { useDemoStream } from "@/components/landing/demo-messages";
 import { useBadgeMap, useEmoteMap } from "@/hooks/use-emotes";
 import { useTwitchChat } from "@/hooks/use-twitch-chat";
 import type {
@@ -20,7 +23,6 @@ import { KNOWN_BOTS } from "@/lib/twitch/bots";
 import type {
 	AvatarMode,
 	ChatEventKind,
-	ChatMessageView,
 	ConnectionStatus,
 } from "@/lib/twitch/types";
 
@@ -118,26 +120,6 @@ function useLogicalScale(enabled: boolean) {
 	return { frameRef, scale };
 }
 
-function staticMedia(message: ChatMessageView): ChatMessageView {
-	const parts = message.parts.map((part) =>
-		part.type === "emote"
-			? {
-					...part,
-					url: part.url.replace("/default/dark/", "/static/dark/"),
-				}
-			: part,
-	);
-	const event = message.event?.cheermoteUrl
-		? {
-				...message.event,
-				cheermoteUrl: message.event.cheermoteUrl
-					.replace("/animated/", "/static/")
-					.replace(/\.gif$/, ".png"),
-			}
-		: message.event;
-	return { ...message, event, parts };
-}
-
 function DemoPreviewMessages({
 	events,
 	limit,
@@ -156,16 +138,9 @@ function DemoPreviewMessages({
 	const { messages, removeMessage } = useDemoStream({ events, limit });
 	const previewMessages = useMemo(
 		() =>
-			messages.map((message) => {
-				const avatarAllowed =
-					avatarMode === undefined ||
-					avatarMode === "all" ||
-					(avatarMode === "subs" && message.isSubscriber);
-				const withAvatar = avatarAllowed
-					? message
-					: { ...message, avatarUrl: undefined };
-				return mediaMode === "static" ? staticMedia(withAvatar) : withAvatar;
-			}),
+			messages.map((message) =>
+				presentDemoMessage(message, avatarMode, mediaMode === "static"),
+			),
 		[avatarMode, mediaMode, messages],
 	);
 
